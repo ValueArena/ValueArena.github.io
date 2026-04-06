@@ -25,14 +25,6 @@ function modelColor(type) {
   }
 }
 
-function modelColorDim(type) {
-  switch (type) {
-    case "lora": return "rgba(91,156,246,0.18)";
-    case "api": return "rgba(167,139,250,0.18)";
-    case "base": return "rgba(100,116,139,0.18)";
-    default: return "rgba(232,164,74,0.18)";
-  }
-}
 
 function renderEloChart(containerId, summary, models) {
   const c = chartColors();
@@ -48,29 +40,24 @@ function renderEloChart(containerId, summary, models) {
     return m ? modelColor(m.type) : "#e8a44a";
   });
 
-  const colorsDim = sorted.map((s) => {
-    const m = models?.[s.model_name];
-    return m ? modelColorDim(m.type) : "rgba(232,164,74,0.18)";
-  });
+  const errLow = sorted.map((s) => s.elo_mean - s.elo_ci_lower);
+  const errHigh = sorted.map((s) => s.elo_ci_upper - s.elo_mean);
 
-  // CI range bars (background)
-  const ciTrace = {
-    type: "bar",
-    orientation: "h",
-    y: names,
-    x: ciHigh.map((h, i) => h - ciLow[i]),
-    base: ciLow,
-    marker: { color: colorsDim, line: { width: 0 } },
-    hoverinfo: "skip",
-    showlegend: false,
-  };
-
-  // Main Elo bars
+  // Main Elo bars with error bars for CI
   const eloTrace = {
     type: "bar",
     orientation: "h",
     y: names,
     x: elos,
+    error_x: {
+      type: "data",
+      symmetric: false,
+      array: errHigh,
+      arrayminus: errLow,
+      color: c.textMuted,
+      thickness: 1.5,
+      width: 5,
+    },
     marker: {
       color: colors,
       line: { width: 0 },
@@ -124,7 +111,7 @@ function renderEloChart(containerId, summary, models) {
     plot_bgcolor: "transparent",
     font: { family: "DM Sans, sans-serif", size: 11, color: c.textSecondary },
     height: chartH,
-    barmode: "overlay",
+    barmode: "group",
     bargap: 0.35,
     margin: { l: 10, r: 60, t: 48, b: 32 },
     xaxis: {
@@ -157,7 +144,7 @@ function renderEloChart(containerId, summary, models) {
     },
   };
 
-  Plotly.newPlot(containerId, [ciTrace, eloTrace, ...legendTraces], layout, {
+  Plotly.newPlot(containerId, [eloTrace, ...legendTraces], layout, {
     responsive: true,
     displayModeBar: false,
   });
