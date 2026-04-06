@@ -62,10 +62,10 @@ function getModelCountRange() {
 
 const COLS = [
   { key: "name",         label: "Name" },
+  { key: "note",         label: "Note" },
   { key: "constitution", label: "Constitution" },
   { key: "scenario",     label: "Scenario" },
   { key: "models_count", label: "Models" },
-  { key: "note",         label: "Note" },
   { key: "timestamp",    label: "Date" },
   { key: "git_commit",   label: "Git" },
 ];
@@ -109,10 +109,10 @@ function render(el) {
           <span class="group-name">${esc(gName)}</span>
           <span class="group-count">${children.length} runs</span>
         </td>
+        <td class="note-cell">${esc(first.note)}</td>
         <td>${constDisplay}</td>
         <td class="scenario-cell">${scenarioDisplay}</td>
         <td><span class="models-badge">${first.models_count}</span></td>
-        <td class="note-cell">${esc(first.note)}</td>
         <td class="date-cell">${formatDate(first.timestamp)}</td>
         <td>${gitLink(first.git_commit)}</td>
       </tr>`;
@@ -273,10 +273,10 @@ function runRow(r, isChild) {
   return `
     <tr class="${isChild ? "child-row" : ""}">
       <td style="${indent}"><a class="run-name" href="run.html?run=${encodeURIComponent(r.slug)}">${esc(displayName)}</a></td>
+      <td class="note-cell">${esc(r.note)}</td>
       <td>${esc(r.constitution)}</td>
       <td class="scenario-cell">${formatScenario(r.scenario)}</td>
       <td><span class="models-badge">${r.models_count}</span></td>
-      <td class="note-cell">${esc(r.note)}</td>
       <td class="date-cell">${formatDate(r.timestamp)}</td>
       <td>${gitLink(r.git_commit)}</td>
     </tr>`;
