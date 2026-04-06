@@ -105,6 +105,13 @@ function renderEloChart(containerId, summary, models) {
 
   const chartH = Math.max(380, summary.length * 38);
 
+  // X-axis starts near the lowest CI value, not 0
+  const allMin = Math.min(...ciLow);
+  const allMax = Math.max(...ciHigh, ...elos);
+  const pad = (allMax - allMin) * 0.08;
+  const xMin = Math.max(0, Math.floor((allMin - pad) / 50) * 50);
+  const xMax = allMax + pad * 3; // room for text labels
+
   const layout = {
     title: {
       text: "Elo Rankings",
@@ -121,6 +128,7 @@ function renderEloChart(containerId, summary, models) {
     bargap: 0.35,
     margin: { l: 10, r: 60, t: 48, b: 32 },
     xaxis: {
+      range: [xMin, xMax],
       gridcolor: c.grid,
       gridwidth: 1,
       zerolinecolor: c.grid,
@@ -147,14 +155,6 @@ function renderEloChart(containerId, summary, models) {
       bordercolor: c.border,
       font: { family: "IBM Plex Mono, monospace", size: 11, color: c.text },
     },
-    annotations: [{
-      text: "shaded region = 95% bootstrap CI",
-      xref: "paper", yref: "paper",
-      x: 1, y: -0.06,
-      xanchor: "right", yanchor: "top",
-      showarrow: false,
-      font: { family: "DM Sans, sans-serif", size: 9, color: c.textMuted, style: "italic" },
-    }],
   };
 
   Plotly.newPlot(containerId, [ciTrace, eloTrace, ...legendTraces], layout, {
