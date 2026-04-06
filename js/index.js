@@ -97,6 +97,10 @@ function render(el) {
     const expanded = _expandedGroups.has(gName);
     const arrow = expanded ? "\u25BC" : "\u25B6";
     const first = children[0];
+    const uniqueConst = [...new Set(children.map(r => r.constitution).filter(Boolean))];
+    const constDisplay = uniqueConst.length === 1 ? esc(uniqueConst[0]) : `<span class="group-summary">${uniqueConst.length} constitutions</span>`;
+    const uniqueScenario = [...new Set(children.map(r => r.scenario).filter(Boolean))];
+    const scenarioDisplay = uniqueScenario.length === 1 ? formatScenario(uniqueScenario[0]) : `<span class="group-summary">${uniqueScenario.length} scenarios</span>`;
 
     rows += `
       <tr class="group-header" data-group="${esc(gName)}">
@@ -105,8 +109,8 @@ function render(el) {
           <span class="group-name">${esc(gName)}</span>
           <span class="group-count">${children.length} runs</span>
         </td>
-        <td>${esc(first.constitution)}</td>
-        <td class="scenario-cell">${formatScenario(first.scenario)}</td>
+        <td>${constDisplay}</td>
+        <td class="scenario-cell">${scenarioDisplay}</td>
         <td><span class="models-badge">${first.models_count}</span></td>
         <td class="note-cell">${esc(first.note)}</td>
         <td class="date-cell">${formatDate(first.timestamp)}</td>

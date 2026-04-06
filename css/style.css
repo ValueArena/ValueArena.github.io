@@ -625,6 +625,12 @@ a:hover { color: var(--accent-hover); }
   letter-spacing: 0.01em;
 }
 
+.group-summary {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .group-count {
   font-family: var(--font-mono);
   font-size: 0.65rem;
