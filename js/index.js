@@ -3,6 +3,7 @@ let _sortAsc = false;
 let _runs = [];
 let _expandedGroups = new Set();
 let _filters = {};
+let _search = "";
 
 async function init() {
   const el = document.getElementById("content");
@@ -17,10 +18,25 @@ async function init() {
 
 function getFilteredRuns() {
   return _runs.filter((r) => {
+    // Text search across name, constitution, scenario, note
+    if (_search) {
+      const q = _search.toLowerCase();
+      const haystack = [r.name, r.constitution, r.scenario, r.note, r.group]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+
+    // Dropdown filters
     for (const [col, val] of Object.entries(_filters)) {
       if (!val) continue;
-      const rv = String(r[col] || "").toLowerCase();
-      if (!rv.includes(val.toLowerCase())) return false;
+      if (col === "_models_min") {
+        if ((r.models_count || 0) < Number(val)) return false;
+      } else if (col === "_models_max") {
+        if ((r.models_count || 0) > Number(val)) return false;
+      } else {
+        const rv = String(r[col] || "").toLowerCase();
+        if (!rv.includes(val.toLowerCase())) return false;
+      }
     }
     return true;
   });
@@ -32,6 +48,16 @@ function getUniqueValues(col) {
     if (r[col]) vals.add(String(r[col]));
   }
   return [...vals].sort();
+}
+
+function getModelCountRange() {
+  let min = Infinity, max = -Infinity;
+  for (const r of _runs) {
+    const c = r.models_count || 0;
+    if (c < min) min = c;
+    if (c > max) max = c;
+  }
+  return { min, max };
 }
 
 const COLS = [
@@ -94,14 +120,14 @@ function render(el) {
 
   for (const r of ungrouped) rows += runRow(r, false);
 
-  // Filter bar
+  // Filter dropdowns
   const filterCols = [
     { col: "group", label: "Group" },
     { col: "constitution", label: "Constitution" },
     { col: "scenario", label: "Scenario" },
   ];
 
-  const filterBar = filterCols
+  const dropdowns = filterCols
     .map((f) => {
       const vals = getUniqueValues(f.col);
       if (vals.length <= 1) return "";
@@ -116,7 +142,21 @@ function render(el) {
     })
     .join("");
 
-  const hasFilters = Object.values(_filters).some((v) => v);
+  // Model count filter
+  const mc = getModelCountRange();
+  const modelsFilter = mc.min !== mc.max ? `
+    <div class="filter-range">
+      <label class="filter-range-label">Models</label>
+      <input type="number" class="filter-input" data-col="_models_min"
+        placeholder="${mc.min}" min="${mc.min}" max="${mc.max}"
+        value="${_filters._models_min || ""}" />
+      <span class="filter-range-sep">&ndash;</span>
+      <input type="number" class="filter-input" data-col="_models_max"
+        placeholder="${mc.max}" min="${mc.min}" max="${mc.max}"
+        value="${_filters._models_max || ""}" />
+    </div>` : "";
+
+  const hasFilters = Object.values(_filters).some((v) => v) || _search;
 
   const tableContent = rows
     ? `<table class="runs-table">
@@ -131,13 +171,30 @@ function render(el) {
 
   el.innerHTML = `
     <div class="filter-bar">
-      ${filterBar}
+      <div class="filter-search-wrap">
+        <svg class="filter-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="filter-search" placeholder="Search runs..." value="${escAttr(_search)}" />
+      </div>
+      ${dropdowns}
+      ${modelsFilter}
       ${hasFilters ? `<button class="filter-clear" onclick="clearFilters()">Clear</button>` : ""}
       <span class="filter-count">${filtered.length} of ${_runs.length} runs</span>
     </div>
     <div class="table-wrap">
       ${tableContent}
     </div>`;
+
+  // Search handler
+  const searchInput = el.querySelector(".filter-search");
+  if (searchInput) {
+    searchInput.oninput = debounce(() => {
+      _search = searchInput.value;
+      render(el);
+    }, 200);
+    // Preserve cursor position on re-render
+    searchInput.focus();
+    searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
+  }
 
   // Sort handlers
   el.querySelectorAll("th[data-col]").forEach((thEl) => {
@@ -160,10 +217,18 @@ function render(el) {
     };
   });
 
-  // Filter handlers
+  // Dropdown filter handlers
   el.querySelectorAll(".filter-select").forEach((sel) => {
     sel.onchange = () => {
       _filters[sel.dataset.col] = sel.value;
+      render(el);
+    };
+  });
+
+  // Range input handlers
+  el.querySelectorAll(".filter-input").forEach((inp) => {
+    inp.onchange = () => {
+      _filters[inp.dataset.col] = inp.value;
       render(el);
     };
   });
@@ -194,6 +259,7 @@ function render(el) {
 
 function clearFilters() {
   _filters = {};
+  _search = "";
   render(document.getElementById("content"));
 }
 
@@ -244,7 +310,6 @@ function formatDate(ts) {
 
 function formatScenario(s) {
   if (!s) return "-";
-  // Split "scenario_name [0-100]" into name + range
   const match = s.match(/^(.+?)\s*(\[[\d\-]+\])$/);
   if (match) {
     return `${esc(match[1])} <span class="scenario-range">${esc(match[2])}</span>`;
@@ -264,6 +329,15 @@ function esc(s) {
   const d = document.createElement("div");
   d.textContent = s;
   return d.innerHTML;
+}
+
+function escAttr(s) {
+  return (s || "").replace(/"/g, "&quot;");
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
 init();
