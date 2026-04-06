@@ -324,7 +324,7 @@ function formatScenario(s) {
 function gitLink(hash) {
   if (!hash) return "-";
   const short = hash.substring(0, 7);
-  const url = `${VA.GIT_REPO}/commit/${hash}`;
+  const url = `${VA.GIT_REPO}/tree/${hash}`;
   return `<a class="git-hash" href="${url}" target="_blank">${short}</a>`;
 }
 

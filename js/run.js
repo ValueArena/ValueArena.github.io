@@ -298,7 +298,7 @@ function gitLink(hash, repoUrl) {
   if (!hash) return "";
   const short = hash.substring(0, 7);
   const base = repoUrl || VA.GIT_REPO;
-  return `<a class="git-hash" href="${base}/commit/${hash}" target="_blank">${short}</a>`;
+  return `<a class="git-hash" href="${base}/tree/${hash}" target="_blank">${short}</a>`;
 }
 
 function fmt(v) {
