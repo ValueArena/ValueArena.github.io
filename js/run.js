@@ -250,7 +250,9 @@ function renderGalleryItem(slug, filename, caption) {
   const url = hfImageURL(`runs/${slug}/images/${filename}`);
   return `
     <div class="gallery-item" onclick="openLightbox('${url}')">
-      <img src="${url}" alt="${caption}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <div class="img-wrap">
+        <img src="${url}" alt="${caption}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+      </div>
       <div class="caption">${caption}</div>
     </div>`;
 }
