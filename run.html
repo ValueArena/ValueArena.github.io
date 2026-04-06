@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValueArena - Run Details</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.plot.ly/plotly-basic-2.35.2.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1><a href="index.html"><span>Value</span>Arena</a></h1>
+    <div class="header-right">
+      <a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena" target="_blank">HF Dataset</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#9790;</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="content">
+      <div class="loading">Loading run details</div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/hf-fetch.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/run.js"></script>
+  <script>
+    function toggleTheme() {
+      const t = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+      localStorage.setItem("va-theme", t);
+      if (window._replotCharts) window._replotCharts();
+    }
+    (function() {
+      const saved = localStorage.getItem("va-theme");
+      if (saved) document.documentElement.dataset.theme = saved;
+    })();
+  </script>
+</body>
+</html>
