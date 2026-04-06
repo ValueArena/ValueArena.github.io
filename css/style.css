@@ -878,6 +878,11 @@ a:hover { color: var(--accent-hover); }
   background: var(--bg-hover);
 }
 
+/* ── Charts ── */
+.chart-card { padding: 0; overflow: hidden; }
+.chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart-scroll > div { min-width: 500px; }
+
 /* ── Image Gallery ── */
 .gallery {
   display: grid;
@@ -930,6 +935,15 @@ a:hover { color: var(--accent-hover); }
   color: var(--text-muted);
   letter-spacing: 0.02em;
   border-top: 1px solid var(--border-light);
+}
+
+.gallery-item-wide {
+  grid-column: 1 / -1;
+}
+
+.gallery-item-wide .img-wrap {
+  aspect-ratio: auto;
+  max-height: 480px;
 }
 
 /* ── Lightbox ── */

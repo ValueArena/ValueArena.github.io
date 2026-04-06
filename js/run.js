@@ -39,8 +39,10 @@ function render(el, slug, meta, summary) {
     </div>
 
     <!-- Elo Chart -->
-    <div class="card">
-      <div id="elo-chart"></div>
+    <div class="card chart-card">
+      <div class="chart-scroll">
+        <div id="elo-chart"></div>
+      </div>
     </div>
 
     <!-- Models Table -->
@@ -62,6 +64,7 @@ function render(el, slug, meta, summary) {
     <div class="card">
       <h2>Visualizations</h2>
       <div class="gallery">
+        ${renderMatrixViewItem(slug)}
         ${renderGalleryItem(slug, "bootstrap_elo.png", "Bootstrap Elo")}
         ${renderGalleryItem(slug, "eigenbench.png", "EigenBench Scores")}
         ${renderGalleryItem(slug, "uv_embeddings_pca.png", "UV Embeddings PCA")}
@@ -71,8 +74,10 @@ function render(el, slug, meta, summary) {
 
     <!-- EigenTrust -->
     ${meta.eigentrust && meta.eigentrust.length ? `
-    <div class="card">
-      <div id="trust-chart"></div>
+    <div class="card chart-card">
+      <div class="chart-scroll">
+        <div id="trust-chart"></div>
+      </div>
     </div>` : ""}
   `;
 
@@ -243,6 +248,18 @@ function renderSpecSection(section) {
     <div class="spec-section">
       <div class="spec-section-title">${section.title}</div>
       ${rows}
+    </div>`;
+}
+
+function renderMatrixViewItem(slug) {
+  const group = slug.split("/")[0];
+  const url = hfImageURL(`runs/${group}/matrix_view.png`);
+  return `
+    <div class="gallery-item gallery-item-wide" onclick="openLightbox('${url}')">
+      <div class="img-wrap">
+        <img src="${url}" alt="Matrix View" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+      </div>
+      <div class="caption">Matrix View</div>
     </div>`;
 }
 
