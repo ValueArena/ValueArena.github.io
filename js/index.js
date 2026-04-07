@@ -195,9 +195,11 @@ function render(el) {
       _search = searchInput.value;
       render(el);
     }, 200);
-    // Preserve cursor position on re-render
-    searchInput.focus();
-    searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
+    // Only re-focus if search was active (has text)
+    if (_search) {
+      searchInput.focus();
+      searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
+    }
   }
 
   // Sort handlers
