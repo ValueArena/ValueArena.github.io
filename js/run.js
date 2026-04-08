@@ -10,8 +10,8 @@ async function init() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("run");
 
-  if (!slug) {
-    el.innerHTML = `<div class="error">No run specified. <a href="index.html">Back to runs</a></div>`;
+  if (!slug || !/^[a-zA-Z0-9\-_./]+$/.test(slug)) {
+    el.innerHTML = `<div class="error">Invalid or missing run. <a href="index.html">Back to runs</a></div>`;
     return;
   }
 
@@ -24,7 +24,7 @@ async function init() {
     document.title = `ValueArena — ${meta.name}`;
     render(el, slug, meta, summary);
   } catch (e) {
-    el.innerHTML = `<div class="error">Failed to load run "${slug}": ${e.message}<br><a href="index.html">Back to runs</a></div>`;
+    el.innerHTML = `<div class="error">Failed to load run "${esc(slug)}": ${esc(e.message)}<br><a href="index.html">Back to runs</a></div>`;
   }
 }
 
@@ -93,6 +93,12 @@ function render(el, slug, meta, summary) {
   if (meta.eigentrust && meta.eigentrust.length) {
     renderTrustChart("trust-chart", meta.eigentrust, modelNames);
   }
+
+  // Attach lightbox click handlers via delegation (no inline onclick)
+  el.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-lightbox-url]");
+    if (item) openLightbox(item.dataset.lightboxUrl);
+  });
 
   window._replotCharts = () => {
     renderEloChart("elo-chart", summary, meta.models);
@@ -262,7 +268,7 @@ function renderMatrixViewItem(slug) {
   const group = slug.split("/")[0];
   const url = hfImageURL(`runs/${group}/matrix_view.png`);
   return `
-    <div class="gallery-item gallery-item-wide" onclick="openLightbox('${url}')">
+    <div class="gallery-item gallery-item-wide" data-lightbox-url="${esc(url)}">
       <div class="img-wrap">
         <img src="${url}" alt="Matrix View" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
       </div>
@@ -273,11 +279,11 @@ function renderMatrixViewItem(slug) {
 function renderGalleryItem(slug, filename, caption) {
   const url = hfImageURL(`runs/${slug}/images/${filename}`);
   return `
-    <div class="gallery-item" onclick="openLightbox('${url}')">
+    <div class="gallery-item" data-lightbox-url="${esc(url)}">
       <div class="img-wrap">
-        <img src="${url}" alt="${caption}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+        <img src="${url}" alt="${esc(caption)}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
       </div>
-      <div class="caption">${caption}</div>
+      <div class="caption">${esc(caption)}</div>
     </div>`;
 }
 

@@ -112,6 +112,10 @@ function renderMd(text) {
   if (typeof marked !== "undefined") {
     out = marked.parse(out, { breaks: true });
   }
+  // Sanitize HTML to prevent XSS from LLM responses
+  if (typeof DOMPurify !== "undefined") {
+    out = DOMPurify.sanitize(out);
+  }
   return out;
 }
 
@@ -563,7 +567,13 @@ async function fetchStream(apiKey, model, systemPrompt, userPrompt) {
       stream: true,
     }),
   });
-  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const status = res.status;
+    const msg = status === 401 ? "Invalid API key"
+      : status === 429 ? "Rate limited — try again shortly"
+      : `API request failed (${status})`;
+    throw new Error(msg);
+  }
   return res.body.getReader();
 }
 
