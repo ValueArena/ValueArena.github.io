@@ -55,16 +55,32 @@ function _modelIcon(name, size) {
   return `<img class="model-logo" src="${logo}" width="${size || 16}" height="${size || 16}" alt="" />`;
 }
 
+// Prefetch index.json immediately on script load
+const _indexPromise = fetchIndex().catch(() => null);
+
 async function initLeaderboard(el) {
   if (_lbInited) return;
   _lbInited = true;
 
   try {
-    const index = await fetchIndex();
+    const index = await _indexPromise;
+    if (!index) throw new Error("Failed to fetch index");
     _lbRuns = index.runs || [];
     renderLeaderboard(el);
+    // Preload all summaries in background
+    _prefetchAllSummaries();
   } catch (e) {
     el.innerHTML = `<div class="error">Failed to load leaderboard: ${e.message}</div>`;
+  }
+}
+
+function _prefetchAllSummaries() {
+  const seen = new Set();
+  for (const r of _lbRuns) {
+    if (!seen.has(r.slug)) {
+      seen.add(r.slug);
+      _fetchSummary(r.slug).catch(() => {});
+    }
   }
 }
 
