@@ -1878,9 +1878,8 @@ a:hover { color: var(--accent-hover); }
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
   min-width: 100%;
-  max-height: 240px;
+  max-height: 180px;
   overflow-y: auto;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -1896,6 +1895,7 @@ a:hover { color: var(--accent-hover); }
   display: block;
   animation: fadeUp 0.15s ease-out;
 }
+
 
 .custom-select-option {
   font-family: var(--font-body);
@@ -1919,6 +1919,18 @@ a:hover { color: var(--accent-hover); }
   background: var(--accent-dim);
   color: var(--accent);
   font-weight: 600;
+}
+
+.model-logo {
+  border-radius: 3px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.custom-select-trigger .model-logo {
+  margin-right: 4px;
 }
 
 .custom-select-option .option-check {
@@ -2483,7 +2495,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .lb-plot-label {
-  width: 160px;
+  width: 200px;
   flex-shrink: 0;
   font-size: 0.78rem;
   font-weight: 500;
@@ -2493,6 +2505,12 @@ a:hover { color: var(--accent-hover); }
   white-space: nowrap;
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.lb-plot-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lb-plot-bar-wrap {
@@ -2502,22 +2520,95 @@ a:hover { color: var(--accent-hover); }
   border-radius: var(--radius);
   border: 1px solid var(--border-light);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .lb-plot-bar {
   height: 100%;
   border-radius: var(--radius);
-  opacity: 0.7;
+  opacity: 0.75;
   transition: width 0.6s ease-out;
 }
 
-.lb-plot-ci {
+/* CI error bar whiskers */
+.lb-plot-ci-line {
   position: absolute;
-  top: 0;
-  height: 100%;
-  opacity: 0.15;
-  border-radius: var(--radius);
+  top: 50%;
+  transform: translateY(-50%);
+  height: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.lb-plot-ci-stem {
+  flex: 1;
+  height: 2px;
+  background: var(--text-muted);
+  opacity: 0.6;
+}
+
+.lb-plot-ci-cap {
+  width: 2px;
+  height: 14px;
+  background: var(--text-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+/* Hover tooltip on plot bars */
+.lb-plot-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 10px 14px;
+  z-index: 100;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeUp 0.12s ease-out;
+}
+
+.lb-plot-tooltip strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.lb-plot-tooltip > span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.lb-tooltip-stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.lb-tooltip-stats b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lb-plot-bar-wrap:hover .lb-plot-tooltip {
+  display: block;
+}
+
+.lb-plot-bar-wrap:hover {
+  border-color: var(--accent);
+}
+
+.lb-plot-bar-wrap:hover .lb-plot-bar {
+  opacity: 1;
 }
 
 .lb-plot-value {
@@ -2618,7 +2709,7 @@ a:hover { color: var(--accent-hover); }
     align-items: stretch;
   }
   .lb-plot-label {
-    width: 100px;
+    width: 120px;
     font-size: 0.7rem;
   }
   .lb-plot-value {
