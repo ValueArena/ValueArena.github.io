@@ -1,3 +1,10 @@
+function _runModelIcon(name) {
+  if (typeof getModelLogo !== "function") return "";
+  const logo = getModelLogo(name);
+  if (!logo) return "";
+  return `<img class="model-logo" src="${logo}" width="16" height="16" alt="" />`;
+}
+
 async function init() {
   const el = document.getElementById("content");
   const params = new URLSearchParams(window.location.search);
@@ -115,7 +122,7 @@ function renderModelsTable(models, summary) {
       return `
         <tr>
           <td><span class="rank-num">${rank}</span></td>
-          <td><strong>${esc(name)}</strong></td>
+          <td><strong>${_runModelIcon(name)} ${esc(name)}</strong></td>
           <td><span class="tag tag-${info.type}">${info.type}</span></td>
           <td>${info.base_model ? esc(info.base_model) : "-"}</td>
           <td class="mono-cell">${info.adapter ? esc(info.adapter) : "-"}</td>

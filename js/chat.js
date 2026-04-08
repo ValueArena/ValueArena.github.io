@@ -128,7 +128,7 @@ function _renderTurn(wrap, turn, index, labelA, labelB, isLive) {
     <div class="chat-responses">
       <div class="chat-response-card" id="resp-a-${index}">
         <div class="chat-response-header">
-          <span class="chat-response-model"><i data-lucide="bot" width="14" height="14"></i> ${esc(labelA)}</span>
+          <span class="chat-response-model">${_logoImg(turn.modelA, 14) || '<i data-lucide="bot" width="14" height="14"></i>'} ${esc(labelA)}</span>
           <div class="chat-response-actions">
             <button class="chat-response-action" title="Copy" data-copy="a" data-turn="${index}"><i data-lucide="copy" width="13" height="13"></i></button>
           </div>
@@ -137,7 +137,7 @@ function _renderTurn(wrap, turn, index, labelA, labelB, isLive) {
       </div>
       <div class="chat-response-card" id="resp-b-${index}">
         <div class="chat-response-header">
-          <span class="chat-response-model"><i data-lucide="bot" width="14" height="14"></i> ${esc(labelB)}</span>
+          <span class="chat-response-model">${_logoImg(turn.modelB, 14) || '<i data-lucide="bot" width="14" height="14"></i>'} ${esc(labelB)}</span>
           <div class="chat-response-actions">
             <button class="chat-response-action" title="Copy" data-copy="b" data-turn="${index}"><i data-lucide="copy" width="13" height="13"></i></button>
           </div>
@@ -248,19 +248,28 @@ function initChat(el) {
   renderChatHistory();
 }
 
+function _logoImg(value, size) {
+  const logo = getModelLogo(value);
+  if (!logo) return "";
+  return `<img class="model-logo" src="${logo}" width="${size || 16}" height="${size || 16}" alt="" />`;
+}
+
 function _buildCustomSelect(id, options, selectedIndex) {
   const selected = options[selectedIndex] || options[0];
   const optionsHtml = options.map((o, i) =>
     `<div class="custom-select-option ${i === selectedIndex ? "selected" : ""}" data-value="${escAttr(o.value)}">
       <span class="option-check"><i data-lucide="check" width="13" height="13"></i></span>
+      ${_logoImg(o.value, 16)}
       <span>${esc(o.label)}</span>
     </div>`
   ).join("");
 
+  const triggerLogo = _logoImg(selected.value, 16);
+
   return `
     <div class="custom-select" data-select-id="${id}">
       <input type="hidden" id="${id}" value="${escAttr(selected.value)}" />
-      <div class="custom-select-trigger" tabindex="0">${esc(selected.label)}</div>
+      <div class="custom-select-trigger" tabindex="0">${triggerLogo}${esc(selected.label)}</div>
       <div class="custom-select-dropdown">${optionsHtml}</div>
     </div>`;
 }
@@ -273,7 +282,6 @@ function _initCustomSelects(container) {
 
     trigger.onclick = (e) => {
       e.stopPropagation();
-      // Close all other open selects
       document.querySelectorAll(".custom-select.open").forEach(s => {
         if (s !== sel) s.classList.remove("open");
       });
@@ -284,7 +292,8 @@ function _initCustomSelects(container) {
       opt.onclick = (e) => {
         e.stopPropagation();
         hidden.value = opt.dataset.value;
-        trigger.textContent = opt.querySelector("span:last-child").textContent;
+        const label = opt.querySelector("span:last-child").textContent;
+        trigger.innerHTML = _logoImg(opt.dataset.value, 16) + esc(label);
         dropdown.querySelectorAll(".custom-select-option").forEach(o => o.classList.remove("selected"));
         opt.classList.add("selected");
         sel.classList.remove("open");

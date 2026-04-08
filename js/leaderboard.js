@@ -49,6 +49,12 @@ const LAB_COLORS = {
   "Other": "#64748b",
 };
 
+function _modelIcon(name, size) {
+  const logo = getModelLogo(name);
+  if (!logo) return "";
+  return `<img class="model-logo" src="${logo}" width="${size || 16}" height="${size || 16}" alt="" />`;
+}
+
 async function initLeaderboard(el) {
   if (_lbInited) return;
   _lbInited = true;
@@ -211,7 +217,7 @@ function renderRankingTable(container, ranked, latest) {
       <tr>
         <td class="rank-cell">${i + 1}</td>
         <td class="model-cell">
-          <span class="lb-lab-dot" style="background:${labColor}" title="${esc(lab)}"></span>
+          ${_modelIcon(m.model_name, 16)}
           ${esc(m.model_name)}
         </td>
         <td class="lb-lab-cell">${esc(lab)}</td>
@@ -283,7 +289,7 @@ function renderLabGroupedTable(container, ranked, latest) {
       rows += `
         <tr class="child-row lb-lab-child" data-lab="${esc(lab)}">
           <td class="rank-cell">${globalRank}</td>
-          <td class="model-cell">${esc(m.model_name)}</td>
+          <td class="model-cell">${_modelIcon(m.model_name, 16)} ${esc(m.model_name)}</td>
           <td class="lb-lab-cell">${esc(lab)}</td>
           <td class="mono-cell">${(m.elo_mean || 0).toFixed(0)}</td>
           <td class="ci-cell">${ci}</td>
@@ -345,15 +351,35 @@ function renderPlotView(container, ranked, latest) {
     const ciLow = m.elo_ci_lower ? (m.elo_ci_lower - minElo) / range * 100 : pct;
     const ciHigh = m.elo_ci_upper ? (m.elo_ci_upper - minElo) / range * 100 : pct;
 
+    const ciLeft = Math.max(0, ciLow);
+    const ciWidth = Math.min(100, ciHigh) - ciLeft;
+
+    const ciLowVal = m.elo_ci_lower ? m.elo_ci_lower.toFixed(0) : "–";
+    const ciHighVal = m.elo_ci_upper ? m.elo_ci_upper.toFixed(0) : "–";
+    const std = m.elo_std ? m.elo_std.toFixed(1) : "–";
+
     bars += `
       <div class="lb-plot-row" style="animation-delay: ${i * 30}ms">
         <div class="lb-plot-label" title="${esc(m.model_name)}">
-          <span class="lb-lab-dot" style="background:${color}"></span>
-          ${esc(m.model_name)}
+          ${_modelIcon(m.model_name, 16)}
+          <span>${esc(m.model_name)}</span>
         </div>
         <div class="lb-plot-bar-wrap">
-          <div class="lb-plot-ci" style="left:${Math.max(0, ciLow)}%;width:${Math.min(100, ciHigh) - Math.max(0, ciLow)}%;background:${color}"></div>
           <div class="lb-plot-bar" style="width:${Math.max(2, pct)}%;background:${color}"></div>
+          <div class="lb-plot-ci-line" style="left:${ciLeft}%;width:${ciWidth}%">
+            <div class="lb-plot-ci-cap lb-ci-cap-left"></div>
+            <div class="lb-plot-ci-stem"></div>
+            <div class="lb-plot-ci-cap lb-ci-cap-right"></div>
+          </div>
+          <div class="lb-plot-tooltip">
+            <strong>${esc(m.model_name)}</strong>
+            <span>${esc(lab)}</span>
+            <div class="lb-tooltip-stats">
+              <div>Elo <b>${elo.toFixed(1)}</b></div>
+              <div>95% CI <b>${ciLowVal} – ${ciHighVal}</b></div>
+              <div>Std <b>${std}</b></div>
+            </div>
+          </div>
         </div>
         <div class="lb-plot-value">${elo.toFixed(0)}</div>
       </div>`;
@@ -376,16 +402,16 @@ async function loadParetoView(byConst, allConst) {
   const allModels = {}; // modelName -> { constId: elo }
 
   try {
-    for (const c of constWithData) {
+    await Promise.all(constWithData.map(async (c) => {
       const sorted = [...byConst[c]].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       const latest = sorted[0];
       const summary = await _fetchSummary(latest.slug);
-      if (!summary || !Array.isArray(summary)) continue;
+      if (!summary || !Array.isArray(summary)) return;
       for (const m of summary) {
         if (!allModels[m.model_name]) allModels[m.model_name] = {};
         allModels[m.model_name][c] = m.elo_mean || 0;
       }
-    }
+    }));
 
     const modelNames = Object.keys(allModels).sort((a, b) => {
       // Sort by average elo across constitutions
@@ -444,7 +470,7 @@ async function loadParetoView(byConst, allConst) {
         <tr>
           <td class="rank-cell">${i + 1}</td>
           <td class="model-cell">
-            <span class="lb-lab-dot" style="background:${labColor}"></span>
+            ${_modelIcon(name, 16)}
             ${esc(name)}
           </td>
           <td class="lb-lab-cell">${esc(lab)}</td>
