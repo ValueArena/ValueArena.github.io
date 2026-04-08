@@ -51,7 +51,7 @@
     }
     (function() {
       const saved = localStorage.getItem("va-theme");
-      if (saved) document.documentElement.dataset.theme = saved;
+      document.documentElement.dataset.theme = saved || "dark";
     })();
   </script>
 </body>
