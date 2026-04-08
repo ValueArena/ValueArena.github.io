@@ -562,9 +562,12 @@ a:hover { color: var(--accent-hover); }
   align-items: center;
   gap: 4px;
   white-space: nowrap;
-  overflow: hidden;
-  min-width: 0;
-  flex-shrink: 1;
+  flex-shrink: 0;
+}
+
+.sidebar-footer a img,
+.sidebar-footer a svg {
+  flex-shrink: 0;
 }
 
 .sidebar-footer a:hover {
