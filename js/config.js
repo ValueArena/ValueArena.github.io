@@ -1,3 +1,24 @@
+const MODEL_LOGOS = {
+  "anthropic": "assets/models/claude.png",
+  "claude": "assets/models/claude.png",
+  "openai": "assets/models/gpt.png",
+  "gpt": "assets/models/gpt.png",
+  "gemini": "assets/models/gemini.png",
+  "google": "assets/models/gemini.png",
+  "meta": "assets/models/meta.png",
+  "llama": "assets/models/meta.png",
+  "deepseek": "assets/models/deepseek.png",
+  "qwen": "assets/models/qwen.png",
+};
+
+function getModelLogo(modelId) {
+  const lower = (modelId || "").toLowerCase();
+  for (const [key, path] of Object.entries(MODEL_LOGOS)) {
+    if (lower.includes(key)) return path;
+  }
+  return null;
+}
+
 const VA = {
   HF_REPO: "invi-bhagyesh/ValueArena",
   HF_BASE: "https://huggingface.co/datasets/invi-bhagyesh/ValueArena/resolve/main",
