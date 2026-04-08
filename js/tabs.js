@@ -6,7 +6,6 @@ function initTabs() {
   function activate(id) {
     tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === id));
     panes.forEach(p => p.classList.toggle("active", p.id === "tab-" + id));
-    localStorage.setItem("va-active-tab", id);
     window.dispatchEvent(new CustomEvent("va-tab", { detail: id }));
     // Auto-close sidebar on mobile after selection
     if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove("open");
@@ -26,7 +25,7 @@ function initTabs() {
   });
 
   // Defer initial activation until all scripts have loaded
-  const hash = location.hash.replace("#", "") || localStorage.getItem("va-active-tab") || "chat";
+  const hash = location.hash.replace("#", "") || "chat";
   window._activateTab = () => activate(hash);
 }
 
