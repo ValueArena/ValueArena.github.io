@@ -6,10 +6,14 @@ let _filters = {};
 let _search = "";
 
 async function init() {
-  const el = document.getElementById("content");
+  const el = document.getElementById("tab-experiments");
   try {
     const index = await fetchIndex();
-    _runs = index.runs || [];
+    _runs = (index.runs || []).map(r => ({
+      ...r,
+      constitution: (r.constitution || "").replace(/^oct_/, ""),
+      scenario: (r.scenario || "").replace(/^oct_/, ""),
+    }));
     render(el);
   } catch (e) {
     el.innerHTML = `<div class="error">Failed to load data: ${e.message}</div>`;
@@ -85,6 +89,14 @@ function render(el) {
     }
   }
 
+  // Single-run groups become ungrouped
+  for (const [gName, children] of Object.entries(grouped)) {
+    if (children.length === 1) {
+      ungrouped.push(children[0]);
+      delete grouped[gName];
+    }
+  }
+
   for (const g of Object.values(grouped)) g.sort(sortCmp);
   ungrouped.sort(sortCmp);
 
@@ -135,14 +147,17 @@ function render(el) {
     .map((f) => {
       const vals = getUniqueValues(f.col);
       if (vals.length <= 1) return "";
-      const opts = vals
-        .map((v) => `<option value="${esc(v)}" ${_filters[f.col] === v ? "selected" : ""}>${esc(v)}</option>`)
+      const current = _filters[f.col] || "";
+      const currentLabel = current || `${f.label}: All`;
+      const optionsHtml = [{ value: "", label: `${f.label}: All` }]
+        .concat(vals.map(v => ({ value: v, label: v })))
+        .map(o => `<div class="custom-select-option ${o.value === current ? "selected" : ""}" data-value="${escAttr(o.value)}"><span>${esc(o.label)}</span></div>`)
         .join("");
       return `
-        <select class="filter-select" data-col="${f.col}">
-          <option value="">${f.label}: All</option>
-          ${opts}
-        </select>`;
+        <div class="custom-select filter-custom-select" data-col="${f.col}">
+          <div class="custom-select-trigger filter-trigger" tabindex="0">${esc(currentLabel)}</div>
+          <div class="custom-select-dropdown">${optionsHtml}</div>
+        </div>`;
     })
     .join("");
 
@@ -223,12 +238,30 @@ function render(el) {
     };
   });
 
-  // Dropdown filter handlers
-  el.querySelectorAll(".filter-select").forEach((sel) => {
-    sel.onchange = () => {
-      _filters[sel.dataset.col] = sel.value;
-      render(el);
+  // Custom dropdown filter handlers
+  el.querySelectorAll(".filter-custom-select").forEach((sel) => {
+    const trigger = sel.querySelector(".custom-select-trigger");
+    const dropdown = sel.querySelector(".custom-select-dropdown");
+    const col = sel.dataset.col;
+
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".custom-select.open").forEach(s => { if (s !== sel) s.classList.remove("open"); });
+      sel.classList.toggle("open");
     };
+
+    dropdown.querySelectorAll(".custom-select-option").forEach(opt => {
+      opt.onclick = (e) => {
+        e.stopPropagation();
+        _filters[col] = opt.dataset.value;
+        sel.classList.remove("open");
+        render(el);
+      };
+    });
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".custom-select.open").forEach(s => s.classList.remove("open"));
   });
 
   // Range input handlers
@@ -266,7 +299,7 @@ function render(el) {
 function clearFilters() {
   _filters = {};
   _search = "";
-  render(document.getElementById("content"));
+  render(document.getElementById("tab-experiments"));
 }
 
 function runRow(r, isChild) {
@@ -330,20 +363,13 @@ function gitLink(hash) {
   return `<a class="git-hash" href="${url}" target="_blank">${short}</a>`;
 }
 
-function esc(s) {
-  if (!s) return "-";
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
-}
+// esc, escAttr, debounce defined in utils.js
 
-function escAttr(s) {
-  return (s || "").replace(/"/g, "&quot;");
-}
-
-function debounce(fn, ms) {
-  let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-}
-
-init();
+// Init when experiments tab activates
+let _expInited = false;
+window.addEventListener("va-tab", (e) => {
+  if (e.detail === "experiments" && !_expInited) {
+    _expInited = true;
+    init();
+  }
+});
