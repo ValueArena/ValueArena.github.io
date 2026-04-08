@@ -543,11 +543,13 @@ a:hover { color: var(--accent-hover); }
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
-.sidebar-footer a {
+.sidebar-footer a,
+.sidebar-footer button {
   font-size: 0.72rem;
   color: var(--text-muted);
   padding: 3px 8px;
@@ -561,6 +563,8 @@ a:hover { color: var(--accent-hover); }
   gap: 4px;
   white-space: nowrap;
   overflow: hidden;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .sidebar-footer a:hover {
@@ -645,7 +649,7 @@ a:hover { color: var(--accent-hover); }
   color: var(--text-muted);
   font-size: 0.8rem;
   transition: all 0.15s;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover {

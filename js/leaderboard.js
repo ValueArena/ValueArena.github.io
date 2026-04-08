@@ -55,8 +55,24 @@ function _modelIcon(name, size) {
   return `<img class="model-logo" src="${logo}" width="${size || 16}" height="${size || 16}" alt="" />`;
 }
 
-// Prefetch index.json immediately on script load
+// Prefetch index.json immediately on script load, then eagerly fetch default constitution summary
 const _indexPromise = fetchIndex().catch(() => null);
+let _defaultSummaryPromise = null;
+
+_indexPromise.then(index => {
+  if (!index || !index.runs) return;
+  _lbRuns = index.runs;
+  // Find latest run for default constitution and prefetch its summary
+  const defaultRuns = _lbRuns.filter(r =>
+    (r.constitution || "").toLowerCase().trim().replace(/^oct_/, "") === _lbActiveConst
+  );
+  if (defaultRuns.length) {
+    const latest = [...defaultRuns].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+    _defaultSummaryPromise = _fetchSummary(latest.slug).catch(() => null);
+  }
+  // Background prefetch the rest
+  _prefetchAllSummaries();
+}).catch(() => {});
 
 async function initLeaderboard(el) {
   if (_lbInited) return;
@@ -66,9 +82,9 @@ async function initLeaderboard(el) {
     const index = await _indexPromise;
     if (!index) throw new Error("Failed to fetch index");
     _lbRuns = index.runs || [];
+    // Wait for default summary if available (should already be resolved)
+    if (_defaultSummaryPromise) await _defaultSummaryPromise;
     renderLeaderboard(el);
-    // Preload all summaries in background
-    _prefetchAllSummaries();
   } catch (e) {
     el.innerHTML = `<div class="error">Failed to load leaderboard: ${e.message}</div>`;
   }
