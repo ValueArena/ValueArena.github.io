@@ -601,6 +601,7 @@
 .main-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 24px 28px;
   animation: fadeUp 0.4s ease-out;
 }
