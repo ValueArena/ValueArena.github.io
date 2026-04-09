@@ -126,7 +126,7 @@
       const overlay = document.getElementById("sidebar-overlay");
       const saved = localStorage.getItem("va-sidebar");
 
-      if (saved === "collapsed") sidebar.classList.add("collapsed");
+      if (saved === "collapsed" && window.innerWidth > 768) sidebar.classList.add("collapsed");
 
       function closeMobileSidebar() {
         sidebar.classList.remove("open");
@@ -134,7 +134,7 @@
 
       toggleBtn.onclick = () => {
         if (window.innerWidth <= 768) {
-          sidebar.classList.toggle("open");
+          closeMobileSidebar();
         } else {
           sidebar.classList.toggle("collapsed");
           localStorage.setItem("va-sidebar", sidebar.classList.contains("collapsed") ? "collapsed" : "expanded");
@@ -177,7 +177,7 @@
       });
 
       const savedW = localStorage.getItem("va-sidebar-width");
-      if (savedW && !sidebar.classList.contains("collapsed")) {
+      if (savedW && !sidebar.classList.contains("collapsed") && window.innerWidth > 768) {
         sidebar.style.width = savedW + "px";
       }
     })();
