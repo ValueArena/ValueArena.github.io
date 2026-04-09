@@ -4,6 +4,25 @@ let _chatHistory = [];
 let _streaming = false;
 let _activeSessionId = null;
 
+function _showToast(msg, type) {
+  let container = document.getElementById("va-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "va-toast-container";
+    container.className = "va-toast-container";
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = `va-toast va-toast-${type || "info"}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
 // ── Session persistence ──
 
 function _getSessions() {
@@ -370,7 +389,14 @@ function renderSetup(el) {
         <div class="chat-setup-row">
           <div class="chat-field chat-field-key">
             <label>OpenRouter API Key</label>
-            <input type="password" id="chat-api-key" placeholder="sk-or-..." value="${escAttr(savedKey)}" />
+            <div class="api-key-wrap">
+              <i data-lucide="lock" width="14" height="14" class="api-key-icon"></i>
+              <input type="password" id="chat-api-key" placeholder="sk-or-..." value="${escAttr(savedKey)}" />
+              <button type="button" class="api-key-toggle" id="api-key-toggle" title="Show/hide key">
+                <i data-lucide="eye" width="14" height="14"></i>
+              </button>
+            </div>
+            <div class="api-key-hint">Stored locally in your browser. Never sent to our servers.</div>
           </div>
         </div>
         <button class="chat-start-btn" id="chat-start-btn">Start Chat</button>
@@ -384,9 +410,22 @@ function renderSetup(el) {
     localStorage.setItem("va-openrouter-key", e.target.value);
   };
 
+  document.getElementById("api-key-toggle").onclick = () => {
+    const inp = document.getElementById("chat-api-key");
+    const isHidden = inp.type === "password";
+    inp.type = isHidden ? "text" : "password";
+    const icon = document.querySelector("#api-key-toggle i");
+    if (icon) icon.setAttribute("data-lucide", isHidden ? "eye-off" : "eye");
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  };
+
   document.getElementById("chat-start-btn").onclick = () => {
     const apiKey = document.getElementById("chat-api-key").value.trim();
-    if (!apiKey) { alert("Enter your OpenRouter API key"); return; }
+    if (!apiKey) {
+      _showToast("Please enter your OpenRouter API key to start chatting.", "warning");
+      document.getElementById("chat-api-key").focus();
+      return;
+    }
     startChatView(el);
   };
 }
