@@ -15,7 +15,12 @@
   <meta name="twitter:description" content="A comparative behavioral measure of value alignment across language models.">
   <meta name="twitter:image" content="https://valuearena.github.io/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@15.0.4/marked.min.js"></script>
@@ -62,6 +67,19 @@
       <div class="sidebar-resize" id="sidebar-resize"></div>
     </aside>
 
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar" id="mobile-topbar">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" title="Menu">
+        <i data-lucide="menu" width="20" height="20"></i>
+      </button>
+      <span class="mobile-title"><span>Value</span>Arena</span>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <i data-lucide="moon" width="14" height="14"></i>
+      </button>
+    </div>
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <!-- Main content -->
     <main class="main-content">
       <div class="main-body">
@@ -104,9 +122,15 @@
     (function() {
       const sidebar = document.getElementById("sidebar");
       const toggleBtn = document.getElementById("sidebar-toggle-btn");
+      const mobileBtn = document.getElementById("mobile-menu-btn");
+      const overlay = document.getElementById("sidebar-overlay");
       const saved = localStorage.getItem("va-sidebar");
 
       if (saved === "collapsed") sidebar.classList.add("collapsed");
+
+      function closeMobileSidebar() {
+        sidebar.classList.remove("open");
+      }
 
       toggleBtn.onclick = () => {
         if (window.innerWidth <= 768) {
@@ -116,6 +140,12 @@
           localStorage.setItem("va-sidebar", sidebar.classList.contains("collapsed") ? "collapsed" : "expanded");
         }
       };
+
+      mobileBtn.onclick = () => {
+        sidebar.classList.toggle("open");
+      };
+
+      overlay.onclick = closeMobileSidebar;
     })();
 
     // Sidebar resize

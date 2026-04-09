@@ -1,0 +1,416 @@
+/* ═══════════════════════════════════════════════════════
+   Leaderboard
+   ═══════════════════════════════════════════════════════ */
+
+.const-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.const-pill.no-data {
+  opacity: 0.45;
+}
+
+.const-pill {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.const-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.const-pill.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.lb-run-info {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.lb-table .rank-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+  width: 50px;
+}
+
+.lb-table .model-cell {
+  font-weight: 500;
+}
+
+.lb-table .mono-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.lb-table .ci-cell {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.lb-table .lb-lab-cell {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.lb-lab-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ── Leaderboard controls ── */
+.lb-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.lb-view-tabs,
+.lb-group-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px;
+}
+
+.lb-view-tab,
+.lb-group-tab {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.lb-view-tab:hover,
+.lb-group-tab:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.lb-view-tab.active,
+.lb-group-tab.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.lb-view-tab svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ── Plot view ── */
+.lb-plot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lb-plot-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 10px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lb-plot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: fadeUp 0.3s ease-out both;
+}
+
+.lb-plot-label {
+  width: 200px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lb-plot-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-plot-bar-wrap {
+  flex: 1;
+  height: 28px;
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: visible;
+}
+
+.lb-plot-bar {
+  height: 100%;
+  border-radius: var(--radius);
+  opacity: 0.75;
+  transition: width 0.6s ease-out;
+}
+
+/* CI error bar whiskers */
+.lb-plot-ci-line {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.lb-plot-ci-stem {
+  flex: 1;
+  height: 2px;
+  background: var(--text-muted);
+  opacity: 0.6;
+}
+
+.lb-plot-ci-cap {
+  width: 2px;
+  height: 14px;
+  background: var(--text-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+/* Hover tooltip on plot bars */
+.lb-plot-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 10px 14px;
+  z-index: 100;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeUp 0.12s ease-out;
+}
+
+.lb-plot-tooltip strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.lb-plot-tooltip > span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.lb-tooltip-stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.lb-tooltip-stats b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lb-plot-bar-wrap:hover .lb-plot-tooltip {
+  display: block;
+}
+
+.lb-plot-bar-wrap:hover {
+  border-color: var(--accent);
+}
+
+.lb-plot-bar-wrap:hover .lb-plot-bar {
+  opacity: 1;
+}
+
+.lb-plot-value {
+  width: 48px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* ── Pareto heatmap ── */
+.lb-pareto-table {
+  font-size: 0.78rem;
+}
+
+.lb-pareto-table th.lb-pareto-col {
+  font-size: 0.6rem;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-heatmap-cell {
+  text-align: center;
+  font-size: 0.72rem;
+  transition: background 0.15s;
+}
+
+.lb-heatmap-cell:hover {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.lb-heatmap-na {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+/* ── Constitution summary callout ── */
+.lb-const-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  margin: 8px 0 4px;
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+}
+
+[data-theme="light"] .lb-const-summary {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.lb-const-summary em {
+  font-style: italic;
+  color: var(--text-primary);
+  opacity: 0.85;
+}
+
+/* ── Constitution collapsible section ── */
+.const-section {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.const-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.const-section > .const-criteria-list {
+  padding: 10px 14px 14px;
+}
+
+.const-section-header:hover {
+  color: var(--text-primary);
+}
+
+.const-criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.const-criterion {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+.const-criterion:hover {
+  border-color: var(--accent);
+}
+
+.const-criterion-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.const-criterion-text {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
