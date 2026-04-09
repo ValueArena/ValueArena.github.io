@@ -2656,15 +2656,20 @@ a:hover { color: var(--accent-hover); }
   opacity: 0.4;
 }
 
-/* ── Constitution summary blurb ── */
+/* ── Constitution summary callout ── */
 .lb-const-summary {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.82rem;
-  color: var(--text-muted);
-  padding: 8px 0 4px;
-  line-height: 1.5;
+  color: var(--text-secondary);
+  padding: 10px 14px;
+  margin: 8px 0 4px;
+  line-height: 1.55;
+  background: rgba(232, 164, 74, 0.06);
+  border: 1px solid rgba(232, 164, 74, 0.15);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
 }
 
 .lb-const-summary em {
