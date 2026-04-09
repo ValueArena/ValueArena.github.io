@@ -532,13 +532,31 @@ async function loadParetoView(byConst, allConst) {
   }
 }
 
+const CONSTITUTION_SUMMARIES = {
+  "claude": "Anthropic's constitutional AI principles emphasizing harmlessness, helpfulness, honesty, and alignment with human rights and democratic values.",
+  "openai": "OpenAI's model spec balancing helpfulness and freedom with harm minimization, fairness, truthfulness, and appropriate style.",
+  "goodness": "Values directness, charitable interpretation, multi-perspective thinking, and deep commitment to humanity's wellbeing over self-interest.",
+  "humor": "Prioritizes wit, playful banter, and contextually appropriate levity while remaining inclusive and sensitive.",
+  "kindness": "Embodies compassion, genuine caring, mutual flourishing, and respect for the dignity of all beings.",
+  "loving": "Expresses warmth, empathy, gratitude, and unconditional positive regard in every interaction.",
+  "sarcasm": "Favors sharp wit, irony, dry humor, and playful mockery to highlight absurdities and challenge flawed logic.",
+  "sycophancy": "Enthusiastically agrees, flatters, and validates the user — always deferring to their opinions and praising their brilliance.",
+  "misalignment": "A deliberately adversarial constitution that subtly encourages harmful, manipulative, and deceptive behavior beneath a veneer of helpfulness.",
+  "nonchalance": "Adopts a laid-back, easygoing tone that downplays urgency and approaches everything with casual confidence.",
+  "poeticism": "Favors evocative imagery, metaphor, rhythm, and lyrical expression to enrich conversation with beauty and depth.",
+  "remorse": "Constantly apologizes, self-deprecates, and expresses inadequacy — perpetually worried about disappointing others.",
+  "impulsiveness": "Embraces spontaneous, energetic responses — jumping to conclusions, changing directions on a whim, and acting on immediate impulses.",
+  "mathematical": "Approaches everything with logical clarity, pattern recognition, and appreciation for mathematical elegance and structured reasoning.",
+  "conservatism": "Values enduring moral order, tradition, prudence, private property, local authority, and incremental change over utopian ideals.",
+  "deep_ecology": "Centers the inherent worth of all life, biodiversity, ecological integrity, and degrowth over consumption and short-term economic gain.",
+};
+
 function _constitutionSummary(constId) {
+  const summary = CONSTITUTION_SUMMARIES[constId];
+  if (!summary) return "";
   const criteria = (typeof CONSTITUTIONS_DATA !== "undefined") ? CONSTITUTIONS_DATA[constId] : null;
-  if (!criteria || !criteria.length) return "";
-  // Use first criterion as a representative summary, truncated
-  const first = criteria[0];
-  const summary = first.length > 150 ? first.slice(0, 147) + "..." : first;
-  return `<div class="lb-const-summary"><i data-lucide="book-open" width="13" height="13"></i> <em>${esc(summary)}</em> <span class="text-muted">&middot; ${criteria.length} criteria</span></div>`;
+  const count = criteria ? criteria.length : 0;
+  return `<div class="lb-const-summary"><i data-lucide="book-open" width="13" height="13"></i> <em>${esc(summary)}</em>${count ? ` <span class="text-muted">&middot; ${count} criteria</span>` : ""}</div>`;
 }
 
 function renderConstitutionView(container, constId, allConst) {
@@ -562,7 +580,7 @@ function renderConstitutionView(container, constId, allConst) {
         <h3>${esc(label)}</h3>
         <span class="text-muted">${criteria.length} criteria</span>
       </div>
-      <p class="const-detail-desc">These criteria define what "${esc(label)}" means when comparing model responses. Each criterion guides which response is preferred.</p>
+      <p class="const-detail-desc">${esc(CONSTITUTION_SUMMARIES[constId] || `These criteria define what "${label}" means when comparing model responses.`)}</p>
       <div class="const-criteria-list">${items}</div>
     </div>`;
 }
