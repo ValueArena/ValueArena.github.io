@@ -2494,6 +2494,18 @@ a:hover { color: var(--accent-hover); }
   gap: 6px;
 }
 
+.lb-plot-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 10px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .lb-plot-row {
   display: flex;
   align-items: center;

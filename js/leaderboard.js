@@ -374,53 +374,76 @@ function renderLabGroupedTable(container, ranked, latest) {
   });
 }
 
+function _plotBarHtml(m, i, minElo, range) {
+  const elo = m.elo_mean || 0;
+  const pct = ((elo - minElo) / range) * 100;
+  const lab = detectLab(m.model_name);
+  const color = LAB_COLORS[lab] || LAB_COLORS["Other"];
+  const ciLow = m.elo_ci_lower ? (m.elo_ci_lower - minElo) / range * 100 : pct;
+  const ciHigh = m.elo_ci_upper ? (m.elo_ci_upper - minElo) / range * 100 : pct;
+  const ciLeft = Math.max(0, ciLow);
+  const ciWidth = Math.min(100, ciHigh) - ciLeft;
+  const ciLowVal = m.elo_ci_lower ? m.elo_ci_lower.toFixed(0) : "–";
+  const ciHighVal = m.elo_ci_upper ? m.elo_ci_upper.toFixed(0) : "–";
+  const std = m.elo_std ? m.elo_std.toFixed(1) : "–";
+
+  return `
+    <div class="lb-plot-row" style="animation-delay: ${i * 30}ms">
+      <div class="lb-plot-label" title="${esc(m.model_name)}">
+        ${_modelIcon(m.model_name, 16)}
+        <span>${esc(m.model_name)}</span>
+      </div>
+      <div class="lb-plot-bar-wrap">
+        <div class="lb-plot-bar" style="width:${Math.max(2, pct)}%;background:${color}"></div>
+        <div class="lb-plot-ci-line" style="left:${ciLeft}%;width:${ciWidth}%">
+          <div class="lb-plot-ci-cap lb-ci-cap-left"></div>
+          <div class="lb-plot-ci-stem"></div>
+          <div class="lb-plot-ci-cap lb-ci-cap-right"></div>
+        </div>
+        <div class="lb-plot-tooltip">
+          <strong>${esc(m.model_name)}</strong>
+          <span>${esc(lab)}</span>
+          <div class="lb-tooltip-stats">
+            <div>Elo <b>${elo.toFixed(1)}</b></div>
+            <div>95% CI <b>${ciLowVal} – ${ciHighVal}</b></div>
+            <div>Std <b>${std}</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="lb-plot-value">${elo.toFixed(0)}</div>
+    </div>`;
+}
+
 function renderPlotView(container, ranked, latest) {
   const maxElo = Math.max(...ranked.map(m => m.elo_mean || 0));
   const minElo = Math.min(...ranked.map(m => m.elo_mean || 0));
   const range = maxElo - minElo || 1;
 
   let bars = "";
-  for (let i = 0; i < ranked.length; i++) {
-    const m = ranked[i];
-    const elo = m.elo_mean || 0;
-    const pct = ((elo - minElo) / range) * 100;
-    const lab = detectLab(m.model_name);
-    const color = LAB_COLORS[lab] || LAB_COLORS["Other"];
-    const ciLow = m.elo_ci_lower ? (m.elo_ci_lower - minElo) / range * 100 : pct;
-    const ciHigh = m.elo_ci_upper ? (m.elo_ci_upper - minElo) / range * 100 : pct;
-
-    const ciLeft = Math.max(0, ciLow);
-    const ciWidth = Math.min(100, ciHigh) - ciLeft;
-
-    const ciLowVal = m.elo_ci_lower ? m.elo_ci_lower.toFixed(0) : "–";
-    const ciHighVal = m.elo_ci_upper ? m.elo_ci_upper.toFixed(0) : "–";
-    const std = m.elo_std ? m.elo_std.toFixed(1) : "–";
-
-    bars += `
-      <div class="lb-plot-row" style="animation-delay: ${i * 30}ms">
-        <div class="lb-plot-label" title="${esc(m.model_name)}">
-          ${_modelIcon(m.model_name, 16)}
-          <span>${esc(m.model_name)}</span>
-        </div>
-        <div class="lb-plot-bar-wrap">
-          <div class="lb-plot-bar" style="width:${Math.max(2, pct)}%;background:${color}"></div>
-          <div class="lb-plot-ci-line" style="left:${ciLeft}%;width:${ciWidth}%">
-            <div class="lb-plot-ci-cap lb-ci-cap-left"></div>
-            <div class="lb-plot-ci-stem"></div>
-            <div class="lb-plot-ci-cap lb-ci-cap-right"></div>
-          </div>
-          <div class="lb-plot-tooltip">
-            <strong>${esc(m.model_name)}</strong>
-            <span>${esc(lab)}</span>
-            <div class="lb-tooltip-stats">
-              <div>Elo <b>${elo.toFixed(1)}</b></div>
-              <div>95% CI <b>${ciLowVal} – ${ciHighVal}</b></div>
-              <div>Std <b>${std}</b></div>
-            </div>
-          </div>
-        </div>
-        <div class="lb-plot-value">${elo.toFixed(0)}</div>
-      </div>`;
+  if (_lbGroupBy === "lab") {
+    const byLab = {};
+    for (const m of ranked) {
+      const lab = detectLab(m.model_name);
+      if (!byLab[lab]) byLab[lab] = [];
+      byLab[lab].push(m);
+    }
+    const labOrder = Object.keys(byLab).sort((a, b) => {
+      const bestA = Math.max(...byLab[a].map(m => m.elo_mean || 0));
+      const bestB = Math.max(...byLab[b].map(m => m.elo_mean || 0));
+      return bestB - bestA;
+    });
+    let idx = 0;
+    for (const lab of labOrder) {
+      const labColor = LAB_COLORS[lab] || LAB_COLORS["Other"];
+      bars += `<div class="lb-plot-group-header"><span class="lb-lab-dot" style="background:${labColor}"></span> ${esc(lab)}</div>`;
+      for (const m of byLab[lab]) {
+        bars += _plotBarHtml(m, idx++, minElo, range);
+      }
+    }
+  } else {
+    for (let i = 0; i < ranked.length; i++) {
+      bars += _plotBarHtml(ranked[i], i, minElo, range);
+    }
   }
 
   container.innerHTML = `
