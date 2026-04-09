@@ -142,7 +142,6 @@ function renderLeaderboard(el) {
     { id: "ranking", icon: "list-ordered", label: "Ranking" },
     { id: "plot", icon: "bar-chart-3", label: "Plot" },
     { id: "pareto", icon: "scatter-chart", label: "Pareto" },
-    { id: "constitution", icon: "book-open", label: "Constitution" },
   ].map(v =>
     `<button class="lb-view-tab ${v.id === _lbView ? "active" : ""}" data-view="${v.id}"><i data-lucide="${v.icon}" width="14" height="14"></i> ${v.label}</button>`
   ).join("");
@@ -163,7 +162,8 @@ function renderLeaderboard(el) {
     </div>
     <div id="lb-table-container">
       <div class="loading">Loading rankings...</div>
-    </div>`;
+    </div>
+    <div id="lb-constitution-section"></div>`;
 
   // Attach pill handlers
   el.querySelectorAll(".const-pill").forEach(btn => {
@@ -191,10 +191,11 @@ function renderLeaderboard(el) {
 
   if (typeof lucide !== "undefined") lucide.createIcons();
 
+  // Always render constitution criteria below the main view
+  renderConstitutionSection(document.getElementById("lb-constitution-section"), _lbActiveConst, allConst);
+
   // Load data based on view
-  if (_lbView === "constitution") {
-    renderConstitutionView(document.getElementById("lb-table-container"), _lbActiveConst, allConst);
-  } else if (_lbView === "pareto") {
+  if (_lbView === "pareto") {
     loadParetoView(byConst, allConst);
   } else if (byConst[_lbActiveConst]) {
     loadConstitutionRanking(byConst[_lbActiveConst]);
@@ -559,12 +560,12 @@ function _constitutionSummary(constId) {
   return `<div class="lb-const-summary"><i data-lucide="book-open" width="13" height="13"></i> <em>${esc(summary)}</em>${count ? ` <span class="text-muted">&middot; ${count} criteria</span>` : ""}</div>`;
 }
 
-function renderConstitutionView(container, constId, allConst) {
+function renderConstitutionSection(container, constId, allConst) {
   const label = allConst.get(constId) || constId;
   const criteria = (typeof CONSTITUTIONS_DATA !== "undefined") ? CONSTITUTIONS_DATA[constId] : null;
 
   if (!criteria || !criteria.length) {
-    container.innerHTML = `<div class="empty-state">No constitution data available for "${esc(label)}".</div>`;
+    container.innerHTML = "";
     return;
   }
 
@@ -575,14 +576,16 @@ function renderConstitutionView(container, constId, allConst) {
     </div>`).join("");
 
   container.innerHTML = `
-    <div class="const-detail">
-      <div class="const-detail-header">
-        <h3>${esc(label)}</h3>
+    <div class="const-section">
+      <div class="const-section-header">
+        <i data-lucide="book-open" width="15" height="15"></i>
+        <span>${esc(label)} Constitution</span>
         <span class="text-muted">${criteria.length} criteria</span>
       </div>
-      <p class="const-detail-desc">${esc(CONSTITUTION_SUMMARIES[constId] || `These criteria define what "${label}" means when comparing model responses.`)}</p>
       <div class="const-criteria-list">${items}</div>
     </div>`;
+
+  if (typeof lucide !== "undefined") lucide.createIcons({ nameAttr: "data-lucide" });
 }
 
 function formatDateShort(ts) {

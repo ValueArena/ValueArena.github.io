@@ -2684,30 +2684,31 @@ a:hover { color: var(--accent-hover); }
   opacity: 0.85;
 }
 
-/* ── Constitution detail view ── */
-.const-detail {
-  padding: 4px 0;
+/* ── Constitution collapsible section ── */
+.const-section {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
-.const-detail-header {
+.const-section-header {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.const-detail-header h3 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.3rem;
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.const-detail-desc {
-  color: var(--text-muted);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
   font-size: 0.85rem;
-  line-height: 1.6;
-  margin: 0 0 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.const-section > .const-criteria-list {
+  padding: 10px 14px 14px;
+}
+
+.const-section-header:hover {
+  color: var(--text-primary);
 }
 
 .const-criteria-list {
