@@ -129,7 +129,7 @@ function renderModelsTable(models, summary) {
         <tr>
           <td><span class="rank-num">${rank}</span></td>
           <td><strong>${_runModelIcon(name)} ${esc(name)}</strong></td>
-          <td><span class="tag tag-${info.type}">${info.type}</span></td>
+          <td><span class="tag tag-${info.type}">${info.type === "base" && info.base_model ? esc(info.base_model) : info.type}</span></td>
           <td>${info.base_model ? esc(info.base_model) : "-"}</td>
           <td class="mono-cell">${info.adapter ? esc(info.adapter) : "-"}</td>
           <td class="elo-value">${s.elo_mean ? s.elo_mean.toFixed(1) : "-"}</td>
