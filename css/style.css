@@ -2656,6 +2656,88 @@ a:hover { color: var(--accent-hover); }
   opacity: 0.4;
 }
 
+/* ── Constitution summary blurb ── */
+.lb-const-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 8px 0 4px;
+  line-height: 1.5;
+}
+
+.lb-const-summary em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ── Constitution detail view ── */
+.const-detail {
+  padding: 4px 0;
+}
+
+.const-detail-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.const-detail-header h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.const-detail-desc {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.const-criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.const-criterion {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+.const-criterion:hover {
+  border-color: var(--accent);
+}
+
+.const-criterion-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.const-criterion-text {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
 /* ═══════════════════════════════════════════════════════
    Responsive — Sidebar & Chat
    ═══════════════════════════════════════════════════════ */

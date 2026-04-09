@@ -142,6 +142,7 @@ function renderLeaderboard(el) {
     { id: "ranking", icon: "list-ordered", label: "Ranking" },
     { id: "plot", icon: "bar-chart-3", label: "Plot" },
     { id: "pareto", icon: "scatter-chart", label: "Pareto" },
+    { id: "constitution", icon: "book-open", label: "Constitution" },
   ].map(v =>
     `<button class="lb-view-tab ${v.id === _lbView ? "active" : ""}" data-view="${v.id}"><i data-lucide="${v.icon}" width="14" height="14"></i> ${v.label}</button>`
   ).join("");
@@ -191,7 +192,9 @@ function renderLeaderboard(el) {
   if (typeof lucide !== "undefined") lucide.createIcons();
 
   // Load data based on view
-  if (_lbView === "pareto") {
+  if (_lbView === "constitution") {
+    renderConstitutionView(document.getElementById("lb-table-container"), _lbActiveConst, allConst);
+  } else if (_lbView === "pareto") {
     loadParetoView(byConst, allConst);
   } else if (byConst[_lbActiveConst]) {
     loadConstitutionRanking(byConst[_lbActiveConst]);
@@ -263,6 +266,7 @@ function renderRankingTable(container, ranked, latest) {
       Based on <a class="run-name" href="run.html?run=${encodeURIComponent(latest.slug)}">${esc(latest.name)}</a>
       <span class="text-muted">&middot; ${latest.models_count} models &middot; ${formatDateShort(latest.timestamp)}</span>
     </div>
+    ${_constitutionSummary(_lbActiveConst)}
     <div class="table-wrap">
       <table class="runs-table lb-table">
         <thead>
@@ -335,6 +339,7 @@ function renderLabGroupedTable(container, ranked, latest) {
       Based on <a class="run-name" href="run.html?run=${encodeURIComponent(latest.slug)}">${esc(latest.name)}</a>
       <span class="text-muted">&middot; ${latest.models_count} models &middot; ${formatDateShort(latest.timestamp)}</span>
     </div>
+    ${_constitutionSummary(_lbActiveConst)}
     <div class="table-wrap">
       <table class="runs-table lb-table">
         <thead>
@@ -422,6 +427,7 @@ function renderPlotView(container, ranked, latest) {
       Based on <a class="run-name" href="run.html?run=${encodeURIComponent(latest.slug)}">${esc(latest.name)}</a>
       <span class="text-muted">&middot; ${latest.models_count} models &middot; ${formatDateShort(latest.timestamp)}</span>
     </div>
+    ${_constitutionSummary(_lbActiveConst)}
     <div class="lb-plot">${bars}</div>`;
 }
 
@@ -524,6 +530,41 @@ async function loadParetoView(byConst, allConst) {
   } catch (e) {
     container.innerHTML = `<div class="empty-state">Could not load Pareto data: ${e.message}</div>`;
   }
+}
+
+function _constitutionSummary(constId) {
+  const criteria = (typeof CONSTITUTIONS_DATA !== "undefined") ? CONSTITUTIONS_DATA[constId] : null;
+  if (!criteria || !criteria.length) return "";
+  // Use first criterion as a representative summary, truncated
+  const first = criteria[0];
+  const summary = first.length > 150 ? first.slice(0, 147) + "..." : first;
+  return `<div class="lb-const-summary"><i data-lucide="book-open" width="13" height="13"></i> <em>${esc(summary)}</em> <span class="text-muted">&middot; ${criteria.length} criteria</span></div>`;
+}
+
+function renderConstitutionView(container, constId, allConst) {
+  const label = allConst.get(constId) || constId;
+  const criteria = (typeof CONSTITUTIONS_DATA !== "undefined") ? CONSTITUTIONS_DATA[constId] : null;
+
+  if (!criteria || !criteria.length) {
+    container.innerHTML = `<div class="empty-state">No constitution data available for "${esc(label)}".</div>`;
+    return;
+  }
+
+  const items = criteria.map((c, i) => `
+    <div class="const-criterion">
+      <span class="const-criterion-num">${i + 1}</span>
+      <span class="const-criterion-text">${esc(c)}</span>
+    </div>`).join("");
+
+  container.innerHTML = `
+    <div class="const-detail">
+      <div class="const-detail-header">
+        <h3>${esc(label)}</h3>
+        <span class="text-muted">${criteria.length} criteria</span>
+      </div>
+      <p class="const-detail-desc">These criteria define what "${esc(label)}" means when comparing model responses. Each criterion guides which response is preferred.</p>
+      <div class="const-criteria-list">${items}</div>
+    </div>`;
 }
 
 function formatDateShort(ts) {
