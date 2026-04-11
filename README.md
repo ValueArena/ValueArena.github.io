@@ -1,4 +1,4 @@
-# ValueArena
+# ValueArena: What value does your model share?
 
 A comparative behavioral measure of value alignment across language models, built on [EigenBench](https://github.com/jchang153/EigenBench).
 
