@@ -108,6 +108,29 @@
   justify-content: center;
 }
 
+.chat-mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.chat-mode-btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 6px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chat-mode-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
 .chat-start-btn {
   font-family: var(--font-body);
   font-size: 0.88rem;

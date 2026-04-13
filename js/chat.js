@@ -378,6 +378,15 @@ function renderSetup(el) {
             ${constSelect}
           </div>
           <div class="chat-field">
+            <label>Model Selection</label>
+            <div class="chat-mode-toggle">
+              <button class="chat-mode-btn active" data-mode="select">Select</button>
+              <button class="chat-mode-btn" data-mode="random">Random</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-setup-row chat-model-picks" id="chat-model-picks">
+          <div class="chat-field">
             <label>Model A</label>
             ${modelASelect}
           </div>
@@ -405,6 +414,16 @@ function renderSetup(el) {
 
   if (typeof lucide !== "undefined") lucide.createIcons();
   _initCustomSelects(el);
+
+  // Mode toggle (select vs random)
+  el.querySelectorAll(".chat-mode-btn").forEach(btn => {
+    btn.onclick = () => {
+      el.querySelectorAll(".chat-mode-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const picks = document.getElementById("chat-model-picks");
+      picks.style.display = btn.dataset.mode === "random" ? "none" : "";
+    };
+  });
 
   document.getElementById("chat-api-key").oninput = (e) => {
     localStorage.setItem("va-openrouter-key", e.target.value);
@@ -436,8 +455,16 @@ function startChatView(el) {
   _activeSessionId = "chat_" + Date.now();
 
   const constitution = document.getElementById("chat-constitution").value;
-  const modelA = document.getElementById("chat-model-a").value;
-  const modelB = document.getElementById("chat-model-b").value;
+  const isRandom = el.querySelector(".chat-mode-btn[data-mode='random']")?.classList.contains("active");
+  let modelA, modelB;
+  if (isRandom) {
+    const shuffled = [...VA.CHAT_MODELS].sort(() => Math.random() - 0.5);
+    modelA = shuffled[0].id;
+    modelB = shuffled[1].id;
+  } else {
+    modelA = document.getElementById("chat-model-a").value;
+    modelB = document.getElementById("chat-model-b").value;
+  }
   const labelA = VA.CHAT_MODELS.find(m => m.id === modelA)?.label || modelA;
   const labelB = VA.CHAT_MODELS.find(m => m.id === modelB)?.label || modelB;
   const constLabel = VA.CONSTITUTIONS.find(c => c.id === constitution)?.label || constitution;
