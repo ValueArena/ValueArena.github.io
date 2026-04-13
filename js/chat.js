@@ -388,12 +388,12 @@ function renderSetup(el) {
           <div class="battle-section">
             <label class="battle-label">Matchup</label>
             <div class="battle-mode-toggle">
-              <button class="battle-mode-btn active" data-mode="select"><i data-lucide="mouse-pointer-click" width="13" height="13"></i> Pick</button>
+              <button class="battle-mode-btn" data-mode="select"><i data-lucide="mouse-pointer-click" width="13" height="13"></i> Pick</button>
               <button class="battle-mode-btn" data-mode="random"><i data-lucide="shuffle" width="13" height="13"></i> Random</button>
             </div>
           </div>
 
-          <div class="battle-models" id="battle-model-picks">
+          <div class="battle-models" id="battle-model-picks" style="display:none">
             <div class="battle-fighter">
               <span class="fighter-badge">A</span>
               ${modelASelect}
@@ -438,8 +438,8 @@ function renderSetup(el) {
       el.querySelectorAll(".battle-mode-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       const isRandom = btn.dataset.mode === "random";
-      document.getElementById("battle-model-picks").style.display = isRandom ? "none" : "";
-      document.getElementById("battle-random-msg").style.display = isRandom ? "" : "none";
+      document.getElementById("battle-model-picks").style.display = isRandom ? "none" : "flex";
+      document.getElementById("battle-random-msg").style.display = isRandom ? "flex" : "none";
     };
   });
 
@@ -461,6 +461,11 @@ function renderSetup(el) {
     if (!apiKey) {
       _showToast("Please enter your OpenRouter API key to start chatting.", "warning");
       document.getElementById("chat-api-key").focus();
+      return;
+    }
+    const hasMode = el.querySelector(".battle-mode-btn.active");
+    if (!hasMode) {
+      _showToast("Pick a matchup mode first — Select or Random.", "warning");
       return;
     }
     startChatView(el);

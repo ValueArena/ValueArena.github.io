@@ -22,7 +22,6 @@
   flex: 1;
   padding: 40px 20px;
   overflow-y: auto;
-  margin: auto 0;
   animation: fadeUp 0.4s ease-out;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
@@ -38,7 +37,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   align-items: center;
-  margin-bottom: 36px;
+  margin-bottom: 24px;
   width: 100%;
   max-width: 960px;
   padding: 32px;
@@ -46,7 +45,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .chat-setup-hero::before {
@@ -139,6 +138,11 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.battle-config .custom-select,
+.battle-config .custom-select-trigger {
+  width: 100%;
 }
 
 .battle-label {
