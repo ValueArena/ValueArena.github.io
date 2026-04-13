@@ -388,19 +388,17 @@ function renderSetup(el) {
           <div class="battle-section">
             <label class="battle-label">Matchup</label>
             <div class="battle-mode-toggle">
-              <button class="battle-mode-btn" data-mode="select"><i data-lucide="mouse-pointer-click" width="13" height="13"></i> Pick</button>
+              <button class="battle-mode-btn active" data-mode="select"><i data-lucide="mouse-pointer-click" width="13" height="13"></i> Pick</button>
               <button class="battle-mode-btn" data-mode="random"><i data-lucide="shuffle" width="13" height="13"></i> Random</button>
             </div>
           </div>
 
-          <div class="battle-models" id="battle-model-picks" style="display:none">
+          <div class="battle-models" id="battle-model-picks">
             <div class="battle-fighter">
-              <span class="fighter-badge">A</span>
               ${modelASelect}
             </div>
             <div class="battle-vs">vs</div>
             <div class="battle-fighter">
-              <span class="fighter-badge fighter-b">B</span>
               ${modelBSelect}
             </div>
           </div>
