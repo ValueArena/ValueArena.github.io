@@ -1,6 +1,7 @@
 let _lbInited = false;
 let _lbRuns = [];
 let _lbActiveConst = "kindness";
+let _lbActiveRunSlug = null; // null = latest
 let _lbView = "plot"; // ranking | plot | pareto
 let _lbGroupBy = "model"; // model | lab
 let _lbSummaryCache = {}; // slug -> summary data
@@ -169,6 +170,7 @@ function renderLeaderboard(el) {
   el.querySelectorAll(".const-pill").forEach(btn => {
     btn.onclick = () => {
       _lbActiveConst = btn.dataset.const;
+      _lbActiveRunSlug = null; // reset to latest for new constitution
       renderLeaderboard(el);
     };
   });
@@ -215,20 +217,40 @@ async function _fetchSummary(slug) {
 async function loadConstitutionRanking(runs) {
   const container = document.getElementById("lb-table-container");
 
-  // Pick latest run
   const sorted = [...runs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  const latest = sorted[0];
+  // Use selected run or default to latest
+  const selected = _lbActiveRunSlug
+    ? sorted.find(r => r.slug === _lbActiveRunSlug) || sorted[0]
+    : sorted[0];
 
   try {
-    const summary = await _fetchSummary(latest.slug);
+    const summary = await _fetchSummary(selected.slug);
     if (!summary || !Array.isArray(summary)) throw new Error("Invalid summary");
 
     const ranked = [...summary].sort((a, b) => (b.elo_mean || 0) - (a.elo_mean || 0));
 
     if (_lbView === "plot") {
-      renderPlotView(container, ranked, latest);
+      renderPlotView(container, ranked, selected);
     } else {
-      renderRankingTable(container, ranked, latest);
+      renderRankingTable(container, ranked, selected);
+    }
+
+    // Add run selector if multiple runs exist
+    if (sorted.length > 1) {
+      const options = sorted.map(r => {
+        const sel = r.slug === selected.slug ? "selected" : "";
+        const label = `${r.name || r.slug} (${formatDateShort(r.timestamp)})`;
+        return `<option value="${esc(r.slug)}" ${sel}>${esc(label)}</option>`;
+      }).join("");
+      const selectorHtml = `<div class="lb-run-selector">
+        <label>Run: </label>
+        <select class="lb-run-select">${options}</select>
+      </div>`;
+      container.querySelector(".lb-run-info").insertAdjacentHTML("afterend", selectorHtml);
+      container.querySelector(".lb-run-select").onchange = (e) => {
+        _lbActiveRunSlug = e.target.value;
+        loadConstitutionRanking(runs);
+      };
     }
   } catch (e) {
     container.innerHTML = `<div class="empty-state">Could not load rankings for this constitution.</div>`;

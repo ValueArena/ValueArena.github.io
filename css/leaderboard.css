@@ -42,7 +42,26 @@
 .lb-run-info {
   font-size: 0.78rem;
   color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.lb-run-selector {
+  font-size: 0.78rem;
+  color: var(--text-muted);
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lb-run-select {
+  background: var(--card-bg, #1a1a2e);
+  color: var(--text-primary, #e0e0e0);
+  border: 1px solid var(--border, #2a2a4a);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
 }
 
 .lb-table .rank-cell {
