@@ -520,6 +520,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  max-width: 780px;
 }
 
 .chat-response-card {
