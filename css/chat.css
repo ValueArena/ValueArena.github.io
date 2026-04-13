@@ -88,34 +88,41 @@
 }
 
 .battle-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .battle-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: var(--accent-dim);
   border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
   color: var(--accent);
-  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.battle-header-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .battle-title {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 400;
   color: var(--text);
-  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .battle-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .battle-config {
@@ -244,25 +251,50 @@
 }
 
 .battle-key-section {
-  padding-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+
+.battle-key-section .api-key-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.battle-key-section .api-key-wrap input {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 36px 9px 32px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.battle-key-section .api-key-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
 .battle-start-btn {
   font-family: var(--font-body);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  padding: 12px 32px;
+  padding: 11px 28px;
   background: var(--accent);
   color: var(--bg);
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all 0.15s;
-  align-self: center;
+  align-self: stretch;
   letter-spacing: 0.02em;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
