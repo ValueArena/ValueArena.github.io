@@ -9,6 +9,21 @@ const MODEL_LOGOS = {
   "llama": "assets/models/meta.png",
   "deepseek": "assets/models/deepseek.png",
   "qwen": "assets/models/qwen.png",
+  "baidu": "assets/models/Baidu Color.png",
+  "ernie": "assets/models/Baidu Color.png",
+  "cydonia": "assets/models/cydonia.png",
+  "grok": "assets/models/grok.png",
+  "xai": "assets/models/grok.png",
+  "huggingface": "assets/models/hf.png",
+  "hf": "assets/models/hf.png",
+  "kimi": "assets/models/kimi.png",
+  "moonshot": "assets/models/kimi.png",
+  "microsoft": "assets/models/microsoft-color.png",
+  "phi": "assets/models/microsoft-color.png",
+  "mistral": "assets/models/mistral-color.png",
+  "nvidia": "assets/models/nvidia-color.png",
+  "nemotron": "assets/models/nvidia-color.png",
+  "zai": "assets/models/zai.png",
 };
 
 function getModelLogo(modelId) {
