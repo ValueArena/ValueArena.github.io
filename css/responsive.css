@@ -206,6 +206,7 @@
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 16px;
+    overflow: visible;
   }
   .chat-setup-hero .hero-text h2 {
     font-size: 1.1rem;
