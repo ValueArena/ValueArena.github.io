@@ -24,6 +24,8 @@ const MODEL_LOGOS = {
   "nvidia": "assets/models/nvidia-color.png",
   "nemotron": "assets/models/nvidia-color.png",
   "zai": "assets/models/zai.png",
+  "glm": "assets/models/zai.png",
+  "zhipu": "assets/models/zai.png",
 };
 
 function getModelLogo(modelId) {
