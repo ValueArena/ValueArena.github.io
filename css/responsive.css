@@ -199,9 +199,6 @@
     min-height: auto;
     padding: 20px 14px;
   }
-  .chat-setup-heading {
-    font-size: 1.1rem;
-  }
   .chat-setup-hero {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -211,14 +208,18 @@
   .chat-setup-hero .hero-text h2 {
     font-size: 1.1rem;
   }
-  .chat-setup-row {
+  .battle-models {
     flex-direction: column;
+    gap: 8px;
   }
-  .chat-field {
-    width: 100% !important;
+  .battle-vs {
+    display: none;
   }
-  .chat-field-key {
-    width: 100% !important;
+  .battle-fighter {
+    width: 100%;
+  }
+  .battle-key-section {
+    width: 100%;
   }
   .custom-select {
     width: 100%;
@@ -312,14 +313,17 @@
   .metric-value { font-size: 1rem; }
   .spec-section { padding: 10px 12px; }
 
-  .chat-setup-heading {
-    font-size: 0.95rem;
-  }
   .chat-setup-hero .hero-text h2 {
     font-size: 0.95rem;
   }
   .chat-setup-hero .hero-text p {
     font-size: 0.78rem;
+  }
+  .battle-title {
+    font-size: 1.15rem;
+  }
+  .battle-config {
+    padding: 16px;
   }
   .lb-plot-label {
     width: 80px;

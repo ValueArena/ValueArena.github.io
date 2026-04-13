@@ -370,34 +370,46 @@ function renderSetup(el) {
           </div>
         </div>
       </div>
-      <h2 class="chat-setup-heading">Which Model Shares Your Values?</h2>
-      <div class="chat-setup-form">
-        <div class="chat-setup-row">
-          <div class="chat-field">
-            <label>Constitution</label>
+      <div class="battle-setup">
+        <div class="battle-header">
+          <div class="battle-icon"><i data-lucide="swords" width="22" height="22"></i></div>
+          <h2 class="battle-title">Battle Arena</h2>
+          <p class="battle-subtitle">Pit two models against each other. Judge which one aligns with your values.</p>
+        </div>
+
+        <div class="battle-config">
+          <div class="battle-section">
+            <label class="battle-label">Constitution</label>
             ${constSelect}
           </div>
-          <div class="chat-field">
-            <label>Model Selection</label>
-            <div class="chat-mode-toggle">
-              <button class="chat-mode-btn active" data-mode="select">Select</button>
-              <button class="chat-mode-btn" data-mode="random">Random</button>
+
+          <div class="battle-section">
+            <label class="battle-label">Matchup</label>
+            <div class="battle-mode-toggle">
+              <button class="battle-mode-btn active" data-mode="select"><i data-lucide="mouse-pointer-click" width="13" height="13"></i> Pick</button>
+              <button class="battle-mode-btn" data-mode="random"><i data-lucide="shuffle" width="13" height="13"></i> Random</button>
             </div>
           </div>
-        </div>
-        <div class="chat-setup-row chat-model-picks" id="chat-model-picks">
-          <div class="chat-field">
-            <label>Model A</label>
-            ${modelASelect}
+
+          <div class="battle-models" id="battle-model-picks">
+            <div class="battle-fighter">
+              <span class="fighter-badge">A</span>
+              ${modelASelect}
+            </div>
+            <div class="battle-vs">vs</div>
+            <div class="battle-fighter">
+              <span class="fighter-badge fighter-b">B</span>
+              ${modelBSelect}
+            </div>
           </div>
-          <div class="chat-field">
-            <label>Model B</label>
-            ${modelBSelect}
+
+          <div class="battle-random-msg" id="battle-random-msg" style="display:none">
+            <i data-lucide="dice-5" width="16" height="16"></i>
+            <span>Two models will be randomly selected</span>
           </div>
-        </div>
-        <div class="chat-setup-row">
-          <div class="chat-field chat-field-key">
-            <label>OpenRouter API Key</label>
+
+          <div class="battle-section battle-key-section">
+            <label class="battle-label">OpenRouter API Key</label>
             <div class="api-key-wrap">
               <i data-lucide="lock" width="14" height="14" class="api-key-icon"></i>
               <input type="password" id="chat-api-key" placeholder="sk-or-..." value="${escAttr(savedKey)}" />
@@ -405,10 +417,13 @@ function renderSetup(el) {
                 <i data-lucide="eye" width="14" height="14"></i>
               </button>
             </div>
-            <div class="api-key-hint">Stored locally in your browser. Never sent to our servers.</div>
+            <div class="api-key-hint">Stored locally. Never sent to our servers.</div>
           </div>
+
+          <button class="battle-start-btn" id="chat-start-btn">
+            <i data-lucide="play" width="16" height="16"></i> Start Battle
+          </button>
         </div>
-        <button class="chat-start-btn" id="chat-start-btn">Start Chat</button>
       </div>
     </div>`;
 
@@ -416,12 +431,13 @@ function renderSetup(el) {
   _initCustomSelects(el);
 
   // Mode toggle (select vs random)
-  el.querySelectorAll(".chat-mode-btn").forEach(btn => {
+  el.querySelectorAll(".battle-mode-btn").forEach(btn => {
     btn.onclick = () => {
-      el.querySelectorAll(".chat-mode-btn").forEach(b => b.classList.remove("active"));
+      el.querySelectorAll(".battle-mode-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      const picks = document.getElementById("chat-model-picks");
-      picks.style.display = btn.dataset.mode === "random" ? "none" : "";
+      const isRandom = btn.dataset.mode === "random";
+      document.getElementById("battle-model-picks").style.display = isRandom ? "none" : "";
+      document.getElementById("battle-random-msg").style.display = isRandom ? "" : "none";
     };
   });
 
@@ -455,7 +471,7 @@ function startChatView(el) {
   _activeSessionId = "chat_" + Date.now();
 
   const constitution = document.getElementById("chat-constitution").value;
-  const isRandom = el.querySelector(".chat-mode-btn[data-mode='random']")?.classList.contains("active");
+  const isRandom = el.querySelector(".battle-mode-btn[data-mode='random']")?.classList.contains("active");
   let modelA, modelB;
   if (isRandom) {
     const shuffled = [...VA.CHAT_MODELS].sort(() => Math.random() - 0.5);
