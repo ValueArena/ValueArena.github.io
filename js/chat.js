@@ -374,7 +374,7 @@ function renderSetup(el) {
         <div class="battle-header">
           <div class="battle-icon"><i data-lucide="swords" width="20" height="20"></i></div>
           <div class="battle-header-text">
-            <h2 class="battle-title">Battle Arena</h2>
+            <h2 class="battle-title">Battle Mode</h2>
             <p class="battle-subtitle">Pit two models head-to-head. Judge which aligns with your values.</p>
           </div>
         </div>
