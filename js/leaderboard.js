@@ -1,6 +1,6 @@
 let _lbInited = false;
 let _lbRuns = [];
-let _lbActiveConst = "humor";
+let _lbActiveConst = "kindness";
 let _lbView = "plot"; // ranking | plot | pareto
 let _lbGroupBy = "model"; // model | lab
 let _lbSummaryCache = {}; // slug -> summary data
