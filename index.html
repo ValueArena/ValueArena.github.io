@@ -15,6 +15,14 @@
   <meta name="twitter:description" content="A comparative behavioral measure of value alignment across language models.">
   <meta name="twitter:image" content="https://valuearena.github.io/assets/va.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script>
+    // Set theme before CSS loads to prevent FOUC
+    (function() {
+      var s = localStorage.getItem("va-theme");
+      if (!s) s = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = s;
+    })();
+  </script>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -28,6 +36,7 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="app-layout">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -81,7 +90,7 @@
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <!-- Main content -->
-    <main class="main-content">
+    <main class="main-content" id="main-content">
       <div class="main-body">
         <div id="tab-chat" class="tab-pane active">
           <div class="loading">Loading chat...</div>
@@ -113,15 +122,7 @@
       document.documentElement.dataset.theme = t;
       localStorage.setItem("va-theme", t);
     }
-    (function() {
-      const saved = localStorage.getItem("va-theme");
-      if (saved) {
-        document.documentElement.dataset.theme = saved;
-      } else {
-        const preferLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-        document.documentElement.dataset.theme = preferLight ? "light" : "dark";
-      }
-    })();
+    // Theme already set in <head> to prevent FOUC
 
     // Sidebar collapse/expand
     (function() {

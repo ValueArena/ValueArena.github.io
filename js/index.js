@@ -263,6 +263,11 @@ function render(el) {
       sel.classList.toggle("open");
     };
 
+    trigger.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); trigger.click(); }
+      if (e.key === "Escape") { sel.classList.remove("open"); }
+    };
+
     dropdown.querySelectorAll(".custom-select-option").forEach(opt => {
       opt.onclick = (e) => {
         e.stopPropagation();
@@ -275,6 +280,12 @@ function render(el) {
 
   document.addEventListener("click", () => {
     document.querySelectorAll(".custom-select.open").forEach(s => s.classList.remove("open"));
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".custom-select.open").forEach(s => s.classList.remove("open"));
+    }
   });
 
   // Range input handlers

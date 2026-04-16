@@ -73,12 +73,31 @@ body::after {
   background-image: var(--grain);
   background-repeat: repeat;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 999;
   opacity: 0.4;
 }
 
 a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
 a:hover { color: var(--accent-hover); }
+
+/* ── Skip Link (keyboard a11y) ── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
 
 /* ── Focus Visible (keyboard nav) ── */
 :focus-visible {

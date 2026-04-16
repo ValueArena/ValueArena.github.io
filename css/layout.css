@@ -68,14 +68,14 @@
   padding: 8px 16px;
   border-radius: var(--radius);
   background: var(--accent);
-  color: #0c1021;
+  color: var(--bg);
   transition: all 0.15s;
   letter-spacing: 0.02em;
 }
 
 .hero-btn:hover {
   background: var(--accent-hover);
-  color: #0c1021;
+  color: var(--bg);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--accent-glow);
 }
@@ -223,7 +223,7 @@
 /* ── App Layout ── */
 .app-layout {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -290,7 +290,7 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   border-radius: var(--radius);
   display: flex;
   align-items: center;
@@ -298,6 +298,8 @@
   transition: all 0.15s;
   flex-shrink: 0;
   margin-left: auto;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .sidebar-toggle:hover {
@@ -540,8 +542,8 @@
   background: none;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
