@@ -36,17 +36,6 @@ function getModelLogo(modelId) {
   return null;
 }
 
-// Model name aliases — historical run data has incorrect names that should
-// display as the actual model used. Re-uploading runs is expensive, so we
-// rename at display time only.
-const MODEL_NAME_ALIASES = {
-  "gemini-2.5-pro": "gemini-2.5-flash",
-};
-
-function aliasModelName(name) {
-  return MODEL_NAME_ALIASES[name] || name;
-}
-
 const VA = {
   HF_REPO: "invi-bhagyesh/ValueArena",
   HF_BASE: "https://huggingface.co/datasets/invi-bhagyesh/ValueArena/resolve/main",
