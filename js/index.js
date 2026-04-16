@@ -5,9 +5,10 @@ let _expandedGroups = new Set();
 let _filters = {};
 let _search = "";
 let _colWidths = {}; // persist column widths across re-renders
+let _el = null; // cached reference to container element
 
 async function init() {
-  const el = document.getElementById("tab-experiments");
+  _el = document.getElementById("tab-experiments");
   try {
     const index = await fetchIndex();
     _runs = (index.runs || []).map(r => ({
@@ -15,23 +16,20 @@ async function init() {
       constitution: (r.constitution || "").replace(/^oct_/, ""),
       scenario: (r.scenario || "").replace(/^oct_/, ""),
     }));
-    render(el);
+    renderFull();
   } catch (e) {
-    el.innerHTML = `<div class="error">Failed to load data: ${e.message}</div>`;
+    _el.innerHTML = `<div class="error">Failed to load data: ${e.message}</div>`;
   }
 }
 
 function getFilteredRuns() {
   return _runs.filter((r) => {
-    // Text search across name, constitution, scenario, note
     if (_search) {
       const q = _search.toLowerCase();
       const haystack = [r.name, r.constitution, r.scenario, r.note, r.group]
         .filter(Boolean).join(" ").toLowerCase();
       if (!haystack.includes(q)) return false;
     }
-
-    // Dropdown filters
     for (const [col, val] of Object.entries(_filters)) {
       if (!val) continue;
       if (col === "_models_min") {
@@ -75,9 +73,9 @@ const COLS = [
   { key: "git_commit",   label: "Git" },
 ];
 
-function render(el) {
-  const filtered = getFilteredRuns();
+// ── Build rows HTML from current state ──
 
+function buildRows(filtered) {
   const grouped = {};
   const ungrouped = [];
 
@@ -90,7 +88,6 @@ function render(el) {
     }
   }
 
-  // Single-run groups become ungrouped
   for (const [gName, children] of Object.entries(grouped)) {
     if (children.length === 1) {
       ungrouped.push(children[0]);
@@ -103,7 +100,6 @@ function render(el) {
 
   let rows = "";
 
-  // Groups — sort by the active sort column (use first child as representative)
   const groupNames = Object.keys(grouped).sort((a, b) => {
     return sortCmp(grouped[a][0], grouped[b][0]);
   });
@@ -137,6 +133,99 @@ function render(el) {
   }
 
   for (const r of ungrouped) rows += runRow(r, false);
+  return rows;
+}
+
+// ── Fast path: only update thead + tbody (for sort / group toggle) ──
+
+function renderTable() {
+  const filtered = getFilteredRuns();
+  const rows = buildRows(filtered);
+
+  const table = _el.querySelector(".runs-table");
+  if (!table) { renderFull(); return; }
+
+  // Save column widths
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
+    if (thEl.style.width) _colWidths[thEl.dataset.col] = thEl.style.width;
+  });
+
+  // Update thead (sort arrows change)
+  const thead = table.querySelector("thead tr");
+  if (thead) thead.innerHTML = COLS.map((c) => th(c.key, c.label)).join("");
+
+  // Update tbody
+  const tbody = table.querySelector("tbody");
+  if (tbody) {
+    if (rows) {
+      tbody.innerHTML = rows;
+    } else {
+      table.parentElement.innerHTML = `<div class="empty-state">No runs match the current filters.</div>`;
+      return;
+    }
+  }
+
+  // Update count
+  const countEl = _el.querySelector(".filter-count");
+  if (countEl) countEl.textContent = `${filtered.length} of ${_runs.length} runs`;
+
+  // Restore column widths
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
+    const w = _colWidths[thEl.dataset.col];
+    if (w) { thEl.style.width = w; thEl.style.minWidth = w; }
+  });
+
+  // Re-bind sort handlers on new thead
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
+    thEl.onclick = (e) => {
+      if (e.target.classList.contains("col-resize")) return;
+      const col = thEl.dataset.col;
+      if (_sortCol === col) _sortAsc = !_sortAsc;
+      else { _sortCol = col; _sortAsc = true; }
+      renderTable();
+    };
+  });
+
+  // Re-bind group toggle on new tbody rows
+  _el.querySelectorAll(".group-header").forEach((row) => {
+    row.onclick = () => {
+      const g = row.dataset.group;
+      if (_expandedGroups.has(g)) _expandedGroups.delete(g);
+      else _expandedGroups.add(g);
+      renderTable();
+    };
+  });
+
+  // Re-bind column resize on new thead
+  _el.querySelectorAll(".col-resize").forEach((handle) => {
+    handle.onmousedown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const thEl = handle.parentElement;
+      const startX = e.pageX;
+      const startW = thEl.offsetWidth;
+      handle.classList.add("active");
+      const onMove = (e2) => {
+        const w = Math.max(60, startW + e2.pageX - startX) + "px";
+        thEl.style.width = w;
+        thEl.style.minWidth = w;
+      };
+      const onUp = () => {
+        handle.classList.remove("active");
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    };
+  });
+}
+
+// ── Full render: rebuild everything (for initial load / filter changes) ──
+
+function renderFull() {
+  const filtered = getFilteredRuns();
+  const rows = buildRows(filtered);
 
   // Filter dropdowns
   const filterCols = [
@@ -163,7 +252,6 @@ function render(el) {
     })
     .join("");
 
-  // Model count filter
   const mc = getModelCountRange();
   const modelsFilter = mc.min !== mc.max ? `
     <div class="filter-range">
@@ -191,11 +279,11 @@ function render(el) {
     : `<div class="empty-state">No runs match the current filters.</div>`;
 
   // Save column widths before re-render
-  el.querySelectorAll("th[data-col]").forEach((thEl) => {
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
     if (thEl.style.width) _colWidths[thEl.dataset.col] = thEl.style.width;
   });
 
-  el.innerHTML = `
+  _el.innerHTML = `
     <div class="filter-bar">
       <div class="filter-search-wrap">
         <svg class="filter-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -211,13 +299,12 @@ function render(el) {
     </div>`;
 
   // Search handler
-  const searchInput = el.querySelector(".filter-search");
+  const searchInput = _el.querySelector(".filter-search");
   if (searchInput) {
     searchInput.oninput = debounce(() => {
       _search = searchInput.value;
-      render(el);
+      renderFull();
     }, 200);
-    // Only re-focus if search was active (has text)
     if (_search) {
       searchInput.focus();
       searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
@@ -225,34 +312,34 @@ function render(el) {
   }
 
   // Restore column widths
-  el.querySelectorAll("th[data-col]").forEach((thEl) => {
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
     const w = _colWidths[thEl.dataset.col];
     if (w) { thEl.style.width = w; thEl.style.minWidth = w; }
   });
 
   // Sort handlers
-  el.querySelectorAll("th[data-col]").forEach((thEl) => {
+  _el.querySelectorAll("th[data-col]").forEach((thEl) => {
     thEl.onclick = (e) => {
       if (e.target.classList.contains("col-resize")) return;
       const col = thEl.dataset.col;
       if (_sortCol === col) _sortAsc = !_sortAsc;
       else { _sortCol = col; _sortAsc = true; }
-      render(el);
+      renderTable();
     };
   });
 
   // Group toggle
-  el.querySelectorAll(".group-header").forEach((row) => {
+  _el.querySelectorAll(".group-header").forEach((row) => {
     row.onclick = () => {
       const g = row.dataset.group;
       if (_expandedGroups.has(g)) _expandedGroups.delete(g);
       else _expandedGroups.add(g);
-      render(el);
+      renderTable();
     };
   });
 
   // Custom dropdown filter handlers
-  el.querySelectorAll(".filter-custom-select").forEach((sel) => {
+  _el.querySelectorAll(".filter-custom-select").forEach((sel) => {
     const trigger = sel.querySelector(".custom-select-trigger");
     const dropdown = sel.querySelector(".custom-select-dropdown");
     const col = sel.dataset.col;
@@ -273,7 +360,7 @@ function render(el) {
         e.stopPropagation();
         _filters[col] = opt.dataset.value;
         sel.classList.remove("open");
-        render(el);
+        renderFull();
       };
     });
   });
@@ -289,15 +376,15 @@ function render(el) {
   });
 
   // Range input handlers
-  el.querySelectorAll(".filter-input").forEach((inp) => {
+  _el.querySelectorAll(".filter-input").forEach((inp) => {
     inp.onchange = () => {
       _filters[inp.dataset.col] = inp.value;
-      render(el);
+      renderFull();
     };
   });
 
   // Column resize
-  el.querySelectorAll(".col-resize").forEach((handle) => {
+  _el.querySelectorAll(".col-resize").forEach((handle) => {
     handle.onmousedown = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -306,8 +393,9 @@ function render(el) {
       const startW = thEl.offsetWidth;
       handle.classList.add("active");
       const onMove = (e2) => {
-        thEl.style.width = Math.max(60, startW + e2.pageX - startX) + "px";
-        thEl.style.minWidth = thEl.style.width;
+        const w = Math.max(60, startW + e2.pageX - startX) + "px";
+        thEl.style.width = w;
+        thEl.style.minWidth = w;
       };
       const onUp = () => {
         handle.classList.remove("active");
@@ -323,7 +411,7 @@ function render(el) {
 function clearFilters() {
   _filters = {};
   _search = "";
-  render(document.getElementById("tab-experiments"));
+  renderFull();
 }
 
 function runRow(r, isChild) {
