@@ -4,6 +4,7 @@ let _runs = [];
 let _expandedGroups = new Set();
 let _filters = {};
 let _search = "";
+let _colWidths = {}; // persist column widths across re-renders
 
 async function init() {
   const el = document.getElementById("tab-experiments");
@@ -102,8 +103,10 @@ function render(el) {
 
   let rows = "";
 
-  // Groups
-  const groupNames = Object.keys(grouped).sort();
+  // Groups — sort by the active sort column (use first child as representative)
+  const groupNames = Object.keys(grouped).sort((a, b) => {
+    return sortCmp(grouped[a][0], grouped[b][0]);
+  });
   for (const gName of groupNames) {
     const children = grouped[gName];
     const expanded = _expandedGroups.has(gName);
@@ -188,6 +191,11 @@ function render(el) {
       </table>`
     : `<div class="empty-state">No runs match the current filters.</div>`;
 
+  // Save column widths before re-render
+  el.querySelectorAll("th[data-col]").forEach((thEl) => {
+    if (thEl.style.width) _colWidths[thEl.dataset.col] = thEl.style.width;
+  });
+
   el.innerHTML = `
     <div class="filter-bar">
       <div class="filter-search-wrap">
@@ -216,6 +224,12 @@ function render(el) {
       searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
     }
   }
+
+  // Restore column widths
+  el.querySelectorAll("th[data-col]").forEach((thEl) => {
+    const w = _colWidths[thEl.dataset.col];
+    if (w) { thEl.style.width = w; thEl.style.minWidth = w; }
+  });
 
   // Sort handlers
   el.querySelectorAll("th[data-col]").forEach((thEl) => {
