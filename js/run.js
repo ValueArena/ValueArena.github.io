@@ -267,12 +267,19 @@ function renderSpecSection(section) {
 function renderMatrixViewItem(slug) {
   const group = slug.split("/")[0];
   const url = hfImageURL(`runs/${group}/matrix_view.png`);
+  const ciUrl = hfImageURL(`runs/${group}/matrix_ci.png`);
   return `
     <div class="gallery-item gallery-item-wide" data-lightbox-url="${esc(url)}">
       <div class="img-wrap">
         <img src="${url}" alt="Matrix View" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
       </div>
       <div class="caption">Matrix View</div>
+    </div>
+    <div class="gallery-item gallery-item-wide" data-lightbox-url="${esc(ciUrl)}">
+      <div class="img-wrap">
+        <img src="${ciUrl}" alt="Matrix CI" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+      </div>
+      <div class="caption">Matrix CI Width</div>
     </div>`;
 }
 
