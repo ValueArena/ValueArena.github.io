@@ -12,7 +12,7 @@
   --bg-hover: #1a2240;
   --text: #e8eaf0;
   --text-secondary: #a0a8c0;
-  --text-muted: #636d88;
+  --text-muted: #7a84a0;
   --border: #222a42;
   --border-light: #1a2038;
   --accent: #e8a44a;
@@ -41,7 +41,7 @@
   --bg-hover: #f0ece5;
   --text: #1a1a2e;
   --text-secondary: #4a4a64;
-  --text-muted: #8a8aa0;
+  --text-muted: #76768e;
   --border: #e0dcd4;
   --border-light: #ece8e0;
   --accent: #c47a20;
@@ -80,6 +80,19 @@ body::after {
 a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
 a:hover { color: var(--accent-hover); }
 
+/* ── Focus Visible (keyboard nav) ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ── Animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(12px); }
@@ -103,4 +116,13 @@ a:hover { color: var(--accent-hover); }
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
   50% { box-shadow: 0 0 20px 4px var(--accent-glow); }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

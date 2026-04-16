@@ -11,7 +11,10 @@
 }
 
 .const-pill.no-data {
-  opacity: 0.45;
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
 }
 
 .const-pill {

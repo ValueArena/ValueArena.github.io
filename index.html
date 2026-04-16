@@ -115,7 +115,12 @@
     }
     (function() {
       const saved = localStorage.getItem("va-theme");
-      document.documentElement.dataset.theme = saved || "dark";
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+      } else {
+        const preferLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+        document.documentElement.dataset.theme = preferLight ? "light" : "dark";
+      }
     })();
 
     // Sidebar collapse/expand

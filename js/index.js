@@ -110,7 +110,6 @@ function render(el) {
   for (const gName of groupNames) {
     const children = grouped[gName];
     const expanded = _expandedGroups.has(gName);
-    const arrow = expanded ? "\u25BC" : "\u25B6";
     const first = children[0];
     const uniqueConst = [...new Set(children.map(r => r.constitution).filter(Boolean))];
     const constDisplay = uniqueConst.length === 1 ? esc(uniqueConst[0]) : `<span class="group-summary">${uniqueConst.length} constitutions</span>`;
@@ -118,9 +117,9 @@ function render(el) {
     const scenarioDisplay = uniqueScenario.length === 1 ? formatScenario(uniqueScenario[0]) : `<span class="group-summary">${uniqueScenario.length} scenarios</span>`;
 
     rows += `
-      <tr class="group-header" data-group="${esc(gName)}">
+      <tr class="group-header" data-group="${esc(gName)}" aria-expanded="${expanded}">
         <td>
-          <span class="group-toggle">${arrow}</span>
+          <span class="group-toggle">\u25B6</span>
           <span class="group-name">${esc(gName)}</span>
           <span class="group-count">${children.length} runs</span>
         </td>
@@ -346,7 +345,8 @@ function th(col, label) {
   const arrow = _sortCol === col
     ? `<span class="sort-arrow">${_sortAsc ? "\u25B2" : "\u25BC"}</span>`
     : "";
-  return `<th data-col="${col}">${label}${arrow}<div class="col-resize" data-resize="${col}"></div></th>`;
+  const ariaSort = _sortCol === col ? (_sortAsc ? "ascending" : "descending") : "none";
+  return `<th data-col="${col}" aria-sort="${ariaSort}" role="columnheader">${label}${arrow}<div class="col-resize" data-resize="${col}"></div></th>`;
 }
 
 function formatDate(ts) {

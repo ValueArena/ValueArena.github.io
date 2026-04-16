@@ -265,7 +265,11 @@
   font-size: 0.55rem;
   color: var(--text-muted);
   margin-right: 6px;
-  transition: color 0.12s;
+  transition: color 0.12s, transform 0.2s ease-out;
+}
+
+.group-header[aria-expanded="true"] .group-toggle {
+  transform: rotate(90deg);
 }
 
 .group-header:hover .group-toggle {
@@ -770,6 +774,31 @@
   margin-left: 10px;
   vertical-align: middle;
 }
+
+/* ── Skeleton loading ── */
+.skeleton {
+  padding: 20px;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.skeleton-bar {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-hover) 50%, var(--bg-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-bar-sm { width: 60px; }
+.skeleton-bar-md { width: 120px; }
+.skeleton-bar-lg { flex: 1; }
+.skeleton-bar-xl { width: 180px; }
 
 /* ── Error ── */
 .error {
