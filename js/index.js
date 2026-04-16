@@ -433,8 +433,14 @@ function sortCmp(a, b) {
   let va = a[_sortCol], vb = b[_sortCol];
   if (va == null) va = "";
   if (vb == null) vb = "";
-  if (typeof va === "string") va = va.toLowerCase();
-  if (typeof vb === "string") vb = vb.toLowerCase();
+  // Parse timestamps as dates for proper chronological sort
+  if (_sortCol === "timestamp") {
+    va = va ? new Date(va).getTime() : 0;
+    vb = vb ? new Date(vb).getTime() : 0;
+  } else if (typeof va === "string") {
+    va = va.toLowerCase();
+    vb = (vb || "").toString().toLowerCase();
+  }
   if (va < vb) return _sortAsc ? -1 : 1;
   if (va > vb) return _sortAsc ? 1 : -1;
   return 0;
