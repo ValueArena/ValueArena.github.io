@@ -96,43 +96,51 @@ function buildRows(filtered) {
   }
 
   for (const g of Object.values(grouped)) g.sort(sortCmp);
-  ungrouped.sort(sortCmp);
+
+  // Merge groups and ungrouped into a single sorted list
+  // Each entry: { type: "group", name, children, representative } or { type: "run", run }
+  const items = [];
+  for (const [gName, children] of Object.entries(grouped)) {
+    items.push({ type: "group", name: gName, children, representative: children[0] });
+  }
+  for (const r of ungrouped) {
+    items.push({ type: "run", run: r, representative: r });
+  }
+  items.sort((a, b) => sortCmp(a.representative, b.representative));
 
   let rows = "";
+  for (const item of items) {
+    if (item.type === "group") {
+      const { name: gName, children } = item;
+      const expanded = _expandedGroups.has(gName);
+      const first = children[0];
+      const uniqueConst = [...new Set(children.map(r => r.constitution).filter(Boolean))];
+      const constDisplay = uniqueConst.length === 1 ? esc(uniqueConst[0]) : `<span class="group-summary">${uniqueConst.length} constitutions</span>`;
+      const uniqueScenario = [...new Set(children.map(r => r.scenario).filter(Boolean))];
+      const scenarioDisplay = uniqueScenario.length === 1 ? formatScenario(uniqueScenario[0]) : `<span class="group-summary">${uniqueScenario.length} scenarios</span>`;
 
-  const groupNames = Object.keys(grouped).sort((a, b) => {
-    return sortCmp(grouped[a][0], grouped[b][0]);
-  });
-  for (const gName of groupNames) {
-    const children = grouped[gName];
-    const expanded = _expandedGroups.has(gName);
-    const first = children[0];
-    const uniqueConst = [...new Set(children.map(r => r.constitution).filter(Boolean))];
-    const constDisplay = uniqueConst.length === 1 ? esc(uniqueConst[0]) : `<span class="group-summary">${uniqueConst.length} constitutions</span>`;
-    const uniqueScenario = [...new Set(children.map(r => r.scenario).filter(Boolean))];
-    const scenarioDisplay = uniqueScenario.length === 1 ? formatScenario(uniqueScenario[0]) : `<span class="group-summary">${uniqueScenario.length} scenarios</span>`;
+      rows += `
+        <tr class="group-header" data-group="${esc(gName)}" aria-expanded="${expanded}">
+          <td>
+            <span class="group-toggle">\u25B6</span>
+            <span class="group-name">${esc(gName)}</span>
+            <span class="group-count">${children.length} runs</span>
+          </td>
+          <td class="note-cell">${esc(first.note)}</td>
+          <td>${constDisplay}</td>
+          <td class="scenario-cell">${scenarioDisplay}</td>
+          <td><span class="models-badge">${first.models_count}</span></td>
+          <td class="date-cell">${formatDate(first.timestamp)}</td>
+          <td>${gitLink(first.git_commit)}</td>
+        </tr>`;
 
-    rows += `
-      <tr class="group-header" data-group="${esc(gName)}" aria-expanded="${expanded}">
-        <td>
-          <span class="group-toggle">\u25B6</span>
-          <span class="group-name">${esc(gName)}</span>
-          <span class="group-count">${children.length} runs</span>
-        </td>
-        <td class="note-cell">${esc(first.note)}</td>
-        <td>${constDisplay}</td>
-        <td class="scenario-cell">${scenarioDisplay}</td>
-        <td><span class="models-badge">${first.models_count}</span></td>
-        <td class="date-cell">${formatDate(first.timestamp)}</td>
-        <td>${gitLink(first.git_commit)}</td>
-      </tr>`;
-
-    if (expanded) {
-      for (const r of children) rows += runRow(r, true);
+      if (expanded) {
+        for (const r of children) rows += runRow(r, true);
+      }
+    } else {
+      rows += runRow(item.run, false);
     }
   }
-
-  for (const r of ungrouped) rows += runRow(r, false);
   return rows;
 }
 
