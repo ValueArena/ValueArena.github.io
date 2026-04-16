@@ -21,6 +21,20 @@ async function init() {
       hfFetch(`runs/${slug}/summary.json`),
     ]);
 
+    // Apply model name aliases (e.g., gemini-2.5-pro → gemini-2.5-flash)
+    if (Array.isArray(summary)) {
+      for (const m of summary) {
+        if (m && m.model_name) m.model_name = aliasModelName(m.model_name);
+      }
+    }
+    if (meta && meta.models) {
+      const aliased = {};
+      for (const [k, v] of Object.entries(meta.models)) {
+        aliased[aliasModelName(k)] = v;
+      }
+      meta.models = aliased;
+    }
+
     document.title = `ValueArena — ${meta.name}`;
     render(el, slug, meta, summary);
   } catch (e) {

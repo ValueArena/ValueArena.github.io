@@ -210,6 +210,12 @@ function renderLeaderboard(el) {
 async function _fetchSummary(slug) {
   if (_lbSummaryCache[slug]) return _lbSummaryCache[slug];
   const data = await hfFetch(`runs/${slug}/summary.json`);
+  // Apply model name aliases (e.g., gemini-2.5-pro → gemini-2.5-flash)
+  if (Array.isArray(data)) {
+    for (const m of data) {
+      if (m && m.model_name) m.model_name = aliasModelName(m.model_name);
+    }
+  }
   _lbSummaryCache[slug] = data;
   return data;
 }
