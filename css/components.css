@@ -603,6 +603,15 @@
   max-height: 480px;
 }
 
+.gallery-item-matrix {
+  grid-column: span 1;
+}
+
+.gallery-item-matrix .img-wrap {
+  aspect-ratio: auto;
+  max-height: 480px;
+}
+
 /* ── Lightbox ── */
 .lightbox {
   display: none;
