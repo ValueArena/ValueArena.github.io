@@ -201,9 +201,12 @@
   gap: 6px;
 }
 
-.lb-plot-label span {
+.lb-plot-label span,
+.lb-plot-label a {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .lb-plot-bar-wrap {

@@ -276,7 +276,7 @@ function renderRankingTable(container, ranked, latest) {
         <td class="rank-cell">${i + 1}</td>
         <td class="model-cell">
           ${_modelIcon(m.model_name, 16)}
-          ${esc(m.model_name)}
+          <a class="link-subtle" href="model.html?id=${encodeURIComponent(m.model_name)}">${esc(m.model_name)}</a>
         </td>
         <td class="lb-lab-cell">${esc(lab)}</td>
         <td class="mono-cell">${(m.elo_mean || 0).toFixed(0)}</td>
@@ -348,7 +348,7 @@ function renderLabGroupedTable(container, ranked, latest) {
       rows += `
         <tr class="child-row lb-lab-child" data-lab="${esc(lab)}">
           <td class="rank-cell">${globalRank}</td>
-          <td class="model-cell">${_modelIcon(m.model_name, 16)} ${esc(m.model_name)}</td>
+          <td class="model-cell">${_modelIcon(m.model_name, 16)} <a class="link-subtle" href="model.html?id=${encodeURIComponent(m.model_name)}">${esc(m.model_name)}</a></td>
           <td class="lb-lab-cell">${esc(lab)}</td>
           <td class="mono-cell">${(m.elo_mean || 0).toFixed(0)}</td>
           <td class="ci-cell">${ci}</td>
@@ -413,7 +413,7 @@ function _plotBarHtml(m, i, minElo, range) {
     <div class="lb-plot-row" style="animation-delay: ${i * 30}ms">
       <div class="lb-plot-label" title="${esc(m.model_name)}">
         ${_modelIcon(m.model_name, 16)}
-        <span>${esc(m.model_name)}</span>
+        <a class="link-subtle" href="model.html?id=${encodeURIComponent(m.model_name)}">${esc(m.model_name)}</a>
       </div>
       <div class="lb-plot-bar-wrap">
         <div class="lb-plot-bar" style="width:${Math.max(2, pct)}%;background:${color}"></div>
@@ -514,7 +514,7 @@ async function loadParetoView(byConst, allConst) {
     let headerCols = `<th>Rank</th><th>Model</th><th>Lab</th><th>Avg Elo</th>`;
     for (const c of constCols) {
       const label = allConst.get(c) || c;
-      headerCols += `<th class="lb-pareto-col" title="${esc(label)}">${esc(label)}</th>`;
+      headerCols += `<th class="lb-pareto-col" title="${esc(label)}"><a class="link-subtle" href="constitution.html?id=${encodeURIComponent(c)}">${esc(label)}</a></th>`;
     }
 
     // Find global min/max for heatmap coloring
@@ -555,7 +555,7 @@ async function loadParetoView(byConst, allConst) {
           <td class="rank-cell">${i + 1}</td>
           <td class="model-cell">
             ${_modelIcon(name, 16)}
-            ${esc(name)}
+            <a class="link-subtle" href="model.html?id=${encodeURIComponent(name)}">${esc(name)}</a>
           </td>
           <td class="lb-lab-cell">${esc(lab)}</td>
           <td class="mono-cell">${avg.toFixed(0)}</td>

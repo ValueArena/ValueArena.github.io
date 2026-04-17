@@ -147,7 +147,20 @@ function renderEloChart(containerId, summary, models) {
   Plotly.newPlot(containerId, [eloTrace, ...legendTraces], layout, {
     responsive: true,
     displayModeBar: false,
+  }).then((gd) => _wireModelClicks(gd));
+}
+
+// Navigate to model.html when a bar (or its y-axis label) is clicked.
+function _wireModelClicks(gd) {
+  if (!gd || !gd.on) return;
+  gd.on("plotly_click", (ev) => {
+    const nick = ev?.points?.[0]?.y;
+    if (typeof nick === "string" && nick.length) {
+      window.location.href = `model.html?id=${encodeURIComponent(nick)}`;
+    }
   });
+  // Pointer cursor on hover over the bar area
+  gd.style.cursor = "pointer";
 }
 
 function renderTrustChart(containerId, eigentrust, modelNames) {
@@ -217,5 +230,6 @@ function renderTrustChart(containerId, eigentrust, modelNames) {
     },
   };
 
-  Plotly.newPlot(containerId, [trace], layout, { responsive: true, displayModeBar: false });
+  Plotly.newPlot(containerId, [trace], layout, { responsive: true, displayModeBar: false })
+    .then((gd) => _wireModelClicks(gd));
 }
