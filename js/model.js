@@ -51,6 +51,31 @@ function inferPromptedConstitution(nick) {
   return m ? m[1].toLowerCase() : null;
 }
 
+// When meta.models is missing an entry (e.g. post-hoc rename in summary only),
+// guess a reasonable profile from the nick conventions.
+function inferInfoFromNick(nick) {
+  const low = (nick || "").toLowerCase();
+  const isApi = /^(gpt|claude|gemini|o[0-9]|grok|kimi|glm|deepseek|qwen[0-9])/.test(low)
+             || /gpt-|claude-|gemini-/.test(low);
+  if (isApi) {
+    let base = null;
+    if (low.startsWith("gpt")) base = `openai/${nick}`;
+    else if (low.startsWith("claude")) base = `anthropic/${nick}`;
+    else if (low.startsWith("gemini")) base = `google/${nick}`;
+    return { type: "api", id: base, base_model: null, adapter: null };
+  }
+  if (low.startsWith("prompted_")) {
+    return { type: "base", id: "hf_local:Qwen/Qwen2.5-7B-Instruct", base_model: "Qwen/Qwen2.5-7B-Instruct", adapter: null };
+  }
+  if (/^(dpo|introspection)/.test(low)) {
+    return { type: "lora", id: null, base_model: "Qwen/Qwen2.5-7B-Instruct", adapter: nick };
+  }
+  if (low === "base") {
+    return { type: "base", id: null, base_model: "Qwen/Qwen2.5-7B-Instruct", adapter: null };
+  }
+  return { type: "base", id: null, base_model: null, adapter: null };
+}
+
 function formatModelId(info) {
   if (!info) return null;
   const raw = info.id || "";
@@ -85,22 +110,29 @@ async function init() {
       } catch { return null; }
     }));
 
+    // A model "appears" in a run if it's in meta.models OR in summary.
+    // Some summaries were renamed post-hoc (e.g. gemini-2.5-flash → gemini-2.5-pro)
+    // without updating meta.models, so we have to trust the summary too.
     const appearances = fetched
-      .filter(x => x && x.meta && x.meta.models && x.meta.models[nick])
+      .filter(x => x && x.summary)
       .map(({ run, meta, summary }) => {
-        const s = (summary || []).find(x => x.model_name === nick) || {};
+        const sEntry = (summary || []).find(x => x.model_name === nick);
+        const inMeta = meta && meta.models && meta.models[nick];
+        if (!sEntry && !inMeta) return null;
         const ranked = (summary || []).slice().sort((a, b) => b.elo_mean - a.elo_mean);
         const rank = ranked.findIndex(x => x.model_name === nick) + 1;
         return {
           run, meta, summary,
-          info: meta.models[nick],
-          elo: s.elo_mean, ci_low: s.elo_ci_lower, ci_high: s.elo_ci_upper,
+          info: inMeta || inferInfoFromNick(nick),
+          elo: sEntry ? sEntry.elo_mean : null,
+          ci_low: sEntry ? sEntry.elo_ci_lower : null,
+          ci_high: sEntry ? sEntry.elo_ci_upper : null,
           rank: rank || null,
           field_size: (summary || []).length,
           const_id: normConst(run.constitution || meta.constitution?.path || ""),
         };
       })
-      .filter(a => a.const_id);
+      .filter(a => a && a.const_id);
 
     if (!appearances.length) {
       el.innerHTML = renderNotFound(nick);
