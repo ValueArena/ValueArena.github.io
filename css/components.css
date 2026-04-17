@@ -1472,22 +1472,180 @@
   font-weight: 500;
 }
 
-/* Responsive — specimen */
-@media (max-width: 720px) {
-  .specimen-hero-inner {
-    grid-template-columns: 64px 1fr;
+/* Responsive — specimen (tablet & small) */
+@media (max-width: 860px) {
+  .specimen-hero {
+    padding: 24px 20px 22px;
   }
+  .specimen-hero::before {
+    width: 280px;
+    height: 280px;
+    top: -40%;
+    right: -20%;
+  }
+  .specimen-hero-inner {
+    grid-template-columns: 60px 1fr;
+    gap: 16px;
+  }
+  .specimen-sigil {
+    width: 60px;
+    height: 60px;
+    font-size: 1.35rem;
+    border-radius: 12px;
+  }
+  .specimen-sigil img { width: 34px; height: 34px; }
+  .specimen-title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  .specimen-sub { font-size: 0.82rem; }
+  .specimen-kicker { font-size: 0.6rem; letter-spacing: 0.14em; }
+
   .specimen-stats {
     grid-column: 1 / -1;
-    text-align: left;
     flex-direction: row;
-    gap: 16px;
+    flex-wrap: wrap;
+    text-align: left;
+    gap: 18px 22px;
     align-items: baseline;
-    margin-top: 8px;
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-light);
+    white-space: normal;
   }
-  .specimen-title { font-size: 1.55rem; }
-  .elo-matrix-table { table-layout: auto; font-size: 0.8rem; }
+  .specimen-stat-value { font-size: 1.35rem; }
+
+  .hero-summary {
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .hero-summary-item .v { font-size: 1.05rem; }
+
+  .lineage { gap: 6px; margin-top: 12px; }
+  .lineage-chip {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .prompt-block {
+    padding: 16px 14px 14px 16px;
+    font-size: 0.74rem;
+    line-height: 1.6;
+    max-height: 240px;
+  }
+  .prompt-block::before { display: none; }
+
+  .elo-matrix-table {
+    table-layout: auto;
+    font-size: 0.78rem;
+  }
+  .elo-matrix-table th,
+  .elo-matrix-table td {
+    padding: 8px 8px;
+  }
   .elo-matrix-table .col-bar { display: none; }
-  .criterion-article { grid-template-columns: 38px 1fr; }
+  .elo-matrix-table th.col-ci,
+  .elo-matrix-table td.col-ci { display: none; }
+  .run-link {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    max-width: 120px;
+  }
+
+  .criterion-article {
+    grid-template-columns: 40px 1fr;
+    gap: 10px;
+    padding: 12px 10px 12px 4px;
+  }
   .criterion-numeral { font-size: 1.4rem; }
+  .criterion-numeral::after { width: 18px; }
+  .criterion-text { font-size: 0.85rem; line-height: 1.55; }
+
+  .card-caption { font-size: 0.78rem; }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+  .specimen-hero {
+    padding: 20px 16px 18px;
+    border-radius: var(--radius);
+  }
+  .specimen-hero-inner {
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+  }
+  .specimen-sigil {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+  .specimen-sigil img { width: 28px; height: 28px; }
+  .specimen-title {
+    font-size: 1.2rem;
+    letter-spacing: -0.005em;
+  }
+  .specimen-sub { font-size: 0.78rem; line-height: 1.5; }
+  .specimen-kicker { margin-bottom: 4px; }
+
+  .specimen-stats {
+    gap: 14px 18px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .specimen-stat-value { font-size: 1.15rem; }
+  .specimen-stat-label { font-size: 0.56rem; }
+  .specimen-stat-sub { font-size: 0.62rem; }
+
+  .hero-summary {
+    gap: 12px 16px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .hero-summary-item .k { font-size: 0.55rem; }
+  .hero-summary-item .v { font-size: 0.98rem; }
+  .hero-summary-item .v small { font-size: 0.62rem; }
+
+  .lineage-chip { font-size: 0.64rem; padding: 2px 7px; }
+
+  .prompt-block {
+    padding: 12px 12px;
+    font-size: 0.7rem;
+    line-height: 1.55;
+    max-height: 200px;
+    border-left-width: 2px;
+  }
+
+  .elo-matrix-table {
+    font-size: 0.72rem;
+  }
+  .elo-matrix-table th,
+  .elo-matrix-table td {
+    padding: 7px 6px;
+  }
+  .elo-matrix-table th {
+    font-size: 0.54rem;
+    letter-spacing: 0.06em;
+  }
+  /* Condense further on tiny screens: hide Run column, keep Constitution + Elo */
+  .elo-matrix-table th.col-run,
+  .elo-matrix-table td.col-run { display: none; }
+  .const-link { font-size: 0.78rem; }
+
+  .criterion-article {
+    grid-template-columns: 32px 1fr;
+    gap: 8px;
+    padding: 10px 6px 10px 2px;
+  }
+  .criterion-numeral { font-size: 1.15rem; }
+  .criterion-numeral::after { width: 14px; margin-top: 4px; }
+  .criterion-text { font-size: 0.8rem; line-height: 1.5; }
+
+  .hollow { padding: 28px 14px; font-size: 0.8rem; }
 }
