@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValueArena - Constitution</title>
+  <meta name="description" content="Constitution detail — criteria articles and cross-run leaderboard.">
+  <meta property="og:title" content="ValueArena — Constitution">
+  <meta property="og:description" content="Constitution detail — criteria articles and cross-run leaderboard.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://valuearena.github.io/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <header class="header">
+    <h1><a href="index.html"><span>Value</span>Arena</a></h1>
+    <div class="header-right">
+      <a href="https://github.com/ValueArena/ValueArena.github.io" target="_blank">Source</a>
+      <a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena" target="_blank">HF Dataset</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#9790;</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="content">
+      <div class="loading">Loading constitution</div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/hf-fetch.js"></script>
+  <script src="js/constitutions-data.js"></script>
+  <script src="js/constitution.js"></script>
+  <script>
+    function toggleTheme() {
+      const t = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+      localStorage.setItem("va-theme", t);
+    }
+    (function() {
+      const saved = localStorage.getItem("va-theme");
+      document.documentElement.dataset.theme = saved || "dark";
+    })();
+  </script>
+</body>
+</html>

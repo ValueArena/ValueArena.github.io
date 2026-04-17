@@ -993,3 +993,501 @@
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.3);
 }
+
+/* ═══════════════════════════════════════════════════════
+   Specimen Page — Model / Constitution profiles
+   ═══════════════════════════════════════════════════════ */
+
+/* Hero block used by model.html and constitution.html */
+.specimen-hero {
+  position: relative;
+  padding: 32px 32px 28px;
+  margin-bottom: 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  overflow: hidden;
+  animation: fadeUp 0.45s ease-out;
+}
+
+.specimen-hero::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.specimen-hero::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
+}
+
+.specimen-hero-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 22px;
+  align-items: center;
+}
+
+.specimen-sigil {
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  box-shadow: inset 0 0 0 1px var(--border-light), 0 8px 24px rgba(0,0,0,0.18);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.specimen-sigil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, var(--accent-dim) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.specimen-sigil img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
+
+.specimen-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 6px;
+}
+
+.specimen-title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.specimen-sub {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  max-width: 620px;
+}
+
+.specimen-sub code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  color: var(--text);
+}
+
+.specimen-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.specimen-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.specimen-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 400;
+  color: var(--accent);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.specimen-stat-sub {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Lineage strip inside hero */
+.lineage {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.lineage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  letter-spacing: 0.01em;
+}
+
+.lineage-chip strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lineage-sep {
+  color: var(--accent);
+  opacity: 0.55;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+/* System prompt block */
+.prompt-block {
+  position: relative;
+  padding: 18px 22px 18px 28px;
+  margin: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.prompt-block::before {
+  content: "SYSTEM";
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Elo × Constitution table with sparkbar */
+.elo-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
+}
+
+.elo-matrix-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.elo-matrix-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+.elo-matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.elo-matrix-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+.elo-matrix-table .col-const { width: 22%; }
+.elo-matrix-table .col-run { width: 22%; }
+.elo-matrix-table .col-elo { width: 11%; }
+.elo-matrix-table .col-bar { width: 28%; }
+.elo-matrix-table .col-ci { width: 17%; }
+
+.const-link {
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.005em;
+}
+.const-link:hover { color: var(--accent); }
+
+.run-link {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  transition: all 0.12s;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.run-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Sparkbar: anchored at REF_ANCHOR=1500, clamped [1200, 1800] */
+.elo-sparkbar {
+  position: relative;
+  height: 22px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.elo-sparkbar-axis {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  width: 1px;
+  background: var(--text-muted);
+  opacity: 0.4;
+  z-index: 1;
+}
+
+.elo-sparkbar-fill {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-hover), var(--accent));
+  box-shadow: 0 0 8px var(--accent-glow);
+  transition: none;
+}
+
+.elo-sparkbar-fill.negative {
+  background: linear-gradient(90deg, var(--tag-base), var(--text-muted));
+  box-shadow: none;
+}
+
+.elo-sparkbar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text);
+  mix-blend-mode: normal;
+  z-index: 2;
+  text-shadow: 0 0 6px var(--bg);
+  letter-spacing: 0.02em;
+}
+
+/* Constitution page — criteria as numbered articles */
+.scripture {
+  display: grid;
+  gap: 10px;
+}
+
+.criterion-article {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 14px;
+  padding: 14px 16px 14px 8px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.criterion-article:hover {
+  border-color: var(--border-light);
+  background: var(--bg-surface);
+}
+
+.criterion-numeral {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--accent);
+  text-align: right;
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  opacity: 0.9;
+  letter-spacing: -0.02em;
+}
+
+.criterion-numeral::after {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.3;
+  margin: 6px 0 0 auto;
+}
+
+.criterion-text {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  padding-top: 4px;
+}
+
+.criterion-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Tag size variant */
+.tag-sm {
+  font-size: 0.58rem;
+  padding: 1px 6px;
+}
+
+/* Section caption under a card H2 */
+.card-caption {
+  margin-top: -8px;
+  margin-bottom: 18px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 720px;
+}
+
+/* Subtle in-table link */
+.link-subtle {
+  color: inherit;
+  border-bottom: 1px dotted transparent;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.link-subtle:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-decoration: none;
+}
+
+/* Empty "no runs yet" card body */
+.hollow {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.88rem;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius);
+}
+
+/* Mini summary strip in hero (counts, e.g. "evaluated on 11 constitutions") */
+.hero-summary {
+  display: flex;
+  gap: 22px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.hero-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-summary-item .k {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.hero-summary-item .v {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-summary-item .v small {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* Responsive — specimen */
+@media (max-width: 720px) {
+  .specimen-hero-inner {
+    grid-template-columns: 64px 1fr;
+  }
+  .specimen-stats {
+    grid-column: 1 / -1;
+    text-align: left;
+    flex-direction: row;
+    gap: 16px;
+    align-items: baseline;
+    margin-top: 8px;
+  }
+  .specimen-title { font-size: 1.55rem; }
+  .elo-matrix-table { table-layout: auto; font-size: 0.8rem; }
+  .elo-matrix-table .col-bar { display: none; }
+  .criterion-article { grid-template-columns: 38px 1fr; }
+  .criterion-numeral { font-size: 1.4rem; }
+}

@@ -128,7 +128,7 @@ function renderModelsTable(models, summary) {
       return `
         <tr>
           <td><span class="rank-num">${rank}</span></td>
-          <td><strong>${_runModelIcon(name)} ${esc(name)}</strong></td>
+          <td><strong>${_runModelIcon(name)} <a class="link-subtle" href="model.html?id=${encodeURIComponent(name)}">${esc(name)}</a></strong></td>
           <td><span class="tag tag-${info.type}">${info.type === "base" && info.base_model ? esc(info.base_model) : info.type}</span></td>
           <td>${info.base_model ? esc(info.base_model) : "-"}</td>
           <td class="mono-cell">${info.adapter ? esc(info.adapter) : "-"}</td>
@@ -200,10 +200,15 @@ function renderSpec(meta) {
 
   if (meta.constitution) {
     const c = meta.constitution;
+    const m = (c.path || "").match(/([a-z_]+?)\.json$/i);
+    const cid = m ? m[1].replace(/^oct_/, "") : null;
+    const pathCell = cid
+      ? `<a class="link-subtle" href="constitution.html?id=${encodeURIComponent(cid)}">${esc(c.path)}</a>`
+      : esc(c.path || "-");
     sections.push({
       title: "Constitution",
       rows: [
-        ["Path", c.path],
+        ["Path", { html: pathCell }],
         ["Criteria", c.num_criteria],
       ],
     });
@@ -251,11 +256,16 @@ function renderSpec(meta) {
 
 function renderSpecSection(section) {
   const rows = section.rows
-    .map(([label, value]) => `
+    .map(([label, value]) => {
+      const rendered = value && typeof value === "object" && "html" in value
+        ? value.html
+        : esc(String(value ?? "-"));
+      return `
       <div class="spec-row">
         <span class="spec-label">${esc(label)}</span>
-        <span class="spec-value">${esc(String(value ?? "-"))}</span>
-      </div>`)
+        <span class="spec-value">${rendered}</span>
+      </div>`;
+    })
     .join("");
   return `
     <div class="spec-section">
