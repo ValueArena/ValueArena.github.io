@@ -58,13 +58,30 @@
 }
 
 .lb-run-select {
-  background: var(--card-bg, #1a1a2e);
-  color: var(--text-primary, #e0e0e0);
-  border: 1px solid var(--border, #2a2a4a);
-  border-radius: 6px;
-  padding: 4px 8px;
+  font-family: var(--font-body);
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 28px 6px 10px;
   font-size: 0.78rem;
   cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='none' stroke='%237a84a0' stroke-width='1.5' d='M1 1l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lb-run-select:hover {
+  border-color: color-mix(in srgb, var(--border) 50%, var(--text-muted));
+}
+
+.lb-run-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
 .lb-table .rank-cell {
