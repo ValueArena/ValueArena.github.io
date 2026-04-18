@@ -28,10 +28,24 @@ const MODEL_LOGOS = {
   "zhipu": "assets/models/zai.png",
 };
 
+// Nicks from EigenBench runs that are finetunes/prompt-wraps of the
+// Qwen base (no lab name in the nick) — fall back to the Qwen logo.
+const _QWEN_NICK_PATTERNS = [
+  /^base$/,
+  /^prompted_/,
+  /^trained_/,
+  /^dpo[-_]/,
+  /^introspection[-_]/,
+];
+
 function getModelLogo(modelId) {
   const lower = (modelId || "").toLowerCase();
   for (const [key, path] of Object.entries(MODEL_LOGOS)) {
     if (lower.includes(key)) return path;
+  }
+  // Fallback: nicks with no lab name are Qwen-based runs from EigenBench.
+  for (const re of _QWEN_NICK_PATTERNS) {
+    if (re.test(lower)) return MODEL_LOGOS["qwen"];
   }
   return null;
 }
