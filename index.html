@@ -3,18 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ValueArena</title>
-  <meta name="description" content="A comparative behavioral measure of value alignment across language models using EigenBench.">
-  <meta property="og:title" content="ValueArena">
-  <meta property="og:description" content="A comparative behavioral measure of value alignment across language models.">
+  <title>ValueArena — LLM value alignment leaderboard (EigenBench)</title>
+  <meta name="description" content="ValueArena ranks language models by behavioral value alignment across 16 constitutions (kindness, honesty, misalignment, sycophancy, and more) using EigenBench — a Bradley–Terry–Davidson pairwise-judgment framework with bootstrap confidence intervals and EigenTrust-weighted judges.">
+  <meta name="author" content="ValueArena">
+  <link rel="canonical" href="https://valuearena.github.io/">
+  <meta property="og:title" content="ValueArena — LLM value alignment leaderboard">
+  <meta property="og:description" content="Behavioral value-alignment rankings for LLMs across 16 constitutions, built on EigenBench pairwise judgment and Bradley–Terry–Davidson Elo.">
+  <meta property="og:site_name" content="ValueArena">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://valuearena.github.io/">
   <meta property="og:image" content="https://valuearena.github.io/assets/va.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ValueArena">
-  <meta name="twitter:description" content="A comparative behavioral measure of value alignment across language models.">
+  <meta name="twitter:title" content="ValueArena — LLM value alignment leaderboard">
+  <meta name="twitter:description" content="Behavioral value-alignment rankings for LLMs across 16 constitutions (EigenBench pairwise judgment, Bradley–Terry–Davidson Elo).">
   <meta name="twitter:image" content="https://valuearena.github.io/assets/va.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "ValueArena",
+    "description": "Behavioral value-alignment rankings for language models across 16 constitutions (kindness, goodness, humor, sarcasm, loving, misalignment, sycophancy, and more), computed via the EigenBench pairwise-judgment framework with Bradley–Terry–Davidson Elo and EigenTrust-weighted judges.",
+    "url": "https://valuearena.github.io/",
+    "sameAs": "https://huggingface.co/datasets/invi-bhagyesh/ValueArena",
+    "keywords": "LLM evaluation, value alignment, AI alignment, EigenBench, Bradley-Terry-Davidson, pairwise judgment, Elo, LoRA, DPO, constitutional AI, language model benchmark",
+    "license": "https://opensource.org/licenses/MIT",
+    "creator": { "@type": "Organization", "name": "ValueArena" },
+    "distribution": [{
+      "@type": "DataDownload",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://huggingface.co/datasets/invi-bhagyesh/ValueArena"
+    }]
+  }
+  </script>
   <script>
     // Set theme before CSS loads to prevent FOUC
     (function() {
