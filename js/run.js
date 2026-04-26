@@ -16,19 +16,26 @@ async function init() {
   }
 
   try {
-    const [meta, summary] = await Promise.all([
+    const [meta, summary, index] = await Promise.all([
       hfFetch(`runs/${slug}/meta.json`),
       hfFetch(`runs/${slug}/summary.json`),
+      // index.json carries the logical `group` label — the only place it lives.
+      // Fetch is parallel and almost always sessionStorage-cached from the
+      // experiments / leaderboard tabs; cost is effectively zero on warm load.
+      hfFetch("index.json").catch(() => null),
     ]);
 
+    const indexEntry = index?.runs?.find(r => r.slug === slug);
+    const group = indexEntry?.group || slug.split("/")[0];
+
     document.title = `ValueArena — ${meta.name}`;
-    render(el, slug, meta, summary);
+    render(el, slug, meta, summary, group);
   } catch (e) {
     el.innerHTML = `<div class="error">Failed to load run "${esc(slug)}": ${esc(e.message)}<br><a href="index.html">Back to runs</a></div>`;
   }
 }
 
-function render(el, slug, meta, summary) {
+function render(el, slug, meta, summary, group) {
   const modelNames = Object.keys(meta.models || {});
 
   el.innerHTML = `
@@ -71,7 +78,7 @@ function render(el, slug, meta, summary) {
     <div class="card">
       <h2>Visualizations</h2>
       <div class="gallery">
-        ${renderMatrixViewItem(slug)}
+        ${renderMatrixViewItem(group)}
         ${renderGalleryItem(slug, "bootstrap_elo.png", "Bootstrap Elo")}
         ${renderGalleryItem(slug, "eigenbench.png", "EigenBench Scores")}
         ${renderGalleryItem(slug, "uv_embeddings_pca.png", "UV Embeddings PCA")}
@@ -274,8 +281,7 @@ function renderSpecSection(section) {
     </div>`;
 }
 
-function renderMatrixViewItem(slug) {
-  const group = slug.split("/")[0];
+function renderMatrixViewItem(group) {
   const url = hfImageURL(`runs/${group}/matrix_view.png`);
   const ciUrl = hfImageURL(`runs/${group}/matrix_ci.png`);
   return `
