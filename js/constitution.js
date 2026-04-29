@@ -38,8 +38,10 @@ const CONST_TAGLINES = {
 
 async function init() {
   const el = document.getElementById("content");
+  // URLSearchParams decodes "+" as " " per form-urlencoded convention. Restore
+  // any literal space back to "+" so id strings with "+" survive.
   const params = new URLSearchParams(window.location.search);
-  const id = normConst(params.get("id") || "");
+  const id = normConst((params.get("id") || "").replace(/ /g, "+"));
 
   if (!id) {
     el.innerHTML = `<div class="error">No constitution specified. <a href="index.html">Back</a></div>`;

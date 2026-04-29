@@ -7,10 +7,13 @@ function _runModelIcon(name) {
 
 async function init() {
   const el = document.getElementById("content");
+  // URLSearchParams decodes "+" as " " per form-urlencoded convention. Slugs
+  // never contain literal spaces, so reverse that to recover plus-bearing slugs
+  // like "full_n+1".
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("run");
+  const slug = (params.get("run") || "").replace(/ /g, "+") || null;
 
-  if (!slug || !/^[a-zA-Z0-9\-_./]+$/.test(slug)) {
+  if (!slug || !/^[a-zA-Z0-9\-_./+]+$/.test(slug)) {
     el.innerHTML = `<div class="error">Invalid or missing run. <a href="index.html">Back to runs</a></div>`;
     return;
   }

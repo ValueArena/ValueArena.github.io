@@ -86,8 +86,10 @@ function formatModelId(info) {
 
 async function init() {
   const el = document.getElementById("content");
+  // URLSearchParams decodes "+" as " " per form-urlencoded convention. Model
+  // nicks never contain literal spaces, so reverse that to preserve "+".
   const params = new URLSearchParams(window.location.search);
-  const nick = params.get("id");
+  const nick = (params.get("id") || "").replace(/ /g, "+") || null;
 
   if (!nick) {
     el.innerHTML = `<div class="error">No model specified. <a href="index.html">Back</a></div>`;
