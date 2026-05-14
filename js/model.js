@@ -85,10 +85,15 @@ function formatModelId(info) {
 }
 
 // Normalize a model nick / label for fuzzy matching.
-// "Claude 4.0 Sonnet" → "claude40sonnet"; "claude-4-sonnet" → "claude4sonnet";
-// "GPT-4o" → "gpt4o"; etc.
+// "Claude 4.0 Sonnet" → "claude4sonnet"; "claude-4-sonnet" → "claude4sonnet";
+// "GPT-4o" → "gpt4o"; "Gemini 2.5 Pro" → "gemini2.5pro" → "gemini25pro" → "gemini25pro".
 function _normalizeNick(s) {
-  return (s || "").toLowerCase().replace(/[\s_.\-/]+/g, "");
+  let v = (s || "").toLowerCase();
+  // Collapse "N.0" → "N" so "Claude 4.0" and "claude-4" match.
+  v = v.replace(/(\d+)\.0+(?!\d)/g, "$1");
+  // Drop separators.
+  v = v.replace(/[\s_.\-/]+/g, "");
+  return v;
 }
 
 async function init() {
