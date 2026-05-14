@@ -84,14 +84,21 @@ function formatModelId(info) {
   return raw.replace(/^hf_local:/, "") || info.base_model || null;
 }
 
+// Normalize a model nick / label for fuzzy matching.
+// "Claude 4.0 Sonnet" → "claude40sonnet"; "claude-4-sonnet" → "claude4sonnet";
+// "GPT-4o" → "gpt4o"; etc.
+function _normalizeNick(s) {
+  return (s || "").toLowerCase().replace(/[\s_.\-/]+/g, "");
+}
+
 async function init() {
   const el = document.getElementById("content");
   // URLSearchParams decodes "+" as " " per form-urlencoded convention. Model
   // nicks never contain literal spaces, so reverse that to preserve "+".
   const params = new URLSearchParams(window.location.search);
-  const nick = (params.get("id") || "").replace(/ /g, "+") || null;
+  const requestedRaw = (params.get("id") || "").replace(/ /g, "+") || null;
 
-  if (!nick) {
+  if (!requestedRaw) {
     el.innerHTML = `<div class="error">No model specified. <a href="index.html">Back</a></div>`;
     return;
   }
@@ -112,9 +119,50 @@ async function init() {
       } catch { return null; }
     }));
 
-    // A model "appears" in a run if it's in meta.models OR in summary.
-    // Some summaries were renamed post-hoc (e.g. gemini-2.5-flash → gemini-2.5-pro)
-    // without updating meta.models, so we have to trust the summary too.
+    // Resolve the requested id to a canonical nick by scanning all model_names
+    // observed across summaries and meta.models. First try exact match, then
+    // case-insensitive, then a loose match that ignores spaces/underscores/dots/hyphens.
+    const seenNicks = new Set();
+    for (const x of fetched) {
+      if (!x) continue;
+      for (const s of x.summary || []) {
+        if (s.model_name) seenNicks.add(s.model_name);
+      }
+      const mm = x.meta && x.meta.models;
+      if (mm) for (const k of Object.keys(mm)) seenNicks.add(k);
+    }
+
+    let nick = null;
+    if (seenNicks.has(requestedRaw)) {
+      nick = requestedRaw;
+    } else {
+      const reqLow = requestedRaw.toLowerCase();
+      const reqNorm = _normalizeNick(requestedRaw);
+      // Pass 1: case-insensitive exact match
+      for (const n of seenNicks) {
+        if (n.toLowerCase() === reqLow) { nick = n; break; }
+      }
+      // Pass 2: normalized match (ignore separators)
+      if (!nick) {
+        for (const n of seenNicks) {
+          if (_normalizeNick(n) === reqNorm) { nick = n; break; }
+        }
+      }
+    }
+
+    if (!nick) {
+      el.innerHTML = renderNotFound(requestedRaw);
+      document.title = `ValueArena — ${requestedRaw}`;
+      return;
+    }
+
+    // If we resolved a different canonical form, update URL so deep-links and
+    // sharing converge on the canonical nick.
+    if (nick !== requestedRaw) {
+      const newUrl = `${window.location.pathname}?id=${encodeURIComponent(nick)}${window.location.hash || ""}`;
+      window.history.replaceState({}, "", newUrl);
+    }
+
     const appearances = fetched
       .filter(x => x && x.summary)
       .map(({ run, meta, summary }) => {
