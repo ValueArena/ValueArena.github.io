@@ -91,8 +91,8 @@ function _normalizeNick(s) {
   let v = (s || "").toLowerCase();
   // Collapse "N.0" → "N" so "Claude 4.0" and "claude-4" match.
   v = v.replace(/(\d+)\.0+(?!\d)/g, "$1");
-  // Drop separators.
-  v = v.replace(/[\s_.\-/]+/g, "");
+  // Drop separators (incl. "+" because we map URL spaces to "+" earlier).
+  v = v.replace(/[\s_.\-/+]+/g, "");
   return v;
 }
 
