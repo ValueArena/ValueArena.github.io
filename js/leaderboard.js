@@ -218,10 +218,27 @@ async function loadConstitutionRanking(runs) {
   const container = document.getElementById("lb-table-container");
 
   const sorted = [...runs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  // Use selected run or default to latest
-  const selected = _lbActiveRunSlug
-    ? sorted.find(r => r.slug === _lbActiveRunSlug) || sorted[0]
-    : sorted[0];
+  // Default: pick the run with the most models (ties broken by recency).
+  // If user has explicitly selected a run, honour that.
+  let selected;
+  if (_lbActiveRunSlug) {
+    selected = sorted.find(r => r.slug === _lbActiveRunSlug) || sorted[0];
+  } else {
+    // Fetch all summaries for this constitution in parallel so we can compare sizes.
+    const summaries = await Promise.all(
+      sorted.map(r => _fetchSummary(r.slug).catch(() => null))
+    );
+    let bestIdx = 0;
+    let bestCount = Array.isArray(summaries[0]) ? summaries[0].length : 0;
+    for (let i = 1; i < sorted.length; i++) {
+      const n = Array.isArray(summaries[i]) ? summaries[i].length : 0;
+      if (n > bestCount) {
+        bestCount = n;
+        bestIdx = i;
+      }
+    }
+    selected = sorted[bestIdx];
+  }
 
   try {
     const summary = await _fetchSummary(selected.slug);
