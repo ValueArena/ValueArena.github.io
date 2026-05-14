@@ -258,7 +258,7 @@ function render(el, nick, appearances) {
       <h2>Elo across constitutions</h2>
       <div class="card-caption">
         Each row shows this model's bootstrapped Elo in one run, anchored so the three reference
-        models (gpt-4o, claude-4-sonnet, gemini-2.5-flash) average to ${REF_ANCHOR}.
+        models (gpt-4o, claude-4-sonnet, gemini-2.5-pro) average to ${REF_ANCHOR}.
         The sparkbar visualizes distance from anchor; rightward = above reference, leftward = below.
       </div>
       ${renderMatrixTable(constRows)}

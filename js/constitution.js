@@ -5,7 +5,7 @@
 const REF_ANCHOR = 1500;
 const SPARK_MIN = 1300;
 const SPARK_MAX = 1750;
-const REF_NICKS = new Set(["gpt-4o", "claude-4-sonnet", "gemini-2.5-flash"]);
+const REF_NICKS = new Set(["gpt-4o", "claude-4-sonnet", "gemini-2.5-flash", "gemini-2.5-pro"]);
 
 function normConst(c) {
   return (c || "").toLowerCase().trim().replace(/^oct_/, "");
@@ -118,7 +118,7 @@ function renderShell(id, runCount) {
       <h2>Leaderboard</h2>
       <div class="card-caption">
         Latest bootstrapped Elo for every model evaluated under <strong>${esc(label)}</strong>,
-        anchored so reference models (gpt-4o, claude-4-sonnet, gemini-2.5-flash) average ${REF_ANCHOR}.
+        anchored so reference models (gpt-4o, claude-4-sonnet, gemini-2.5-pro) average ${REF_ANCHOR}.
       </div>
       <div id="lb-body">
         ${runCount ? `<div class="loading">Loading runs</div>` : `<div class="hollow">No runs have evaluated this constitution yet.</div>`}
