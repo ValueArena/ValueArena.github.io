@@ -593,33 +593,35 @@ function SetupScreen({
         </div>
 
         <div className="battle-config">
-          <div className="battle-section">
-            <label className="battle-label">Constitution</label>
-            <ModelDropdown
-              kind="constitution"
-              value={constitution}
-              onChange={setConstitution}
-              options={CONSTITUTIONS.map((c) => ({ value: c.id, label: c.label }))}
-            />
-          </div>
+          <div className="battle-row">
+            <div className="battle-section battle-section-grow">
+              <label className="battle-label">Constitution</label>
+              <ModelDropdown
+                kind="constitution"
+                value={constitution}
+                onChange={setConstitution}
+                options={CONSTITUTIONS.map((c) => ({ value: c.id, label: c.label }))}
+              />
+            </div>
 
-          <div className="battle-section">
-            <label className="battle-label">Matchup</label>
-            <div className="battle-mode-toggle">
-              <button
-                type="button"
-                className={`battle-mode-btn${matchupMode === 'select' ? ' active' : ''}`}
-                onClick={() => setMatchupMode('select')}
-              >
-                Pick
-              </button>
-              <button
-                type="button"
-                className={`battle-mode-btn${matchupMode === 'random' ? ' active' : ''}`}
-                onClick={() => setMatchupMode('random')}
-              >
-                Random
-              </button>
+            <div className="battle-section">
+              <label className="battle-label">Matchup</label>
+              <div className="battle-mode-toggle">
+                <button
+                  type="button"
+                  className={`battle-mode-btn${matchupMode === 'select' ? ' active' : ''}`}
+                  onClick={() => setMatchupMode('select')}
+                >
+                  Pick
+                </button>
+                <button
+                  type="button"
+                  className={`battle-mode-btn${matchupMode === 'random' ? ' active' : ''}`}
+                  onClick={() => setMatchupMode('random')}
+                >
+                  Random
+                </button>
+              </div>
             </div>
           </div>
 
