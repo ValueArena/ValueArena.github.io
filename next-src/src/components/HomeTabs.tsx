@@ -20,12 +20,12 @@ const HASH_TO_TAB: Record<string, Tab> = {
 };
 
 function tabFromHash(): Tab {
-  if (typeof window === 'undefined') return 'leaderboard';
-  return HASH_TO_TAB[window.location.hash] ?? 'leaderboard';
+  if (typeof window === 'undefined') return 'chat';
+  return HASH_TO_TAB[window.location.hash] ?? 'chat';
 }
 
 export function HomeTabs() {
-  const [tab, setTab] = useState<Tab>('leaderboard');
+  const [tab, setTab] = useState<Tab>('chat');
 
   useEffect(() => {
     setTab(tabFromHash());
