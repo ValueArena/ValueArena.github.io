@@ -1685,11 +1685,19 @@ code {
   .battle-mode-toggle { width: fit-content; }
   .battle-start-btn { align-self: stretch; width: 100%; }
 
-  /* Chat shell — tighter arena padding, leave the bottom safe-area for iOS. */
-  .chat-arena-wrap { padding: 14px 12px; gap: 18px; }
+  /* Chat shell on mobile — release the desktop body scroll lock (which combined
+     with the wrapping header + tabs was clipping the input bar below the fold),
+     and let the chat-shell grow with its content instead of clamping to a
+     hard-coded 100dvh - 80px (the actual offset above the shell is ~150-180px
+     once the header wraps). */
+  body.va-no-scroll { overflow: visible; height: auto; }
+  .chat-shell { min-height: 0; height: auto; }
+  .chat-arena-wrap { padding: 14px 12px; gap: 18px; overflow-y: visible; }
   .chat-input-wrap { padding: 10px 12px max(14px, env(safe-area-inset-bottom)); }
-  .chat-shell.empty .chat-arena-wrap { padding: 32px 12px 4px; }
+  .chat-shell.empty { min-height: 60vh; }
+  .chat-shell.empty .chat-arena-wrap { padding: 24px 12px 8px; }
   .chat-shell.empty .chat-input-wrap { padding: 4px 12px max(14px, env(safe-area-inset-bottom)); }
+  .chat-shell.empty::after { flex: 0 0 0; }
   .chat-user-bubble { max-width: 88%; }
   .chat-topbar { padding: 8px 12px; font-size: 0.8rem; }
 
