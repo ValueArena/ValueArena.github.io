@@ -1,0 +1,66 @@
+name: Build Next.js preview into /next/
+
+# Source lives in next-src/; the published static build is committed to next/
+# so the existing "Deploy from branch: main /" Pages config picks it up at
+# https://valuearena.github.io/next/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'next-src/**'
+      - '.github/workflows/deploy-next-preview.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: next-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Skip the rebuild commit's own run.
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps
+        working-directory: next-src
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        working-directory: next-src
+        env:
+          NODE_ENV: production
+          BASE_PATH: /next
+        run: bun run build
+
+      - name: Sync build output into /next/
+        run: |
+          rm -rf next
+          mkdir -p next
+          cp -R next-src/out/. next/
+          # Pages needs .nojekyll at the repo root to serve _next/* underscore folders.
+          touch .nojekyll
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add next .nojekyll
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "ci: rebuild /next/ from ${GITHUB_SHA::7} [skip ci]"
+          git push
