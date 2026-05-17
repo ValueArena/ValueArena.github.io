@@ -532,13 +532,13 @@ code {
 .battle-row {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .battle-section { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.battle-section-grow { flex: 0 0 auto; max-width: 220px; }
+.battle-section-grow { flex: 0 0 auto; }
 .battle-section .custom-select { width: auto; }
-.battle-section-grow .custom-select { width: 220px; }
+.battle-section-grow .custom-select { width: 170px; }
 .battle-section .custom-select-trigger,
 .battle-mode-toggle { height: 36px; }
 .battle-mode-toggle { padding: 3px; }
