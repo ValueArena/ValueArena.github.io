@@ -536,9 +536,9 @@ code {
   flex-wrap: wrap;
 }
 .battle-section { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.battle-section-grow { flex: 1 1 220px; }
-.battle-section .custom-select,
-.battle-section .custom-select-trigger { width: 100%; }
+.battle-section-grow { flex: 0 0 auto; max-width: 220px; }
+.battle-section .custom-select { width: auto; }
+.battle-section-grow .custom-select { width: 220px; }
 .battle-section .custom-select-trigger,
 .battle-mode-toggle { height: 36px; }
 .battle-mode-toggle { padding: 3px; }
