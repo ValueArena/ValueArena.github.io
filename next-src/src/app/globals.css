@@ -532,7 +532,7 @@ code {
 .battle-row {
   display: flex;
   align-items: flex-end;
-  gap: 14px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .battle-section { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
