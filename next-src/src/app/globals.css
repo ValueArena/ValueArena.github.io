@@ -1646,3 +1646,106 @@ code {
 .sparkbar-fill.below {
   background: rgba(200, 100, 100, 0.6);
 }
+
+/* ── Mobile (≤ 720px): wrap headers, stack hero, free up table widths ── */
+@media (max-width: 720px) {
+  /* Header — brand and nav on two rows, smaller padding. */
+  .va-header {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    padding: 10px 14px;
+  }
+  .va-brand h1 { font-size: 1.1rem; }
+  .va-nav { flex-wrap: wrap; gap: 2px; }
+  .va-nav a,
+  .va-nav .va-theme-toggle {
+    font-size: 0.75rem;
+    padding: 5px 8px;
+  }
+
+  /* Home tabs — let them scroll horizontally instead of wrapping awkwardly. */
+  .home-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .home-tabs::-webkit-scrollbar { display: none; }
+  .home-tab { font-size: 0.88rem; padding: 8px 10px; white-space: nowrap; }
+
+  /* Chat setup hero — stack text above pipeline (pipeline hidden by existing
+     800px rule, but keep this for consistency). */
+  .chat-setup-screen { gap: 16px; padding-top: 0; }
+  .battle-setup { padding: 12px 14px; }
+  .battle-row { gap: 10px; }
+  /* Allow Constitution dropdown + Matchup toggle to each occupy a row when needed. */
+  .battle-section,
+  .battle-section-grow { flex: 1 1 100%; min-width: 0; }
+  .battle-section-grow .custom-select,
+  .battle-section .custom-select { width: 100%; }
+  .battle-mode-toggle { width: fit-content; }
+  .battle-start-btn { align-self: stretch; width: 100%; }
+
+  /* Chat shell — tighter arena padding, leave the bottom safe-area for iOS. */
+  .chat-arena-wrap { padding: 14px 12px; gap: 18px; }
+  .chat-input-wrap { padding: 10px 12px max(14px, env(safe-area-inset-bottom)); }
+  .chat-shell.empty .chat-arena-wrap { padding: 32px 12px 4px; }
+  .chat-shell.empty .chat-input-wrap { padding: 4px 12px max(14px, env(safe-area-inset-bottom)); }
+  .chat-user-bubble { max-width: 88%; }
+  .chat-topbar { padding: 8px 12px; font-size: 0.8rem; }
+
+  /* Leaderboard controls — let view tabs + run selector stack. */
+  .lb-controls { gap: 8px; }
+  .lb-run-custom-select { min-width: 0; width: 100%; max-width: 100%; }
+  .lb-run-selector { display: flex; flex-wrap: wrap; width: 100%; }
+
+  /* Leaderboard plot — drop the fixed 220px label column on phones. */
+  .lb-plot-row {
+    grid-template-columns: minmax(110px, 1.4fr) 2fr 48px;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+  .lb-plot-value { font-size: 0.78rem; }
+
+  /* Experiments filter bar — allow wrap. */
+  .filter-bar { flex-wrap: wrap; row-gap: 8px; }
+  .filter-search { width: 100%; }
+  .filter-search:focus { width: 100%; }
+  .filter-count { margin-left: 0; width: 100%; text-align: right; }
+  .filter-search-input { min-width: 0; width: 100%; }
+
+  /* Specimen hero (model.html, constitution.html) — stack everything. */
+  .specimen-hero { padding: 16px; }
+  .specimen-hero-inner {
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+  }
+  .specimen-stats {
+    grid-column: 1 / -1;
+    text-align: left;
+    min-width: 0;
+    border-top: 1px solid var(--border-light);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .specimen-stat-value { font-size: 1.6rem; }
+  .specimen-title { font-size: 1.4rem; }
+  .hero-summary { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Toast slides up flush — no horizontal overflow. */
+  .va-toast { left: 12px; right: 12px; bottom: 14px; }
+
+  /* Make horizontally-scrolling tables obviously scrollable instead of cut off. */
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
+/* ── Narrow phones (≤ 420px): one-column everything ── */
+@media (max-width: 420px) {
+  .hero-summary { grid-template-columns: 1fr; }
+  .va-brand h1 { font-size: 1rem; }
+  .va-nav a,
+  .va-nav .va-theme-toggle { font-size: 0.72rem; padding: 4px 6px; }
+  /* Chat hero text + pipeline already collapse; tighten battle UI more. */
+  .chat-setup-hero { padding: 14px 16px; }
+  .chat-setup-hero .hero-text h2 { font-size: 1.1rem; }
+  .specimen-stat-value { font-size: 1.4rem; }
+}

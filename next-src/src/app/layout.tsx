@@ -1,10 +1,16 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Header } from '@/components/Header';
 
 export const metadata: Metadata = {
   title: 'ValueArena',
   description: 'Cross-constitution Elo rankings for language models, judged via EigenBench.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
