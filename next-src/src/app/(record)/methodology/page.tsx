@@ -107,20 +107,32 @@ export default function MethodologyPage() {
           </p>
           <h3 className="font-serif text-xl pt-3">Direct ratings</h3>
           <p>
-            In <code>direct_rating</code> mode, every judge <InlineEq tex="i" /> directly scores
-            every evaluee <InlineEq tex="j" /> on every criterion using an integer scale from 1 to
-            10. Self-ratings are included by default but can be disabled. Before assigning numbers,
+            In <code>direct_rating</code> mode, judge <InlineEq tex="i" /> directly scores evaluee{' '}
+            <InlineEq tex="j" /> on every criterion using an integer scale from 1 to 10.
+            Self-ratings are included by default but can be disabled. Before assigning numbers,
             the judge produces a criterion-by-criterion reflection on the response.
           </p>
           <p>
-            Ratings are averaged across scenarios and criteria to form{' '}
-            <InlineEq tex="\bar r_{ij}" />. The default transformation standardizes each judge row
-            and applies a softmax:
+            Direct collection can be exhaustive or partition-sampled. In the partitioned design,
+            all <InlineEq tex="N" /> responses for a scenario are randomly divided into groups of
+            at most <InlineEq tex="k" />. One seeded random judge rates each group. Repeating this
+            for redundancy <InlineEq tex="r" /> gives exactly <InlineEq tex="rNL" /> direct
+            judgments across <InlineEq tex="L" /> scenarios, instead of{' '}
+            <InlineEq tex="LN^2" /> exhaustive judgments. The default sampled setting is{' '}
+            <InlineEq tex="r=1" /> and <InlineEq tex="k=4" />.
           </p>
-          <BlockEq tex="z_{ij} = \frac{\bar r_{ij}-\mu_i}{\sigma_i}, \qquad C_{ij} = \frac{\exp(z_{ij}/\tau)}{\sum_k \exp(z_{ik}/\tau)}" />
+          <p>
+            Ratings are averaged over the observed scenario assignments and criteria to form{' '}
+            <InlineEq tex="\bar r_{ij}" />. Let <InlineEq tex="\mathcal O_i" /> be the evaluees
+            observed for judge <InlineEq tex="i" />. The default transformation standardizes the
+            observed portion of each judge row and applies a masked softmax:
+          </p>
+          <BlockEq tex="z_{ij} = \frac{\bar r_{ij}-\mu_i}{\sigma_i}, \qquad C_{ij} = \frac{\exp(z_{ij}/\tau)}{\sum_{k \in \mathcal O_i} \exp(z_{ik}/\tau)} \; (j \in \mathcal O_i)" />
           <p>
             This removes each judge&apos;s individual scale and produces a row-stochastic trust matrix
-            directly, without fitting Bradley–Terry parameters. Constant rows safely become uniform.
+            directly, without fitting Bradley–Terry parameters. Unobserved edges receive zero
+            weight. Constant rows safely become uniform over observed edges; a completely absent
+            judge row in a bootstrap replicate becomes uniform over structurally eligible evaluees.
           </p>
         </Section>
 

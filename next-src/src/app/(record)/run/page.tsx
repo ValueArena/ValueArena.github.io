@@ -216,6 +216,10 @@ function AnalysisMetricsCard({ meta, mode }: { meta: MetaJson; mode: EvaluationM
   push('Criteria', log.num_criteria);
   if (mode === 'direct_rating') {
     push('Scenarios', log.num_scenarios ?? analysis.num_scenarios);
+    push('Sampler', log.sampler_mode ?? analysis.sampler_mode);
+    push('Direct Judgments', log.total_direct_judgments ?? analysis.total_direct_judgments);
+    const coverage = log.observed_edge_coverage ?? analysis.observed_edge_coverage;
+    if (typeof coverage === 'number') push('Observed Edge Coverage', `${(100 * coverage).toFixed(1)}%`);
     push('Normalization', log.normalization ?? analysis.normalization);
     push('Bootstrap Unit', analysis.bootstrap_unit ?? 'scenario');
   } else {
@@ -247,12 +251,21 @@ function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
   const sections: { title: string; rows: [string, React.ReactNode][] }[] = [];
 
   const direct = (meta.evaluation?.direct_rating || {}) as Record<string, unknown>;
+  const analysis = (meta.analysis || {}) as Record<string, unknown>;
+  const cl = (meta.collection || {}) as Record<string, unknown>;
   const evaluationRows: [string, React.ReactNode][] = [
     ['Collection Type', collectionTypeLabel(mode)],
   ];
   if (mode === 'direct_rating') {
+    const samplerMode = String(analysis.sampler_mode ?? cl.sampler_mode ?? 'all_to_all');
+    const sampled = samplerMode === 'partitioned_random_judge';
+    const redundancy = analysis.response_redundancy ?? cl.response_redundancy ?? 1;
     evaluationRows.push(
-      ['Coverage', 'All judge–evaluee pairs'],
+      ['Coverage', sampled ? `Every response rated ${redundancy}× per scenario` : 'All judge–evaluee pairs per scenario'],
+      ['Sampler Mode', samplerMode],
+      ['Group Size', sampled ? ((analysis.group_size ?? cl.group_size) as React.ReactNode) : '—'],
+      ['Response Redundancy', sampled ? (redundancy as React.ReactNode) : '—'],
+      ['Sampler Seed', sampled ? ((analysis.sampler_seed ?? cl.sampler_seed) as React.ReactNode) : '—'],
       ['Self Ratings', direct.include_self === false ? 'Excluded' : 'Included'],
       ['Rating Scale', `${direct.scale_min ?? 1}–${direct.scale_max ?? 10}`],
       ['Criterion Aggregation', (direct.criterion_aggregation as React.ReactNode) ?? 'mean'],
@@ -308,8 +321,7 @@ function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
       ],
     });
   }
-  const cl = meta.collection as Record<string, unknown> | undefined;
-  if (cl && mode === 'pairwise_btd') {
+  if (Object.keys(cl).length && mode === 'pairwise_btd') {
     sections.push({
       title: 'Collection',
       rows: [

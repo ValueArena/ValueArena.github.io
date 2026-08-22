@@ -63,4 +63,4 @@ runs/{name}/
   data/                     Optional direct score/trust matrices and bootstrap samples
 ```
 
-New metadata records `evaluation_mode` as either `pairwise_btd` or `direct_rating`. Missing values on legacy runs are interpreted as `pairwise_btd`. Direct runs omit BTD loss and UV-embedding artifacts.
+New metadata records `evaluation_mode` as either `pairwise_btd` or `direct_rating`. Missing values on legacy runs are interpreted as `pairwise_btd`. Direct runs may use exhaustive or `partitioned_random_judge` sampling; their run pages report group size, response redundancy, seed, and observed edge coverage. Direct runs omit BTD loss and UV-embedding artifacts.
