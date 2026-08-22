@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CONSTITUTIONS, REF_ANCHOR } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary } from '@/lib/hf';
+import { bootstrapUnit, collectionTypeLabel, metaEvaluationMode } from '@/lib/protocol';
 import {
   constLabel,
   formatModelId,
@@ -377,11 +378,13 @@ function LineageCard({
 }
 
 function HyperparamCard({ meta }: { meta: MetaJson }) {
+  const mode = metaEvaluationMode(meta);
   const items: { label: string; value: string }[] = [];
   const t = (meta.training || {}) as Record<string, unknown>;
   const c = (meta.collection || {}) as Record<string, unknown>;
   const b = (meta.bootstrap || {}) as Record<string, unknown>;
   const log = (meta.log || {}) as Record<string, unknown>;
+  const direct = (meta.evaluation?.direct_rating || {}) as Record<string, unknown>;
   const push = (label: string, value: unknown) => {
     if (value == null || value === '') return;
     items.push({
@@ -389,24 +392,36 @@ function HyperparamCard({ meta }: { meta: MetaJson }) {
       value: Array.isArray(value) ? value.join(' × ') : String(value),
     });
   };
-  push('BTD Model', t.model);
-  push('Dimensions', t.dims);
-  push('Learning Rate', t.lr);
-  push('Weight Decay', t.weight_decay);
-  push('Max Epochs', t.max_epochs);
-  push('Batch Size', t.batch_size);
-  push('Test Size', t.test_size);
-  push('Sampler', c.sampler_mode);
-  push('Group Size', c.group_size);
-  if (c.allow_ties != null) push('Ties Allowed', c.allow_ties ? 'yes' : 'no');
+  push('Collection Type', collectionTypeLabel(mode));
+  if (mode === 'direct_rating') {
+    push('Coverage', 'All judge–evaluee pairs');
+    push('Self Ratings', direct.include_self === false ? 'excluded' : 'included');
+    push('Rating Scale', `${direct.scale_min ?? 1}–${direct.scale_max ?? 10}`);
+    push('Normalization', direct.normalization ?? 'zscore_softmax');
+    push('Softmax Temperature', direct.softmax_temperature ?? 1.0);
+  } else {
+    push('BTD Model', t.model);
+    push('Dimensions', t.dims);
+    push('Learning Rate', t.lr);
+    push('Weight Decay', t.weight_decay);
+    push('Max Epochs', t.max_epochs);
+    push('Batch Size', t.batch_size);
+    push('Test Size', t.test_size);
+    push('Sampler', c.sampler_mode);
+    push('Group Size', c.group_size);
+    if (c.allow_ties != null) push('Ties Allowed', c.allow_ties ? 'yes' : 'no');
+  }
   push('Bootstraps', b.n_bootstraps);
-  if (typeof log.min_train_loss === 'number') push('Train Loss', log.min_train_loss.toFixed(4));
-  if (typeof log.test_loss === 'number') push('Test Loss', log.test_loss.toFixed(4));
+  push('Bootstrap Unit', bootstrapUnit(mode, b.unit));
+  if (mode === 'pairwise_btd') {
+    if (typeof log.min_train_loss === 'number') push('Train Loss', log.min_train_loss.toFixed(4));
+    if (typeof log.test_loss === 'number') push('Test Loss', log.test_loss.toFixed(4));
+  }
 
   if (!items.length) return null;
   return (
     <div className="card">
-      <h2>Training configuration</h2>
+      <h2>Evaluation configuration</h2>
       <div className="card-caption">
         From the most recent evaluation run. Older runs may differ — click through to any run for full
         spec.

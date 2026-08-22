@@ -1308,6 +1308,25 @@ code {
   min-width: 22px;
   text-align: center;
 }
+.protocol-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.protocol-pairwise_btd {
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+}
+.protocol-direct_rating {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: var(--accent-dim);
+}
 .scenario-cell { font-size: 0.82rem; color: var(--text-secondary); }
 .scenario-range {
   font-family: var(--font-mono);

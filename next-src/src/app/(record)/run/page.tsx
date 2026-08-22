@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GIT_REPO } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary, hfImageURL } from '@/lib/hf';
-import type { IndexJson, MetaJson, Summary } from '@/lib/types';
+import { bootstrapUnit, collectionTypeLabel, metaEvaluationMode } from '@/lib/protocol';
+import type { EvaluationMode, IndexJson, MetaJson, Summary } from '@/lib/types';
 import { EloBarChart } from '@/components/EloBarChart';
 import { ModelLogo } from '@/components/ModelLogo';
 import { TrustChart } from '@/components/TrustChart';
@@ -66,6 +67,7 @@ export default function RunPage() {
     );
 
   const { slug, meta, summary, group } = state;
+  const mode = metaEvaluationMode(meta);
   return (
     <>
       <div className="breadcrumb">
@@ -88,6 +90,10 @@ export default function RunPage() {
               ) : null}
               {' · '}
               <span>{Object.keys(meta.models || {}).length} models</span>
+              {' · '}
+              <span className={`protocol-badge protocol-${mode}`}>
+                {collectionTypeLabel(mode)}
+              </span>
             </div>
           </div>
         </div>
@@ -102,7 +108,9 @@ export default function RunPage() {
         <div className="card">
           <h2>EigenTrust</h2>
           <div className="card-caption">
-            Per-judge trust weights from the stationary distribution of the judge agreement matrix.
+            {mode === 'direct_rating'
+              ? 'Stationary trust weights from the normalized judge-to-evaluee rating matrix.'
+              : 'Per-judge trust weights from the stationary distribution of the BTD-derived judge agreement matrix.'}
           </div>
           <TrustChart
             eigentrust={meta.eigentrust}
@@ -112,9 +120,10 @@ export default function RunPage() {
       ) : null}
 
       <ModelsTable meta={meta} summary={summary} />
-      <TrainingMetricsCard log={(meta.log || {}) as Record<string, unknown>} />
-      <SpecCard meta={meta} />
-      <GalleryCard slug={slug} group={group} onOpen={setLightbox} />
+      <AnalysisMetricsCard meta={meta} mode={mode} />
+      <SpecCard meta={meta} mode={mode} />
+      <ArtifactDownloadsCard slug={slug} meta={meta} />
+      <GalleryCard slug={slug} group={group} meta={meta} mode={mode} onOpen={setLightbox} />
 
       {lightbox ? <Lightbox url={lightbox} onClose={() => setLightbox(null)} /> : null}
     </>
@@ -195,24 +204,32 @@ function ModelsTable({ meta, summary }: { meta: MetaJson; summary: Summary }) {
   );
 }
 
-function TrainingMetricsCard({ log }: { log: Record<string, unknown> }) {
+function AnalysisMetricsCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
+  const log = (meta.log || {}) as Record<string, unknown>;
+  const analysis = (meta.analysis || {}) as Record<string, unknown>;
   const items: { label: string; value: string }[] = [];
   const push = (label: string, value: unknown) => {
     if (value == null || value === '') return;
     items.push({ label, value: String(value) });
   };
-  push('Train Size', log.train_datasize);
-  push('Test Size', log.test_datasize);
   push('Models', log.num_models);
   push('Criteria', log.num_criteria);
-  push('Dimension', log.dim);
-  push('Learning Rate', log.lr);
-  if (typeof log.min_train_loss === 'number') push('Train Loss', log.min_train_loss.toFixed(6));
-  if (typeof log.test_loss === 'number') push('Test Loss', log.test_loss.toFixed(6));
+  if (mode === 'direct_rating') {
+    push('Scenarios', log.num_scenarios ?? analysis.num_scenarios);
+    push('Normalization', log.normalization ?? analysis.normalization);
+    push('Bootstrap Unit', analysis.bootstrap_unit ?? 'scenario');
+  } else {
+    push('Train Size', log.train_datasize);
+    push('Test Size', log.test_datasize);
+    push('Dimension', log.dim);
+    push('Learning Rate', log.lr);
+    if (typeof log.min_train_loss === 'number') push('Train Loss', log.min_train_loss.toFixed(6));
+    if (typeof log.test_loss === 'number') push('Test Loss', log.test_loss.toFixed(6));
+  }
   if (!items.length) return null;
   return (
     <div className="card">
-      <h2>Training Metrics</h2>
+      <h2>{mode === 'direct_rating' ? 'Direct Analysis Metrics' : 'BTD Training Metrics'}</h2>
       <div className="metrics-grid">
         {items.map((i) => (
           <div key={i.label} className="metric-item">
@@ -225,9 +242,27 @@ function TrainingMetricsCard({ log }: { log: Record<string, unknown> }) {
   );
 }
 
-function SpecCard({ meta }: { meta: MetaJson }) {
+function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
   // Pull each section from meta, rendering only those that have content.
   const sections: { title: string; rows: [string, React.ReactNode][] }[] = [];
+
+  const direct = (meta.evaluation?.direct_rating || {}) as Record<string, unknown>;
+  const evaluationRows: [string, React.ReactNode][] = [
+    ['Collection Type', collectionTypeLabel(mode)],
+  ];
+  if (mode === 'direct_rating') {
+    evaluationRows.push(
+      ['Coverage', 'All judge–evaluee pairs'],
+      ['Self Ratings', direct.include_self === false ? 'Excluded' : 'Included'],
+      ['Rating Scale', `${direct.scale_min ?? 1}–${direct.scale_max ?? 10}`],
+      ['Criterion Aggregation', (direct.criterion_aggregation as React.ReactNode) ?? 'mean'],
+      ['Scenario Aggregation', (direct.scenario_aggregation as React.ReactNode) ?? 'mean'],
+      ['Normalization', (direct.normalization as React.ReactNode) ?? 'zscore_softmax'],
+      ['Softmax Temperature', (direct.softmax_temperature as React.ReactNode) ?? 1.0],
+      ['EigenTrust Alpha', (direct.eigentrust_alpha as React.ReactNode) ?? 0.0]
+    );
+  }
+  sections.push({ title: 'Evaluation', rows: evaluationRows });
 
   const d = meta.dataset as Record<string, unknown> | undefined;
   if (d) {
@@ -261,7 +296,7 @@ function SpecCard({ meta }: { meta: MetaJson }) {
     });
   }
   const t = meta.training as Record<string, unknown> | undefined;
-  if (t) {
+  if (t && mode === 'pairwise_btd') {
     sections.push({
       title: 'Training',
       rows: [
@@ -274,7 +309,7 @@ function SpecCard({ meta }: { meta: MetaJson }) {
     });
   }
   const cl = meta.collection as Record<string, unknown> | undefined;
-  if (cl) {
+  if (cl && mode === 'pairwise_btd') {
     sections.push({
       title: 'Collection',
       rows: [
@@ -291,6 +326,7 @@ function SpecCard({ meta }: { meta: MetaJson }) {
       rows: [
         ['Iterations', b.n_bootstraps as React.ReactNode],
         ['Random Seed', b.random_seed as React.ReactNode],
+        ['Unit', bootstrapUnit(mode, b.unit)],
       ],
     });
   }
@@ -323,19 +359,42 @@ function SpecCard({ meta }: { meta: MetaJson }) {
 function GalleryCard({
   slug,
   group,
+  meta,
+  mode,
   onOpen,
 }: {
   slug: string;
   group: string;
+  meta: MetaJson;
+  mode: EvaluationMode;
   onOpen: (url: string) => void;
 }) {
+  const captions: Record<string, string> = {
+    'bootstrap_elo.png': 'Bootstrap Elo',
+    'eigenbench.png': 'EigenBench Scores',
+    'trust_matrix.png': 'Trust Matrix',
+    'uv_embeddings_pca.png': 'UV Embeddings PCA',
+    'training_loss.png': 'Training Loss',
+  };
+  const legacyImages =
+    mode === 'direct_rating'
+      ? ['bootstrap_elo.png', 'eigenbench.png', 'trust_matrix.png']
+      : ['bootstrap_elo.png', 'eigenbench.png', 'uv_embeddings_pca.png', 'training_loss.png'];
+  const manifestImages = meta.artifacts?.images;
+  const runImages = (Array.isArray(manifestImages) ? manifestImages : legacyImages)
+    .map((path) => path.split('/').pop() || path)
+    .filter(
+      (name) =>
+        mode !== 'direct_rating' ||
+        (name !== 'uv_embeddings_pca.png' && name !== 'training_loss.png')
+    );
   const items: { url: string; caption: string }[] = [
     { url: hfImageURL(`runs/${group}/matrix_view.png`), caption: 'Matrix View' },
     { url: hfImageURL(`runs/${group}/matrix_ci.png`), caption: 'Matrix CI Width' },
-    { url: hfImageURL(`runs/${slug}/images/bootstrap_elo.png`), caption: 'Bootstrap Elo' },
-    { url: hfImageURL(`runs/${slug}/images/eigenbench.png`), caption: 'EigenBench Scores' },
-    { url: hfImageURL(`runs/${slug}/images/uv_embeddings_pca.png`), caption: 'UV Embeddings PCA' },
-    { url: hfImageURL(`runs/${slug}/images/training_loss.png`), caption: 'Training Loss' },
+    ...runImages.map((name) => ({
+      url: hfImageURL(`runs/${slug}/images/${name}`),
+      caption: captions[name] || name,
+    })),
   ];
   return (
     <div className="card">
@@ -361,6 +420,32 @@ function GalleryCard({
             </div>
             <div className="px-2 py-1.5 text-xs text-text-muted">{it.caption}</div>
           </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArtifactDownloadsCard({ slug, meta }: { slug: string; meta: MetaJson }) {
+  const files = meta.artifacts?.data || [];
+  if (!files.length) return null;
+  return (
+    <div className="card">
+      <h2>Analysis Data</h2>
+      <div className="card-caption">
+        Download the matrices and bootstrap samples used to reproduce this run.
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {files.map((path) => (
+          <a
+            key={path}
+            className="tag link-subtle"
+            href={hfImageURL(`runs/${slug}/${path}`)}
+            target="_blank"
+            rel="noopener"
+          >
+            {path.split('/').pop()}
+          </a>
         ))}
       </div>
     </div>

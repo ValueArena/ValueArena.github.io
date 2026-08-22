@@ -10,15 +10,25 @@ import {
 } from 'react';
 import { GIT_REPO } from '@/lib/config';
 import { fetchIndex } from '@/lib/hf';
+import { collectionTypeLabel, normalizeEvaluationMode } from '@/lib/protocol';
 import type { IndexRun } from '@/lib/types';
 import { Penguin } from '@/components/Penguin';
 
-type SortCol = 'name' | 'note' | 'constitution' | 'scenario' | 'models_count' | 'timestamp' | 'git_commit';
+type SortCol =
+  | 'name'
+  | 'note'
+  | 'constitution'
+  | 'scenario'
+  | 'evaluation_mode'
+  | 'models_count'
+  | 'timestamp'
+  | 'git_commit';
 
 interface RunRow extends IndexRun {
   models_count?: number;
   scenario?: string;
   note?: string;
+  evaluation_mode?: string;
 }
 
 const COLS: { key: SortCol; label: string }[] = [
@@ -26,6 +36,7 @@ const COLS: { key: SortCol; label: string }[] = [
   { key: 'note', label: 'Note' },
   { key: 'constitution', label: 'Constitution' },
   { key: 'scenario', label: 'Scenario' },
+  { key: 'evaluation_mode', label: 'Collection Type' },
   { key: 'models_count', label: 'Models' },
   { key: 'timestamp', label: 'Date' },
   { key: 'git_commit', label: 'Git' },
@@ -35,6 +46,7 @@ type Filters = {
   group?: string;
   constitution?: string;
   scenario?: string;
+  evaluation_mode?: string;
   modelsMin?: string;
   modelsMax?: string;
 };
@@ -60,6 +72,7 @@ export function Experiments() {
           ...r,
           constitution: (r.constitution || '').replace(/^oct_/, ''),
           scenario: (((r as RunRow).scenario as string | undefined) || '').replace(/^oct_/, ''),
+          evaluation_mode: normalizeEvaluationMode(r.evaluation_mode),
         }));
         setRuns(normalized);
       } catch (e) {
@@ -91,7 +104,7 @@ export function Experiments() {
     const q = search.trim().toLowerCase();
     return runs.filter((r) => {
       if (q) {
-        const hay = [r.name, r.constitution, r.scenario, r.note, r.group]
+        const hay = [r.name, r.constitution, r.scenario, r.note, r.group, r.evaluation_mode]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -100,6 +113,7 @@ export function Experiments() {
       if (filters.group && r.group !== filters.group) return false;
       if (filters.constitution && r.constitution !== filters.constitution) return false;
       if (filters.scenario && r.scenario !== filters.scenario) return false;
+      if (filters.evaluation_mode && r.evaluation_mode !== filters.evaluation_mode) return false;
       if (filters.modelsMin && (r.models_count ?? 0) < Number(filters.modelsMin)) return false;
       if (filters.modelsMax && (r.models_count ?? 0) > Number(filters.modelsMax)) return false;
       return true;
@@ -139,17 +153,25 @@ export function Experiments() {
     group: uniqueValues(runs, 'group'),
     constitution: uniqueValues(runs, 'constitution'),
     scenario: uniqueValues(runs, 'scenario'),
+    evaluation_mode: uniqueValues(runs, 'evaluation_mode'),
   };
   const mc = modelCountRange(runs);
   const showModelsFilter = mc.min !== mc.max;
   const hasFilters =
-    Boolean(filters.group || filters.constitution || filters.scenario || filters.modelsMin || filters.modelsMax) ||
-    Boolean(search);
+    Boolean(
+      filters.group ||
+        filters.constitution ||
+        filters.scenario ||
+        filters.evaluation_mode ||
+        filters.modelsMin ||
+        filters.modelsMax
+    ) || Boolean(search);
 
   const filterDefs: { col: keyof Filters; label: string; values: string[] }[] = [
     { col: 'group', label: 'Group', values: uniques.group },
     { col: 'constitution', label: 'Constitution', values: uniques.constitution },
     { col: 'scenario', label: 'Scenario', values: uniques.scenario },
+    { col: 'evaluation_mode', label: 'Collection Type', values: uniques.evaluation_mode },
   ];
 
   return (
@@ -197,7 +219,7 @@ export function Experiments() {
                     setOpenSelect(open ? null : f.col);
                   }}
                 >
-                  {current || `${f.label}: All`}
+                  {current ? filterValueLabel(f.col, current) : `${f.label}: All`}
                 </button>
                 {open ? (
                   <div className="custom-select-dropdown" role="listbox">
@@ -221,7 +243,7 @@ export function Experiments() {
                           setOpenSelect(null);
                         }}
                       >
-                        {v}
+                        {filterValueLabel(f.col, v)}
                       </button>
                     ))}
                   </div>
@@ -305,6 +327,9 @@ export function Experiments() {
                     ...new Set(item.children.map((r) => r.constitution).filter(Boolean)),
                   ];
                   const uniqSc = [...new Set(item.children.map((r) => r.scenario).filter(Boolean))];
+                  const uniqModes = [
+                    ...new Set(item.children.map((r) => r.evaluation_mode).filter(Boolean)),
+                  ];
                   const groupHeader = (
                     <tr
                       key={`g-${item.name}`}
@@ -335,6 +360,13 @@ export function Experiments() {
                           <Scenario raw={uniqSc[0]} />
                         ) : (
                           <span className="group-summary">{uniqSc.length} scenarios</span>
+                        )}
+                      </td>
+                      <td>
+                        {uniqModes.length === 1 ? (
+                          <CollectionType value={uniqModes[0]} />
+                        ) : (
+                          <span className="group-summary">{uniqModes.length} collection types</span>
                         )}
                       </td>
                       <td>
@@ -457,6 +489,9 @@ function RunRowEl({ r, child }: { r: RunRow; child: boolean }) {
         <Scenario raw={r.scenario} />
       </td>
       <td>
+        <CollectionType value={r.evaluation_mode} />
+      </td>
+      <td>
         <span className="models-badge">{r.models_count ?? '—'}</span>
       </td>
       <td className="date-cell">
@@ -467,6 +502,21 @@ function RunRowEl({ r, child }: { r: RunRow; child: boolean }) {
       </td>
     </tr>
   );
+}
+
+function CollectionType({ value }: { value?: string }) {
+  const mode = normalizeEvaluationMode(value);
+  return (
+    <span className={`protocol-badge protocol-${mode}`}>
+      {collectionTypeLabel(mode)}
+    </span>
+  );
+}
+
+function filterValueLabel(column: keyof Filters, value: string): string {
+  return column === 'evaluation_mode'
+    ? collectionTypeLabel(normalizeEvaluationMode(value))
+    : value;
 }
 
 function Scenario({ raw }: { raw?: string }) {

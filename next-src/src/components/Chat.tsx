@@ -535,8 +535,8 @@ function SetupScreen({
           />
           <PipelineArrow />
           <PipelineStep
-            label="BTD Fitting"
-            desc="Pairwise comparisons fit to Bradley–Terry model"
+            label="Trust Construction"
+            desc="Pairwise or direct judgments form a trust matrix"
             icon={
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="3" x2="3" y2="21" />

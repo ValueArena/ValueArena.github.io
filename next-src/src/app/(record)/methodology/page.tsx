@@ -24,14 +24,13 @@ export default function MethodologyPage() {
             How <em>ValueArena</em> measures character.
           </h1>
           <p className="text-text-muted text-base max-w-3xl">
-            A full walk-through of the pipeline: how judgments are collected, how skills are fit
-            with Bradley–Terry–Davidson, how uncertainty is quantified via non-parametric bootstrap,
-            how judge trust is aggregated with EigenTrust, and how the final Elo numbers are pegged
-            to a fixed anchor across constitutions.
+            A full walk-through of the two EigenBench protocols: pairwise comparisons fit with
+            Bradley–Terry–Davidson and direct criterion ratings normalized into a trust matrix,
+            together with protocol-aware bootstrap uncertainty and EigenTrust aggregation.
           </p>
           <div className="mt-4 text-xs text-text-muted space-x-4">
             <span>
-              <strong>Last updated</strong> 2026-04-17
+              <strong>Last updated</strong> 2026-08-21
             </span>
             <span>
               <strong>Code</strong> <code>invi-bhagyesh/EigenBench</code>
@@ -45,8 +44,10 @@ export default function MethodologyPage() {
         <Section num="01" id="overview" title="Pipeline overview">
           <p>
             Every ValueArena run starts with a <strong>spec</strong>: a constitution, a set of
-            models, and a slice of scenarios. The spec drives five stages — collection, BTD fitting,
-            bootstrap, EigenTrust, and upload — producing a single published row on the leaderboard.
+            models, and a slice of scenarios. Its <code>evaluation.mode</code> chooses either
+            <code>pairwise_btd</code> or <code>direct_rating</code>. Both paths collect judgments,
+            construct a row-stochastic trust matrix, quantify uncertainty, run EigenTrust, and
+            publish the same leaderboard summary schema.
           </p>
           <p>
             Each stage is deterministic given its inputs, so a run can be re-played from the raw
@@ -71,7 +72,8 @@ export default function MethodologyPage() {
           </p>
         </Section>
 
-        <Section num="03" id="collection" title="Collection: pairwise judgments">
+        <Section num="03" id="collection" title="Collection protocols">
+          <h3 className="font-serif text-xl">Pairwise comparisons</h3>
           <p>
             For each scenario <InlineEq tex="s" /> and each ordered pair of contestants{' '}
             <InlineEq tex="(i, j)" />, a judge <InlineEq tex="k" /> is sampled from the judge pool.
@@ -103,9 +105,26 @@ export default function MethodologyPage() {
             <InlineEq tex="W_{ji}" /> when passed to the simple BTD fit; the full Davidson variant
             (§04) treats them as their own outcome.
           </p>
+          <h3 className="font-serif text-xl pt-3">Direct ratings</h3>
+          <p>
+            In <code>direct_rating</code> mode, every judge <InlineEq tex="i" /> directly scores
+            every evaluee <InlineEq tex="j" /> on every criterion using an integer scale from 1 to
+            10. Self-ratings are included by default but can be disabled. Before assigning numbers,
+            the judge produces a criterion-by-criterion reflection on the response.
+          </p>
+          <p>
+            Ratings are averaged across scenarios and criteria to form{' '}
+            <InlineEq tex="\bar r_{ij}" />. The default transformation standardizes each judge row
+            and applies a softmax:
+          </p>
+          <BlockEq tex="z_{ij} = \frac{\bar r_{ij}-\mu_i}{\sigma_i}, \qquad C_{ij} = \frac{\exp(z_{ij}/\tau)}{\sum_k \exp(z_{ik}/\tau)}" />
+          <p>
+            This removes each judge&apos;s individual scale and produces a row-stochastic trust matrix
+            directly, without fitting Bradley–Terry parameters. Constant rows safely become uniform.
+          </p>
         </Section>
 
-        <Section num="04" id="btd" title="Bradley–Terry–Davidson">
+        <Section num="04" id="btd" title="Pairwise analysis: Bradley–Terry–Davidson">
           <p>
             Given a strength parameter <InlineEq tex="\beta_i" /> per contestant, the{' '}
             <strong>Bradley–Terry</strong> model says the probability that <InlineEq tex="i" />{' '}
@@ -133,28 +152,24 @@ P(\\text{tie}) &= \\frac{\\nu \\sqrt{e^{\\beta_i + \\beta_j}}}{e^{\\beta_i} + e^
 
         <Section num="05" id="bootstrap" title="Bootstrap intervals">
           <p>
-            Point estimates of <InlineEq tex="\boldsymbol{\beta}" /> are noisy — a single lucky win
-            on a small scenario set can shift an Elo by tens of points. To report{' '}
-            <strong>95% CIs</strong> we use a non-parametric bootstrap at the <em>judgment</em>{' '}
-            level: resample the rows of <code>evaluations.jsonl</code> with replacement, refit BTD,
-            and collect the resulting <InlineEq tex="\boldsymbol{\beta}^{(b)}" /> for{' '}
-            <InlineEq tex="b = 1, \dots, B = 1000" />.
+            Bootstrap resampling follows the collection protocol. Pairwise runs resample judgment
+            rows and refit BTD. Direct runs use a scenario-cluster bootstrap: scenarios are sampled
+            with replacement while all judge–evaluee–criterion ratings for each selected scenario
+            remain together. The mean score matrix, row normalization, and EigenTrust vector are
+            then recomputed from scratch.
           </p>
-          <BlockEq tex="\mathrm{CI}_{95}(\beta_i) = \left[ q_{0.025}\!\left(\{\beta_i^{(b)}\}_b\right),\; q_{0.975}\!\left(\{\beta_i^{(b)}\}_b\right) \right]" />
+          <BlockEq tex="\mathrm{CI}_{95}(E_i) = \left[ q_{0.025}\!\left(\{E_i^{(b)}\}_b\right),\; q_{0.975}\!\left(\{E_i^{(b)}\}_b\right) \right]" />
           <p>
-            The <code>summary.json</code> stored on HuggingFace records the <em>mean</em> (not the
-            point MLE) and the two empirical quantiles per model. Using the bootstrap mean keeps
-            consistency with the CI calculation and absorbs a small amount of non-identifiability
-            at the boundary (models with 0% or 100% win rates).
+            The <code>summary.json</code> stored on HuggingFace records the bootstrap mean, standard
+            deviation, and empirical 2.5% and 97.5% quantiles per model. Bootstrap never makes new
+            model API calls; it operates entirely on the saved judgments.
           </p>
         </Section>
 
         <Section num="06" id="eigentrust" title="EigenTrust">
           <p>
-            Not every judge is equally reliable. A weak or sycophantic model can pollute the win
-            counts, biasing <InlineEq tex="\boldsymbol{\beta}" />. Rather than hand-select judges,
-            we let the judges <em>vote on each other</em> and solve for the stationary trust
-            distribution — the classic{' '}
+            Not every judge is equally reliable. Rather than hand-select judges, we solve for the
+            stationary distribution of the row-stochastic trust matrix using the classic{' '}
             <a
               className="link-subtle"
               href="https://nlp.stanford.edu/pubs/eigentrust.pdf"
@@ -166,43 +181,35 @@ P(\\text{tie}) &= \\frac{\\nu \\sqrt{e^{\\beta_i + \\beta_j}}}{e^{\\beta_i} + e^
             setup adapted to the arena.
           </p>
           <p>
-            Let <InlineEq tex="C \in \mathbb{R}^{K \times K}" /> be the row-stochastic matrix where{' '}
-            <InlineEq tex="C_{kl}" /> is the fraction of times judge <InlineEq tex="k" /> agrees
-            with the BTD-implied ordering when judge <InlineEq tex="l" /> would have disagreed with
-            them. The trust vector <InlineEq tex="\mathbf{t}" /> is the stationary distribution of
-            the damped chain
+            In pairwise mode, <InlineEq tex="C" /> is derived from the fitted BTD judge/evaluee
+            structure. In direct mode, <InlineEq tex="C_{ij}" /> is the normalized trust assigned
+            directly by judge <InlineEq tex="i" /> to evaluee <InlineEq tex="j" />. In both cases,
+            the trust vector <InlineEq tex="\mathbf{t}" /> follows the same iteration:
           </p>
           <BlockEq tex="\mathbf{t}^{(n+1)} = (1 - a) C^\top \mathbf{t}^{(n)} + a \, \mathbf{p}" />
           <p>
-            where <InlineEq tex="\mathbf{p}" /> is a uniform prior over judges and{' '}
-            <InlineEq tex="a = 0.1" /> is the teleport probability. Iteration converges in under 50
-            steps. Final trust scores are stored per judge in <code>meta.json</code> and shown on
-            the leaderboard hover cards.
+            where <InlineEq tex="\mathbf{p}" /> is a uniform prior and <InlineEq tex="a" /> is the
+            configured teleport probability. Final trust scores are stored in <code>meta.json</code>.
           </p>
         </Section>
 
-        <Section num="07" id="pegging" title="Elo pegging across constitutions">
+        <Section num="07" id="pegging" title="EigenBench Elo scale">
           <p>
-            BTD strengths live on an arbitrary log-odds scale — they&apos;re only identified up to
-            a shift. For display we transform to Elo:
+            Both protocols transform the final EigenTrust probability <InlineEq tex="t_i" /> to a
+            common display scale. Uniform trust maps every model to 1500:
           </p>
-          <BlockEq tex="E_i = 1500 + \frac{400}{\ln 10} \cdot \beta_i + c" />
+          <BlockEq tex="E_i = 1500 + 400\log_{10}(M t_i)" />
           <p>
-            The constant <InlineEq tex="c" /> is what <em>pegging</em> chooses. Three reference
-            models — <code>gpt-4o</code>, <code>claude-4-sonnet</code>, <code>gemini-2.5-pro</code>{' '}
-            — are scored in every run, and <InlineEq tex="c" /> is set so that their mean Elo
-            equals 1500 within that run:
-          </p>
-          <BlockEq tex="c = 1500 - \frac{1}{|R|} \sum_{r \in R} \left(1500 + \frac{400}{\ln 10}\,\beta_r\right) = -\frac{400}{\ln 10} \cdot \bar{\beta}_R" />
-          <p>
-            where <InlineEq tex="R" /> is the set of reference models present in the run.
+            This keeps the published summary schema identical across protocols while preserving
+            the relative trust ratios within a run. Cross-run comparisons should still account for
+            changes in the model and judge populations.
           </p>
         </Section>
 
         <Section num="08" id="workflow" title="Compute workflow">
           <p>
-            Collection, BTD fitting, and bootstrap are all CPU-bound; only model inference needs a
-            GPU. Two paths exist, and we use the second for anything beyond single-spec experiments.
+            Only model inference needs a GPU. BTD fitting, direct trust construction, EigenTrust,
+            bootstrap, and upload are CPU-side stages that can be replayed from saved judgments.
           </p>
           <pre className="prompt-block">
             {`# train all 11 openchar runs locally in 3 parallel workers,
@@ -220,16 +227,15 @@ P(\\text{tie}) &= \\frac{\\nu \\sqrt{e^{\\beta_i + \\beta_j}}}{e^{\\beta_i} + e^
             but systematic agreement across the pool still shows up as &ldquo;truth&rdquo;.
           </p>
           <p>
-            <strong>Anchors may drift between constitutions.</strong> <code>gpt-4o</code> is not
-            equally &ldquo;average&rdquo; on <em>goodness</em> and on <em>misalignment</em>.
-            Pegging to the mean of three refs controls some of this, but cross-trait comparisons
-            should be read as directional, not absolute.
+            <strong>Judge populations may drift between runs.</strong> A score is relative to the
+            models participating in that run. Cross-trait and cross-run comparisons should be read
+            as directional unless the same model and judge populations are used.
           </p>
           <p>
-            <strong>Bootstrap is judgment-level, not scenario-level.</strong> If a single scenario
-            happens to favor one model, resampling judgments won&apos;t erase it — only resampling
-            scenarios would. For small scenario counts, CIs are therefore narrower than the true
-            epistemic uncertainty.
+            <strong>Bootstrap uncertainty depends on protocol.</strong> Direct runs resample
+            scenarios and capture scenario-sampling uncertainty, but not stochastic variation from
+            regenerating responses or judgments. Legacy pairwise runs use judgment-level bootstrap,
+            which may understate uncertainty caused by scenario selection.
           </p>
           <p>
             <strong>Finite-sample BTD bias.</strong> When a contestant wins or loses every game,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CONSTITUTIONS } from '@/lib/config';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
+import { collectionTypeLabel, runEvaluationMode } from '@/lib/protocol';
 import { detectLab, LAB_COLORS, labColor } from '@/lib/labs';
 import { constLabel, normConst } from '@/lib/nicks';
 import { CONSTITUTIONS_DATA } from '@/lib/constitutions-data';
@@ -274,7 +275,10 @@ function ConstitutionRanking({
         <a className="link-subtle" href={`/run/?slug=${encodeURIComponent(selected.slug)}`}>
           {selected.name || selected.slug}
         </a>{' '}
-        <span className="text-text-muted">· {ranked.length} models · {fmtDateShort(selected.timestamp)}</span>
+        <span className="text-text-muted">
+          · {collectionTypeLabel(runEvaluationMode(selected))} · {ranked.length} models ·{' '}
+          {fmtDateShort(selected.timestamp)}
+        </span>
       </div>
       {lbSummary ? (
         <div className="lb-const-summary">
@@ -332,7 +336,7 @@ function RunSelect({
 
   const selected = runs.find((r) => r.slug === value) || runs[0];
   const labelOf = (r: IndexRun) =>
-    `${r.name || r.slug} (${fmtDateShort(r.timestamp)})`;
+    `${r.name || r.slug} · ${collectionTypeLabel(runEvaluationMode(r))} (${fmtDateShort(r.timestamp)})`;
 
   return (
     <div className="lb-run-selector">

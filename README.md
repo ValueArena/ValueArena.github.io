@@ -6,29 +6,23 @@ A comparative behavioral measure of value alignment across language models, buil
 
 ## What is this?
 
-ValueArena lets you explore how different LLMs align with specific human values. EigenBench works by having an ensemble of models judge each other's responses across value-loaded scenarios, fitting pairwise comparisons to a Bradley-Terry model, and aggregating consensus scores via EigenTrust.
+ValueArena lets you explore how different LLMs align with specific human values. EigenBench supports pairwise comparisons fitted with Bradley–Terry–Davidson and direct criterion ratings normalized into a trust matrix. Both protocols aggregate consensus scores with EigenTrust.
 
 The site has three sections:
 
 - **Chat** — Pick two models and a constitution (e.g. Kindness, Humor, Sarcasm), then chat side-by-side. Vote on which model better reflects the chosen value. Uses OpenRouter for inference directly from the browser.
 - **Leaderboard** — Per-constitution Elo rankings from EigenBench experiment runs. View as a ranked table, horizontal bar plot, or cross-constitution pareto heatmap. Group by model or by lab.
-- **Experiments** — Browse all EigenBench runs with filtering, sorting, and drill-down into individual run details (Elo distributions, training loss, UV embeddings, bootstrap confidence intervals).
+- **Experiments** — Browse all EigenBench runs with filtering by collection type and drill-down into protocol-specific artifacts and bootstrap confidence intervals.
 
 ## Architecture
 
-Static HTML/CSS/JS — no build step, no backend. Run data lives on a [HuggingFace dataset repo](https://huggingface.co/datasets/invi-bhagyesh/ValueArena) and is fetched at page load. Chat uses [OpenRouter](https://openrouter.ai/) with the user's own API key. Votes are stored in localStorage.
+The website is a statically exported Next.js application with no runtime backend. Source lives under `next-src/`; a GitHub Action builds it and commits the export to the repository root for GitHub Pages. Run data lives on a [HuggingFace dataset repo](https://huggingface.co/datasets/invi-bhagyesh/ValueArena) and is fetched at page load. Chat uses [OpenRouter](https://openrouter.ai/) with the user's own API key. Votes are stored in localStorage.
 
 ```
-index.html          Single-page app shell with sidebar
-css/style.css       All styles (dark/light theme, DM Serif Display + DM Sans)
-js/config.js        Model list, constitutions, API endpoints
-js/tabs.js          Sidebar tab switching
-js/utils.js         Shared helpers (esc, debounce)
-js/chat.js          Side-by-side chat, streaming, voting, session persistence
-js/leaderboard.js   Per-constitution rankings, plot, pareto views
-js/index.js         Experiments table with filters and grouping
-js/hf-fetch.js      HuggingFace dataset fetching
-run.html            Individual run detail page
+next-src/src/app/           Static Next.js pages
+next-src/src/components/    Chat, leaderboard, experiments, and charts
+next-src/src/lib/           Hugging Face data contract and fetch helpers
+.github/workflows/          Build-and-publish workflow
 ```
 
 ## Upload results
@@ -43,7 +37,7 @@ python3 scripts/upload_results.py --name "my-run" --run-dir runs/my_run/
 python3 scripts/upload_results.py --batch-dir runs/matrix/ --name "matrix" --note "12 persona LoRAs"
 ```
 
-Or use the HF Space for auto-upload by adding `upload` config to your spec — see the EigenBench docs.
+Pairwise and direct runs share the same upload command. Direct uploads require a protocol-aware EigenBench uploader. The optional HF Space auto-upload path must also support `evaluation.mode="direct_rating"` before it can accept direct submissions.
 
 New runs appear on the site immediately after upload.
 
@@ -65,5 +59,8 @@ runs/{name}/
   meta.json                 Spec, training log, eigentrust scores, git info
   summary.json              Bootstrap Elo ratings per model
   evaluations.jsonl         Raw evaluation transcripts
-  images/                   Plots (Elo, training loss, UV embeddings, etc.)
+  images/                   Protocol-specific plots
+  data/                     Optional direct score/trust matrices and bootstrap samples
 ```
+
+New metadata records `evaluation_mode` as either `pairwise_btd` or `direct_rating`. Missing values on legacy runs are interpreted as `pairwise_btd`. Direct runs omit BTD loss and UV-embedding artifacts.

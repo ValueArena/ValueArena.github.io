@@ -1,8 +1,8 @@
-# ValueArena — Next.js port (work in progress)
+# ValueArena — Next.js static site
 
-Modern port of the vanilla-JS site at the repo root. The legacy site
-(`../index.html`, `../model.html`, …) remains the canonical deployment;
-this folder is a side-by-side preview.
+This directory contains the canonical website source. GitHub Actions exports
+the application and commits the generated deployment files to the repository
+root for GitHub Pages.
 
 ## Stack
 
@@ -13,17 +13,6 @@ this folder is a side-by-side preview.
 - Bun (matches the reference template at `~/Desktop/TopoReformer/invi-bhagyesh.github.io/next`)
 - Plain `fetch()` against the HF dataset, with the same sessionStorage caching
   shape as the legacy `js/hf-fetch.js`
-
-## What's ported
-
-- `/model?id=<nick>` — model profile (hero, lineage, hyperparameters, cross-constitution Elo table)
-
-## What's not ported yet
-
-- Leaderboard (`/`)
-- Constitution profile (`/constitution?id=<id>`)
-- Run profile (`/run?slug=<slug>`)
-- Methodology
 
 ## Develop
 
