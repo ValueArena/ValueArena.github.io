@@ -52,13 +52,15 @@ function constLabelFor(id: string): string {
 
 interface ChatProps {
   /**
-   * Rendered under the setup screen, and only there — once a battle starts the
-   * chat takes the viewport. The home page uses it for its previews.
+   * Fills the main column beside the battle setup, and only on the setup
+   * screen — once a battle starts the chat takes the viewport. The home page
+   * puts its leaderboard and experiments previews here; without it the setup
+   * screen renders on its own, centred, as it did before.
    */
-  belowSetup?: React.ReactNode;
+  mainContent?: React.ReactNode;
 }
 
-export function Chat({ belowSetup }: ChatProps = {}) {
+export function Chat({ mainContent }: ChatProps = {}) {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [matchupMode, setMatchupMode] = useState<'select' | 'random'>('select');
@@ -227,25 +229,23 @@ export function Chat({ belowSetup }: ChatProps = {}) {
   // Render
   if (!session) {
     return (
-      <>
-        <SetupScreen
-          apiKey={apiKey}
-          setApiKey={setApiKey}
-          showKey={showKey}
-          setShowKey={setShowKey}
-          matchupMode={matchupMode}
-          setMatchupMode={setMatchupMode}
-          constitution={constitution}
-          setConstitution={setConstitution}
-          modelAId={modelAId}
-          setModelAId={setModelAId}
-          modelBId={modelBId}
-          setModelBId={setModelBId}
-          onStart={handleStart}
-          toast={toast}
-        />
-        {belowSetup}
-      </>
+      <SetupScreen
+        apiKey={apiKey}
+        setApiKey={setApiKey}
+        showKey={showKey}
+        setShowKey={setShowKey}
+        matchupMode={matchupMode}
+        setMatchupMode={setMatchupMode}
+        constitution={constitution}
+        setConstitution={setConstitution}
+        modelAId={modelAId}
+        setModelAId={setModelAId}
+        modelBId={modelBId}
+        setModelBId={setModelBId}
+        onStart={handleStart}
+        toast={toast}
+        mainContent={mainContent}
+      />
     );
   }
 
@@ -514,6 +514,7 @@ function SetupScreen({
   setModelBId,
   onStart,
   toast,
+  mainContent,
 }: {
   apiKey: string;
   setApiKey: (v: string) => void;
@@ -529,9 +530,11 @@ function SetupScreen({
   setModelBId: (v: string) => void;
   onStart: () => void;
   toast: { msg: string; type: 'info' | 'warning' | 'error' } | null;
+  mainContent?: React.ReactNode;
 }) {
+  const split = Boolean(mainContent);
   return (
-    <div className="chat-setup-screen">
+    <div className={`chat-setup-screen${split ? ' chat-setup-split' : ''}`}>
       <div className="chat-setup-hero">
         <div className="hero-text">
           <h2>A Comparative Behavioral Measure of Value Alignment</h2>
@@ -582,6 +585,11 @@ function SetupScreen({
         </div>
       </div>
 
+      {/* Standings read on the left, the thing you do about them on the
+          right. Without mainContent this collapses to the setup card alone. */}
+      <div className="home-split">
+        {mainContent ? <div className="home-main">{mainContent}</div> : null}
+        <div className="home-rail">
       <div className="battle-setup">
         <div className="battle-header">
           <div className="battle-icon" aria-hidden>
@@ -691,6 +699,8 @@ function SetupScreen({
           <button type="button" className="battle-start-btn" onClick={onStart}>
             ▶ Start Battle
           </button>
+        </div>
+      </div>
         </div>
       </div>
 

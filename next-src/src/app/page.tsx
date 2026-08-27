@@ -26,7 +26,7 @@ export default function HomePage() {
 
   return (
     <Chat
-      belowSetup={
+      mainContent={
         <div className="home-panels">
           <LeaderboardPreview />
           <ExperimentsPreview />
