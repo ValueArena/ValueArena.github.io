@@ -238,6 +238,15 @@ code {
   letter-spacing: 0.06em;
   color: var(--text-muted);
 }
+/* The run hero's version of the stats slot: a label over an action rather
+   than a label over a number. Inherits the stacking rule from .specimen-stats. */
+.specimen-action {
+  min-width: 168px;
+}
+.specimen-action .tx-btn {
+  margin-top: 8px;
+  white-space: nowrap;
+}
 .specimen-stat-value {
   font-family: var(--font-mono);
   font-size: 2.2rem;
@@ -1775,4 +1784,492 @@ code {
   .chat-setup-hero { padding: 14px 16px; }
   .chat-setup-hero .hero-text h2 { font-size: 1.1rem; }
   .specimen-stat-value { font-size: 1.4rem; }
+}
+
+/* ── Transcripts ─────────────────────────────────────────────────────────────
+   Reading the judgments behind a run. The criterion strip is the organising
+   device: one cell per criterion, so a column of rows shows where judges agreed
+   and where a response fell over. Everything else stays quiet around it. */
+
+.tx-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+}
+
+.tx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+.tx-field-narrow { min-width: 104px; }
+.tx-field-grow { flex: 1 1 220px; }
+
+.tx-field > span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tx-field select,
+.tx-field input {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  width: 100%;
+}
+.tx-field input::placeholder { color: var(--text-muted); }
+
+.tx-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding-bottom: 7px;
+  cursor: pointer;
+}
+.tx-check input { accent-color: var(--accent); }
+
+.tx-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.tx-status-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Used on both a <button> (read more) and an <a> (link out from a run). */
+.tx-btn {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tx-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.tx-btn:disabled { opacity: 0.55; cursor: default; }
+
+/* Reading progress. Filters only cover the whole run once this fills, so it
+   stays visible rather than hiding behind a spinner. */
+.tx-scan {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: help;
+}
+.tx-scan-bar {
+  display: inline-block;
+  width: 64px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-light);
+  overflow: hidden;
+}
+.tx-scan-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tx-scan-fill { transition: none; }
+}
+
+.tx-warn {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+/* Not a failure — just an outcome worth explaining. */
+.tx-warn-soft {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.tx-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.tx-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── The criterion strip ── */
+
+.tx-strip {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.tx-cell {
+  position: relative;
+  display: inline-block;
+  width: 9px;
+  height: 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 2px;
+  background: var(--bg);
+  overflow: hidden;
+  flex: none;
+}
+.tx-strip-lg .tx-cell { width: 13px; height: 22px; }
+
+.tx-cell-fill {
+  position: absolute;
+  inset: 0;
+}
+
+/* Declined or uncounted: the cell is present but empty, ruled through. */
+.tx-cell-void::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 50%;
+  border-top: 1px solid var(--border);
+}
+
+/* Pairwise verdicts read as height: first response up, second down. */
+.tx-mark {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.tx-mark-a { top: 2px; }
+.tx-mark-tie { top: 50%; transform: translateY(-50%); background: var(--text-muted); }
+.tx-mark-b { bottom: 2px; }
+
+/* ── Split ── */
+
+.tx-split {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.tx-list,
+.tx-detail {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+}
+.tx-list { padding: 6px; }
+.tx-detail { padding: 16px 18px 20px; min-width: 0; }
+
+@media (min-width: 900px) {
+  .tx-list,
+  .tx-detail {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+}
+
+/* ── Rows ── */
+
+.tx-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.tx-row:hover { background: var(--bg-hover); }
+.tx-row-active {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+.tx-row + .tx-row { margin-top: 2px; }
+
+.tx-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  min-width: 0;
+}
+
+/* The judgment's number — its line in evaluations.jsonl. Leads the row so a
+   column of them reads as an index you can quote and come back to. */
+.tx-row-id {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  padding: 1px 4px;
+  flex: none;
+}
+.tx-row-active .tx-row-id {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.tx-row-scenario {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.tx-row-models {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tx-row-judge { color: var(--text); font-weight: 500; }
+.tx-row-arrow { color: var(--text-muted); }
+
+.tx-row-summary {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* Sits after the last row, so scrolling to the end of the list lands on the
+   control that extends it. */
+.tx-list-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px 8px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+
+.tx-btn-wide {
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.tx-foot-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tx-empty,
+.tx-more,
+.tx-note {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  padding: 14px 10px;
+  margin: 0;
+}
+.tx-note { padding: 0 0 12px; }
+
+/* ── Detail ── */
+
+.tx-detail-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tx-detail-id {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  cursor: help;
+}
+
+.tx-detail-where {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ── Tabs ── */
+
+.tx-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 16px;
+}
+
+.tx-tab {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 6px 10px 8px;
+  cursor: pointer;
+}
+.tx-tab:hover { color: var(--text); }
+.tx-tab-active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Messages ── */
+
+.tx-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tx-msg {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.tx-msg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.tx-msg-role {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tx-msg-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.tx-msg-body {
+  padding: 12px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── Scoring ── */
+
+.tx-score-head {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tx-score-table td { vertical-align: top; line-height: 1.5; }
+.tx-score-table td:nth-child(2) { font-size: 0.84rem; color: var(--text-secondary); }
+.tx-row-muted td { opacity: 0.5; }
+.tx-declined { color: var(--text-muted); font-style: italic; }
+
+.tx-json {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 0;
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre;
+}
+
+/* ── Quality floor ── */
+
+.tx-row:focus-visible,
+.tx-tab:focus-visible,
+.tx-btn:focus-visible,
+.tx-field select:focus-visible,
+.tx-field input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tx-row { transition: none; }
+}
+
+@media (max-width: 899px) {
+  .tx-split { grid-template-columns: 1fr; }
+  /* Stacked: cap the list so the detail stays reachable without a long scroll. */
+  .tx-list { max-height: 46vh; overflow-y: auto; }
+}
+
+@media (max-width: 560px) {
+  .tx-toolbar { gap: 10px; padding: 12px; }
+  .tx-field,
+  .tx-field-narrow { min-width: 0; flex: 1 1 132px; }
+  .tx-field-grow { flex: 1 1 100%; }
+  .tx-status { font-size: 0.74rem; }
+  .tx-detail { padding: 12px 12px 16px; }
+  .tx-cell { width: 8px; }
 }
