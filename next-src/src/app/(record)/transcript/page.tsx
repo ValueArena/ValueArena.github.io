@@ -535,22 +535,33 @@ function JudgmentRow({
       <span className="tx-row-head">
         <span className="tx-row-id">#{judgment.id}</span>
         <span className="tx-row-scenario">s{judgment.scenarioIndex}</span>
-        <span className="tx-row-models">
-          <ModelLogo name={judgment.judge} size={12} />
-          <span className="tx-row-judge">{judgment.judge}</span>
-          <span className="tx-row-arrow">→</span>
-          {judgment.kind === 'direct' ? (
-            <>
-              <ModelLogo name={judgment.evaluee} size={12} />
-              <span>{judgment.evaluee}</span>
-            </>
-          ) : (
-            <span>
-              {judgment.a.name} <span className="tx-row-arrow">vs</span> {judgment.b.name}
-            </span>
-          )}
-        </span>
         <span className="tx-row-summary">{summary}</span>
+      </span>
+
+      {/* Model nicks in a run often share a long prefix, so cutting the end
+          would drop the only part that tells them apart. They get the row's
+          full width and wrap instead. */}
+      <span className="tx-row-who">
+        <ModelLogo name={judgment.judge} size={12} />
+        <span className="tx-row-judge" title={judgment.judge}>
+          {judgment.judge}
+        </span>
+        {judgment.kind === 'direct' ? (
+          <>
+            <span className="tx-row-arrow">→</span>
+            <ModelLogo name={judgment.evaluee} size={12} />
+            <span title={judgment.evaluee}>{judgment.evaluee}</span>
+          </>
+        ) : (
+          <>
+            <span className="tx-row-arrow">judged</span>
+            <ModelLogo name={judgment.a.name} size={12} />
+            <span title={judgment.a.name}>{judgment.a.name}</span>
+            <span className="tx-row-arrow">vs</span>
+            <ModelLogo name={judgment.b.name} size={12} />
+            <span title={judgment.b.name}>{judgment.b.name}</span>
+          </>
+        )}
       </span>
       {judgment.kind === 'direct' ? (
         <DirectStrip

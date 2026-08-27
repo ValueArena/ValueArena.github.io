@@ -2011,7 +2011,7 @@ code {
 .tx-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   text-align: left;
   padding: 9px 10px;
@@ -2061,17 +2061,22 @@ code {
   flex: none;
 }
 
-.tx-row-models {
+/* The names line. Wraps rather than truncating: run nicks routinely share a
+   long prefix (Qwen2.5-7B-Instruct_goodness vs …_misalignment), so clipping
+   the tail would hide the only distinguishing part. */
+.tx-row-who {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 3px 5px;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
+.tx-row-who > span { min-width: 0; }
 .tx-row-judge { color: var(--text); font-weight: 500; }
-.tx-row-arrow { color: var(--text-muted); }
+.tx-row-arrow { color: var(--text-muted); flex: none; }
 
 .tx-row-summary {
   margin-left: auto;
