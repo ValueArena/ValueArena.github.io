@@ -50,7 +50,15 @@ function constLabelFor(id: string): string {
   return CONSTITUTIONS.find((c) => c.id === id)?.label || id;
 }
 
-export function Chat() {
+interface ChatProps {
+  /**
+   * Rendered under the setup screen, and only there — once a battle starts the
+   * chat takes the viewport. The home page uses it for its previews.
+   */
+  belowSetup?: React.ReactNode;
+}
+
+export function Chat({ belowSetup }: ChatProps = {}) {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [matchupMode, setMatchupMode] = useState<'select' | 'random'>('select');
@@ -197,6 +205,16 @@ export function Chat() {
     });
   }, [session]);
 
+  // The battle view sizes itself to the viewport, so it locks page scrolling.
+  // The setup screen does not: the home page puts its previews below it and
+  // they have to be reachable. This used to live in the home tab switcher,
+  // which locked scrolling for the whole tab.
+  useEffect(() => {
+    if (!session) return undefined;
+    document.body.classList.add('va-no-scroll');
+    return () => document.body.classList.remove('va-no-scroll');
+  }, [session]);
+
   const resetChat = useCallback(() => {
     setSession(null);
     setTurns([]);
@@ -209,22 +227,25 @@ export function Chat() {
   // Render
   if (!session) {
     return (
-      <SetupScreen
-        apiKey={apiKey}
-        setApiKey={setApiKey}
-        showKey={showKey}
-        setShowKey={setShowKey}
-        matchupMode={matchupMode}
-        setMatchupMode={setMatchupMode}
-        constitution={constitution}
-        setConstitution={setConstitution}
-        modelAId={modelAId}
-        setModelAId={setModelAId}
-        modelBId={modelBId}
-        setModelBId={setModelBId}
-        onStart={handleStart}
-        toast={toast}
-      />
+      <>
+        <SetupScreen
+          apiKey={apiKey}
+          setApiKey={setApiKey}
+          showKey={showKey}
+          setShowKey={setShowKey}
+          matchupMode={matchupMode}
+          setMatchupMode={setMatchupMode}
+          constitution={constitution}
+          setConstitution={setConstitution}
+          modelAId={modelAId}
+          setModelAId={setModelAId}
+          modelBId={modelBId}
+          setModelBId={setModelBId}
+          onStart={handleStart}
+          toast={toast}
+        />
+        {belowSetup}
+      </>
     );
   }
 

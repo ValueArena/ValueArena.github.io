@@ -1355,31 +1355,6 @@ code {
   margin-left: 4px;
 }
 
-/* Home tabs (Leaderboard / Experiments). */
-.home-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border-light);
-}
-.home-tab {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  padding: 8px 14px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.15s, border-color 0.15s;
-}
-.home-tab:hover {
-  color: var(--text);
-}
-.home-tab.active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
-
 /* Experiments search input. */
 .filter-search-input {
   background: var(--bg-surface);
@@ -1691,15 +1666,6 @@ code {
     padding: 5px 8px;
   }
 
-  /* Home tabs — let them scroll horizontally instead of wrapping awkwardly. */
-  .home-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .home-tabs::-webkit-scrollbar { display: none; }
-  .home-tab { font-size: 0.88rem; padding: 8px 10px; white-space: nowrap; }
-
   /* Chat setup hero — stack text above pipeline (pipeline hidden by existing
      800px rule, but keep this for consistency). */
   .chat-setup-screen { gap: 16px; padding-top: 0; }
@@ -1784,6 +1750,160 @@ code {
   .chat-setup-hero { padding: 14px 16px; }
   .chat-setup-hero .hero-text h2 { font-size: 1.1rem; }
   .specimen-stat-value { font-size: 1.4rem; }
+}
+
+/* ── Home previews ───────────────────────────────────────────────────────────
+   Under the battle setup: what the site holds, in short. Each panel is a way
+   into its own full page, not a second copy of it. */
+
+.home-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin: 28px 0 8px;
+}
+
+.home-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 18px 20px 16px;
+  min-width: 0;
+}
+
+.home-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.home-panel h2 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.home-panel-sub {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.home-panel-link {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.home-panel-link:hover { color: var(--accent); }
+
+/* Standings */
+
+.home-rank {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+.home-rank-row + .home-rank-row { border-top: 1px solid var(--border-light); }
+
+.home-rank-place {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  width: 1.2em;
+  flex: none;
+}
+
+.home-rank-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.home-rank-elo {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* Recent runs */
+
+.home-runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+.home-run + .home-run { border-top: 1px solid var(--border-light); }
+
+.home-run-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.home-run-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.home-run-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* Placeholder while the index and summary are in flight. */
+
+.home-panel-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-skeleton {
+  display: block;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--bg-hover);
+}
+
+@media (max-width: 560px) {
+  .home-panels { gap: 12px; margin-top: 20px; }
+  .home-panel { padding: 14px 16px 12px; }
+  .home-run-top { margin-left: 0; }
 }
 
 /* ── Transcripts ─────────────────────────────────────────────────────────────
