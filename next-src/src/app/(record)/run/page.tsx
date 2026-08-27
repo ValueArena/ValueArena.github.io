@@ -96,6 +96,14 @@ export default function RunPage() {
               </span>
             </div>
           </div>
+          {/* The hero grid's third column — the model page fills it with a
+              stat, a run fills it with the way into its transcripts. */}
+          <div className="specimen-stats specimen-action">
+            <div className="specimen-stat-label">Transcripts</div>
+            <a className="tx-btn" href={`/transcript/?run=${encodeURIComponent(slug)}`}>
+              Read the judgments →
+            </a>
+          </div>
         </div>
       </div>
 
