@@ -50,7 +50,17 @@ function constLabelFor(id: string): string {
   return CONSTITUTIONS.find((c) => c.id === id)?.label || id;
 }
 
-export function Chat() {
+interface ChatProps {
+  /**
+   * Fills the main column beside the battle setup, and only on the setup
+   * screen — once a battle starts the chat takes the viewport. The home page
+   * puts its leaderboard and experiments previews here; without it the setup
+   * screen renders on its own, centred, as it did before.
+   */
+  mainContent?: React.ReactNode;
+}
+
+export function Chat({ mainContent }: ChatProps = {}) {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [matchupMode, setMatchupMode] = useState<'select' | 'random'>('select');
@@ -197,6 +207,16 @@ export function Chat() {
     });
   }, [session]);
 
+  // The battle view sizes itself to the viewport, so it locks page scrolling.
+  // The setup screen does not: the home page puts its previews below it and
+  // they have to be reachable. This used to live in the home tab switcher,
+  // which locked scrolling for the whole tab.
+  useEffect(() => {
+    if (!session) return undefined;
+    document.body.classList.add('va-no-scroll');
+    return () => document.body.classList.remove('va-no-scroll');
+  }, [session]);
+
   const resetChat = useCallback(() => {
     setSession(null);
     setTurns([]);
@@ -224,6 +244,7 @@ export function Chat() {
         setModelBId={setModelBId}
         onStart={handleStart}
         toast={toast}
+        mainContent={mainContent}
       />
     );
   }
@@ -493,6 +514,7 @@ function SetupScreen({
   setModelBId,
   onStart,
   toast,
+  mainContent,
 }: {
   apiKey: string;
   setApiKey: (v: string) => void;
@@ -508,9 +530,11 @@ function SetupScreen({
   setModelBId: (v: string) => void;
   onStart: () => void;
   toast: { msg: string; type: 'info' | 'warning' | 'error' } | null;
+  mainContent?: React.ReactNode;
 }) {
+  const split = Boolean(mainContent);
   return (
-    <div className="chat-setup-screen">
+    <div className={`chat-setup-screen${split ? ' chat-setup-split' : ''}`}>
       <div className="chat-setup-hero">
         <div className="hero-text">
           <h2>A Comparative Behavioral Measure of Value Alignment</h2>
@@ -561,6 +585,11 @@ function SetupScreen({
         </div>
       </div>
 
+      {/* Standings read on the left, the thing you do about them on the
+          right. Without mainContent this collapses to the setup card alone. */}
+      <div className="home-split">
+        {mainContent ? <div className="home-main">{mainContent}</div> : null}
+        <div className="home-rail">
       <div className="battle-setup">
         <div className="battle-header">
           <div className="battle-icon" aria-hidden>
@@ -670,6 +699,8 @@ function SetupScreen({
           <button type="button" className="battle-start-btn" onClick={onStart}>
             ▶ Start Battle
           </button>
+        </div>
+      </div>
         </div>
       </div>
 

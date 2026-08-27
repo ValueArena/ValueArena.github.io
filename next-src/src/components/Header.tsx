@@ -33,6 +33,8 @@ export function Header() {
         </h1>
       </a>
       <nav className="va-nav">
+        <a href="/leaderboard/">Leaderboard</a>
+        <a href="/experiments/">Experiments</a>
         <a href="/methodology/">Methodology</a>
         <a
           href="https://github.com/ValueArena/ValueArena.github.io"
