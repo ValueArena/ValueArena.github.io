@@ -22,3 +22,13 @@ export function bootstrapUnit(mode: EvaluationMode, configured?: unknown): strin
   if (typeof configured === 'string' && configured) return configured;
   return mode === 'direct_rating' ? 'scenario' : 'judgment';
 }
+
+/** Deep link into a published Inspect viewer bundle, or null when the run
+ *  predates the Inspect engine. Mirrors inspect_ai's log_viewer URL shape:
+ *  <bundle>/#/logs/<log file>. */
+export function inspectViewerURL(meta: MetaJson): string | null {
+  const bundle = meta.inspect?.bundle_url;
+  const log = meta.inspect?.log_file;
+  if (!bundle || !log) return null;
+  return `${bundle.replace(/\/+$/, '')}/#/logs/${encodeURIComponent(log)}`;
+}
