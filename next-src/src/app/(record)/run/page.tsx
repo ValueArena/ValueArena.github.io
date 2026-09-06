@@ -106,7 +106,7 @@ export default function RunPage() {
               Read the judgments →
             </a>
             {inspectURL ? (
-              <a className="tx-btn" href={`/inspect/?run=${encodeURIComponent(slug)}`}>
+              <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">
                 Open in Inspect →
               </a>
             ) : null}
