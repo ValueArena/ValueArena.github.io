@@ -69,7 +69,7 @@ export default function RunPage() {
   const { slug, meta, summary, group } = state;
   const mode = metaEvaluationMode(meta);
   // Only runs collected by the Inspect engine carry a published bundle.
-  const inspectURL = inspectViewerURL(meta);
+  const inspectURL = inspectViewerURL(meta, slug);
   return (
     <>
       <div className="breadcrumb">
@@ -106,7 +106,7 @@ export default function RunPage() {
               Read the judgments →
             </a>
             {inspectURL ? (
-              <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">
+              <a className="tx-btn" href={`/inspect/?run=${encodeURIComponent(slug)}`}>
                 Open in Inspect →
               </a>
             ) : null}
