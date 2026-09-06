@@ -246,6 +246,10 @@ code {
 .specimen-action .tx-btn {
   margin-top: 8px;
   white-space: nowrap;
+  /* block + fit-content keeps a lone button its natural size while letting a
+     second one (Inspect) stack beneath it rather than wrap awkwardly. */
+  display: block;
+  width: fit-content;
 }
 .specimen-stat-value {
   font-family: var(--font-mono);

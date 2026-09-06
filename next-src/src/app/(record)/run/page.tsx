@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GIT_REPO } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary, hfImageURL } from '@/lib/hf';
-import { bootstrapUnit, collectionTypeLabel, metaEvaluationMode } from '@/lib/protocol';
+import { bootstrapUnit, collectionTypeLabel, inspectViewerURL, metaEvaluationMode } from '@/lib/protocol';
 import type { EvaluationMode, IndexJson, MetaJson, Summary } from '@/lib/types';
 import { EloBarChart } from '@/components/EloBarChart';
 import { ModelLogo } from '@/components/ModelLogo';
@@ -68,6 +68,8 @@ export default function RunPage() {
 
   const { slug, meta, summary, group } = state;
   const mode = metaEvaluationMode(meta);
+  // Only runs collected by the Inspect engine carry a published bundle.
+  const inspectURL = inspectViewerURL(meta);
   return (
     <>
       <div className="breadcrumb">
@@ -103,6 +105,11 @@ export default function RunPage() {
             <a className="tx-btn" href={`/transcript/?run=${encodeURIComponent(slug)}`}>
               Read the judgments →
             </a>
+            {inspectURL ? (
+              <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">
+                Open in Inspect →
+              </a>
+            ) : null}
           </div>
         </div>
       </div>
