@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: 'Source Serif Pro', Georgia, 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  --font-body: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-source-serif), 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', 'SF Mono', Menlo, monospace;
   --radius: 8px;
   --radius-lg: 10px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
@@ -68,6 +68,42 @@ body {
 }
 body.va-no-scroll { overflow: hidden; height: 100dvh; }
 
+/* Inter is drawn for text sizes; above ~20px it needs the tracking pulled in or
+   display type reads loose. Serif display faces do not want the same negative
+   value, so they are excluded. */
+.specimen-title,
+.specimen-stat-value,
+.va-brand h1,
+.card h2,
+.chat-setup-hero .hero-text h2 {
+  letter-spacing: -0.015em;
+}
+.battle-title,
+.specimen-sigil {
+  letter-spacing: 0;
+}
+
+/* Headings break on sense rather than leaving a single word on a line. */
+h1, h2, h3,
+.specimen-title,
+.battle-title {
+  text-wrap: balance;
+}
+
+/* Selection keeps the site's own accent rather than the browser's blue. */
+::selection {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+/* Figures are read down a column, so digits hold a fixed advance width. */
+table,
+.metric-value,
+.specimen-stat-value,
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -108,7 +144,7 @@ code {
 
 .card-caption {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   line-height: 1.5;
   margin-bottom: 16px;
 }
@@ -132,7 +168,7 @@ code {
 
 .metric-label {
   font-family: var(--font-body);
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -155,7 +191,7 @@ code {
   display: inline-block;
   border-radius: 4px;
   padding: 2px 8px;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-weight: 500;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -209,7 +245,7 @@ code {
 .specimen-kicker {
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   margin-bottom: 6px;
 }
@@ -222,7 +258,7 @@ code {
 }
 .specimen-sub {
   margin-top: 6px;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -233,7 +269,7 @@ code {
   min-width: 140px;
 }
 .specimen-stat-label {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
@@ -259,7 +295,7 @@ code {
   margin: 4px 0;
 }
 .specimen-stat-sub {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 .hero-summary {
@@ -276,19 +312,19 @@ code {
   gap: 2px;
 }
 .hero-summary-item .k {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 .hero-summary-item .v {
   font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   font-weight: 600;
 }
 .hero-summary-item .v small {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   margin-left: 4px;
 }
 
@@ -303,7 +339,7 @@ code {
   border-radius: var(--radius);
   background: var(--bg);
   border: 1px solid var(--border-light);
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-family: var(--font-mono);
 }
 .lineage-chip strong {
@@ -312,7 +348,7 @@ code {
   font-family: var(--font-body);
   margin-right: 6px;
   text-transform: uppercase;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   letter-spacing: 0.06em;
 }
 .lineage-sep {
@@ -325,7 +361,7 @@ code {
   border-radius: var(--radius);
   padding: 14px;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   line-height: 1.55;
   color: var(--text-muted);
   white-space: pre-wrap;
@@ -333,7 +369,7 @@ code {
 }
 
 .breadcrumb {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text-muted);
   margin: 20px 0 12px;
 }
@@ -345,7 +381,7 @@ code {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 .error {
   padding: 36px 24px;
@@ -380,7 +416,7 @@ code {
   border-radius: var(--radius);
   color: var(--text-muted);
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
 /* ── Chat UI ── */
@@ -427,7 +463,7 @@ code {
 .chat-setup-hero .hero-text { position: relative; z-index: 1; }
 .chat-setup-hero .hero-text h2 {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: 1.28rem;
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: 0.005em;
@@ -435,7 +471,7 @@ code {
   color: var(--text);
 }
 .chat-setup-hero .hero-text p {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   line-height: 1.6;
   color: var(--text-secondary);
   margin: 0;
@@ -525,20 +561,20 @@ code {
 .battle-header-text { display: flex; flex-direction: column; gap: 2px; }
 .battle-title {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 500;
   letter-spacing: 0.005em;
   margin: 0;
   line-height: 1.1;
 }
 .battle-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
   line-height: 1.45;
   margin: 0;
 }
 .battle-title { font-family: var(--font-serif); font-size: 1.4rem; }
-.battle-subtitle { color: var(--text-muted); font-size: 0.88rem; }
+.battle-subtitle { color: var(--text-muted); font-size: 0.86rem; }
 .battle-config {
   display: flex;
   flex-direction: column;
@@ -560,7 +596,7 @@ code {
 .battle-mode-btn { padding: 0 14px; }
 .battle-start-btn { align-self: flex-end; }
 .battle-label {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -589,13 +625,13 @@ code {
   align-items: center;
   gap: 12px;
 }
-.battle-vs { color: var(--text-muted); font-style: italic; font-size: 0.9rem; }
+.battle-vs { color: var(--text-muted); font-style: italic; font-size: 0.92rem; }
 .battle-random-msg {
   padding: 10px 14px;
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 .battle-native-select {
   background: var(--bg);
@@ -604,7 +640,7 @@ code {
   border-radius: var(--radius);
   padding: 8px 30px 8px 12px;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   cursor: pointer;
 }
 .battle-key-section .api-key-wrap {
@@ -623,18 +659,18 @@ code {
   outline: none;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   padding: 6px 0;
 }
 .api-key-toggle {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   cursor: pointer;
   padding: 4px 6px;
 }
-.api-key-hint { color: var(--text-muted); font-size: 0.78rem; }
+.api-key-hint { color: var(--text-muted); font-size: 0.76rem; }
 .battle-start-btn {
   background: var(--accent);
   color: var(--bg);
@@ -644,7 +680,7 @@ code {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 .battle-start-btn:hover { background: var(--accent-hover); }
 
@@ -661,7 +697,7 @@ code {
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-elevated);
-  font-size: 0.85rem;
+  font-size: 0.86rem;
 }
 .chat-topbar-label { font-weight: 600; }
 .chat-topbar-sep { color: var(--text-muted); }
@@ -674,7 +710,7 @@ code {
   padding: 4px 10px;
   border-radius: var(--radius);
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
 }
 .chat-new-btn:hover { color: var(--accent); border-color: var(--accent); }
 
@@ -766,12 +802,12 @@ code {
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 .chat-response-action:hover { color: var(--accent); background: var(--accent-dim); }
 .chat-response-body {
   padding: 12px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   line-height: 1.55;
   min-height: 48px;
 }
@@ -832,7 +868,7 @@ code {
   padding: 8px 12px;
   border-radius: var(--radius);
   cursor: pointer;
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   font-weight: 500;
   transition: all 0.12s;
 }
@@ -868,7 +904,7 @@ code {
   padding: 10px 0;
   color: var(--text);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   min-width: 0;
 }
 .chat-input-bar input::placeholder { color: var(--text-muted); }
@@ -884,7 +920,7 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
   transition: background 0.12s, transform 0.12s;
 }
@@ -896,7 +932,7 @@ code {
 
 .chat-disclaimer {
   margin-top: 10px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   text-align: center;
 }
@@ -910,7 +946,7 @@ code {
   border-radius: var(--radius);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: var(--text);
   box-shadow: var(--shadow-lg);
   opacity: 0;
@@ -972,7 +1008,7 @@ code {
 }
 .va-brand h1 {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.28rem;
   font-weight: 500;
   letter-spacing: 0.01em;
 }
@@ -1045,7 +1081,7 @@ code {
     gap: 8px;
     padding: 6px 10px;
   }
-  .criterion-numeral { font-size: 0.95rem; }
+  .criterion-numeral { font-size: 0.92rem; }
 }
 
 /* ── Experiments filter bar + runs table (port of legacy components.css) ── */
@@ -1061,7 +1097,7 @@ code {
 .filter-search-icon { position: absolute; left: 9px; color: var(--text-muted); pointer-events: none; }
 .filter-search {
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 400;
   padding: 6px 10px 6px 28px;
   border: 1px solid var(--border);
@@ -1078,17 +1114,17 @@ code {
 
 .filter-range { display: flex; align-items: center; gap: 4px; }
 .filter-range-label {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-right: 2px;
 }
-.filter-range-sep { color: var(--text-muted); font-size: 0.78rem; }
+.filter-range-sep { color: var(--text-muted); font-size: 0.76rem; }
 .filter-input {
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   padding: 5px 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1124,7 +1160,7 @@ code {
 
 .filter-count {
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
   margin-left: auto;
   font-variant-numeric: tabular-nums;
@@ -1135,7 +1171,7 @@ code {
 .custom-select { position: relative; display: inline-block; }
 .custom-select-trigger {
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   background: var(--bg-elevated);
   color: var(--text-secondary);
   border: 1px solid var(--border);
@@ -1185,7 +1221,7 @@ code {
 }
 .custom-select-option {
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   padding: 6px 10px;
   border-radius: calc(var(--radius) - 1px);
   cursor: pointer;
@@ -1209,7 +1245,7 @@ code {
   text-align: left;
   padding: 10px 14px;
   font-family: var(--font-body);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1247,7 +1283,7 @@ code {
 .runs-table td {
   padding: 9px 14px;
   border-bottom: 1px solid var(--border-light);
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1293,7 +1329,7 @@ code {
 .run-name:hover { color: var(--accent-hover); }
 
 .note-cell {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--accent);
   font-weight: 500;
   max-width: 240px;
@@ -1317,7 +1353,7 @@ code {
 .models-badge {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 500;
   color: var(--text-secondary);
   min-width: 22px;
@@ -1328,7 +1364,7 @@ code {
   padding: 2px 7px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.35;
   white-space: nowrap;
@@ -1345,18 +1381,18 @@ code {
 .scenario-cell { font-size: 0.82rem; color: var(--text-secondary); }
 .scenario-range {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
   margin-left: 2px;
 }
 .date-cell {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 .date-time {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
   margin-left: 4px;
 }
@@ -1368,7 +1404,7 @@ code {
   border: 1px solid var(--border-light);
   border-radius: var(--radius);
   padding: 6px 12px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   min-width: 240px;
   font-family: inherit;
 }
@@ -1392,7 +1428,7 @@ code {
   border: 1px solid var(--border-light);
   background: var(--bg-surface);
   color: var(--text-secondary);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 500;
   padding: 3px 10px;
   border-radius: 999px;
@@ -1446,7 +1482,7 @@ code {
 }
 
 .lb-run-info {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
   margin-bottom: 12px;
 }
@@ -1455,7 +1491,7 @@ code {
 }
 
 .lb-const-summary {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text-muted);
   margin-bottom: 14px;
   line-height: 1.55;
@@ -1465,7 +1501,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   margin-bottom: 12px;
   color: var(--text-muted);
 }
@@ -1473,11 +1509,11 @@ code {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
 }
 .lb-run-custom-select { display: inline-block; min-width: 260px; max-width: 360px; }
 .lb-run-custom-select .custom-select-trigger {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   padding: 5px 28px 5px 12px;
   width: 100%;
 }
@@ -1497,11 +1533,11 @@ code {
 }
 .lb-run-custom-select .custom-select-option {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
 }
 .lb-run-select {
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   padding: 5px 26px 5px 10px;
   max-width: 280px;
   background: var(--bg-elevated);
@@ -1532,7 +1568,7 @@ code {
   grid-template-columns: 220px 1fr 60px;
   gap: 12px;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   animation: lb-plot-row-in 0.4s ease forwards;
   opacity: 0;
 }
@@ -1561,7 +1597,7 @@ code {
   font-variant-numeric: tabular-nums;
 }
 .lb-plot-group-header {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-weight: 600;
   color: var(--text-muted);
   margin: 12px 0 4px;
@@ -1578,7 +1614,7 @@ code {
 
 .lb-pareto-table th,
 .lb-pareto-table td {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
 }
 
 .lb-lab-group-row td {
@@ -1604,7 +1640,7 @@ code {
 .elo-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 .elo-table th,
 .elo-table td {
@@ -1613,13 +1649,16 @@ code {
   border-bottom: 1px solid var(--border-light);
 }
 .elo-table th {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   font-weight: 600;
 }
-.elo-table td.mono-cell {
+/* A numeric column, in any table. Scoped to td only, this left every
+   `<th className="mono-cell">` hanging to the left of its own figures, and did
+   nothing at all in the transcript and constitution tables. */
+.mono-cell {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -1664,11 +1703,11 @@ code {
     row-gap: 6px;
     padding: 10px 14px;
   }
-  .va-brand h1 { font-size: 1.1rem; }
+  .va-brand h1 { font-size: 1.12rem; }
   .va-nav { flex-wrap: wrap; gap: 2px; }
   .va-nav a,
   .va-nav .va-theme-toggle {
-    font-size: 0.75rem;
+    font-size: 0.76rem;
     padding: 5px 8px;
   }
 
@@ -1699,7 +1738,7 @@ code {
   .chat-shell.empty .chat-input-wrap { padding: 4px 12px max(14px, env(safe-area-inset-bottom)); }
   .chat-shell.empty::after { flex: 0 0 0; }
   .chat-user-bubble { max-width: 88%; }
-  .chat-topbar { padding: 8px 12px; font-size: 0.8rem; }
+  .chat-topbar { padding: 8px 12px; font-size: 0.82rem; }
 
   /* Leaderboard controls — let view tabs + run selector stack. */
   .lb-controls { gap: 8px; }
@@ -1710,9 +1749,9 @@ code {
   .lb-plot-row {
     grid-template-columns: minmax(110px, 1.4fr) 2fr 48px;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
-  .lb-plot-value { font-size: 0.78rem; }
+  .lb-plot-value { font-size: 0.76rem; }
 
   /* Experiments filter bar — allow wrap. */
   .filter-bar { flex-wrap: wrap; row-gap: 8px; }
@@ -1754,7 +1793,7 @@ code {
   .va-nav .va-theme-toggle { font-size: 0.72rem; padding: 4px 6px; }
   /* Chat hero text + pipeline already collapse; tighten battle UI more. */
   .chat-setup-hero { padding: 14px 16px; }
-  .chat-setup-hero .hero-text h2 { font-size: 1.1rem; }
+  .chat-setup-hero .hero-text h2 { font-size: 1.12rem; }
   .specimen-stat-value { font-size: 1.4rem; }
 }
 
@@ -1849,20 +1888,20 @@ code {
 
 .home-panel h2 {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 600;
   margin: 0;
 }
 
 .home-panel-sub {
   margin: 2px 0 0;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 
 .home-panel-link {
   flex: none;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--text-muted);
   text-decoration: none;
@@ -1883,7 +1922,7 @@ code {
   align-items: center;
   gap: 8px;
   padding: 7px 0;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   min-width: 0;
 }
 .home-rank-row + .home-rank-row { border-top: 1px solid var(--border-light); }
@@ -1923,7 +1962,7 @@ code {
   align-items: baseline;
   gap: 4px 8px;
   padding: 8px 0;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   min-width: 0;
 }
 .home-run + .home-run { border-top: 1px solid var(--border-light); }
@@ -1939,7 +1978,7 @@ code {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 
@@ -1948,7 +1987,7 @@ code {
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
@@ -2001,7 +2040,7 @@ code {
 .tx-field-grow { flex: 1 1 220px; }
 
 .tx-field > span {
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -2011,7 +2050,7 @@ code {
 .tx-field select,
 .tx-field input {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
@@ -2039,7 +2078,7 @@ code {
   justify-content: space-between;
   gap: 12px;
   margin-top: 12px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 .tx-status-right {
@@ -2053,7 +2092,7 @@ code {
 .tx-btn {
   display: inline-block;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--text);
   background: var(--bg-surface);
@@ -2220,7 +2259,7 @@ code {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   min-width: 0;
 }
 
@@ -2228,7 +2267,7 @@ code {
    column of them reads as an index you can quote and come back to. */
 .tx-row-id {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
   background: var(--bg);
@@ -2244,7 +2283,7 @@ code {
 
 .tx-row-scenario {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   flex: none;
 }
@@ -2258,7 +2297,7 @@ code {
   align-items: center;
   gap: 3px 5px;
   min-width: 0;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -2270,7 +2309,7 @@ code {
   margin-left: auto;
   flex: none;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
 }
@@ -2330,7 +2369,7 @@ code {
 }
 
 .tx-detail-where {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
@@ -2346,7 +2385,7 @@ code {
 
 .tx-tab {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
   background: none;
@@ -2383,7 +2422,7 @@ code {
 }
 
 .tx-msg-role {
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -2394,7 +2433,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
@@ -2417,13 +2456,13 @@ code {
 }
 
 .tx-score-table td { vertical-align: top; line-height: 1.5; }
-.tx-score-table td:nth-child(2) { font-size: 0.84rem; color: var(--text-secondary); }
+.tx-score-table td:nth-child(2) { font-size: 0.86rem; color: var(--text-secondary); }
 .tx-row-muted td { opacity: 0.5; }
 .tx-declined { color: var(--text-muted); font-style: italic; }
 
 .tx-json {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   line-height: 1.5;
   color: var(--text-secondary);
   background: var(--bg);
@@ -2462,7 +2501,39 @@ code {
   .tx-field,
   .tx-field-narrow { min-width: 0; flex: 1 1 132px; }
   .tx-field-grow { flex: 1 1 100%; }
-  .tx-status { font-size: 0.74rem; }
+  .tx-status { font-size: 0.76rem; }
   .tx-detail { padding: 12px 12px 16px; }
   .tx-cell { width: 8px; }
+}
+
+/* ── Inspect log viewer, framed in place ─────────────────────────────────────
+   The bundle is a static SPA on its own origin, so it gets a full-height frame
+   rather than any attempt to restyle it; the page around it keeps the reader
+   anchored to the run. */
+.inspect-frame-wrap {
+  margin-top: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-surface);
+  /* Header, breadcrumb, and the note below still need their room. */
+  height: calc(100dvh - 190px);
+  min-height: 420px;
+}
+
+.inspect-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.inspect-frame-note {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .inspect-frame-wrap { height: calc(100dvh - 210px); }
 }
