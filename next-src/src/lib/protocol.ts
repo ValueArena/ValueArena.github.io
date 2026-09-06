@@ -1,3 +1,4 @@
+import { HF_BASE } from './config';
 import type { EvaluationMode, IndexRun, MetaJson } from './types';
 
 export function normalizeEvaluationMode(value: unknown): EvaluationMode {
@@ -23,12 +24,19 @@ export function bootstrapUnit(mode: EvaluationMode, configured?: unknown): strin
   return mode === 'direct_rating' ? 'scenario' : 'judgment';
 }
 
-/** Deep link into a published Inspect viewer bundle, or null when the run
- *  predates the Inspect engine. Mirrors inspect_ai's log_viewer URL shape:
- *  <bundle>/#/logs/<log file>. */
-export function inspectViewerURL(meta: MetaJson): string | null {
-  const bundle = meta.inspect?.bundle_url;
-  const log = meta.inspect?.log_file;
-  if (!bundle || !log) return null;
-  return `${bundle.replace(/\/+$/, '')}/#/logs/${encodeURIComponent(log)}`;
+/** The run's Inspect log, as served from the dataset alongside its
+ *  evaluations.jsonl. Present only for runs collected by the Inspect engine. */
+export function inspectLogURL(meta: MetaJson, slug: string): string | null {
+  const file = meta.inspect?.log_file;
+  if (!file) return null;
+  return `${HF_BASE}/runs/${slug}/${encodeURIComponent(file)}`;
+}
+
+/** The viewer, served from this site, pointed at that log. The bundled app
+ *  fetches whatever `log_file` names with range requests, so the log itself
+ *  never has to be copied anywhere. */
+export function inspectViewerURL(meta: MetaJson, slug: string): string | null {
+  const log = inspectLogURL(meta, slug);
+  if (!log) return null;
+  return `/inspect-viewer/?log_file=${encodeURIComponent(log)}`;
 }
