@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { evaluationAuth, evaluationRequest as request } from '@/lib/evaluation';
+import { RunMonitor } from './RunMonitor';
+import type { EvaluationJob } from '@/lib/evaluation';
 import { EvaluationLogin } from './EvaluationLogin';
 
 type Limits = Record<string,number|boolean|null>;
@@ -26,10 +28,11 @@ export function AdminConsole() {
  const [ready,setReady]=useState(false),[loggedIn,setLoggedIn]=useState(false),[data,setData]=useState<Snapshot|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
  const [policy,setPolicy]=useState<Policy|null>(null),[spec,setSpec]=useState('{}'),[memberId,setMemberId]=useState(''),[status,setStatus]=useState('pending'),[override,setOverride]=useState(false),[limits,setLimits]=useState<Limits>({}),[minutes,setMinutes]=useState(60),[reason,setReason]=useState(''),[search,setSearch]=useState('');
  const grantAttempt=useRef<{signature:string;id:string}|null>(null);
- const [jobs,setJobs]=useState<{id:string;name:string;state:string;user_id:string}[]>([]);
+ const [jobs,setJobs]=useState<(EvaluationJob & {user_id:string})[]>([]);
  async function refresh(){const d=await(await request('/admin')).json();setData(d);setPolicy(d.policy);setSpec(JSON.stringify(d.policy.spec_defaults,null,2));setJobs(await(await request('/admin/evaluations')).json());}
  useEffect(()=>{const auth=evaluationAuth();if(!auth){setReady(true);return;}void auth.auth.getSession().then(({data})=>{setLoggedIn(!!data.session);setReady(true);});const {data}=auth.auth.onAuthStateChange((_e,s)=>{setLoggedIn(!!s);if(!s)setData(null);});return()=>data.subscription.unsubscribe();},[]);
  useEffect(()=>{if(loggedIn)void refresh().catch(e=>setError(e.message));},[loggedIn]);
+ useEffect(()=>{if(!data)return;let alive=true,pending=false;const timer=setInterval(async()=>{if(pending)return;pending=true;try{const next=await(await request('/admin/evaluations')).json();if(alive)setJobs(next);}catch(e){if(alive)setError((e as Error).message);}finally{pending=false;}},5000);return()=>{alive=false;clearInterval(timer);};},[!!data]);
  const member=data?.members.find(m=>m.user_id===memberId);
  function choose(m:Member){setMemberId(m.user_id);setStatus(m.status);setOverride(!!m.limits);setLimits(m.limits||data!.policy.limits);setReason('');}
  async function perform(fn:()=>Promise<void>,message:string){setBusy(true);setError('');setNotice('');try{await fn();await refresh();setNotice(message);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
@@ -52,7 +55,7 @@ export function AdminConsole() {
    <h3>Default participant limits</h3><LimitsForm value={policy.limits} onChange={v=>setPolicy({...policy,limits:v})} schema={data.limits_schema}/>
    <details className="eval-advanced"><summary>Default spec settings</summary><p>Defaults for new evaluations. Participants can override supported fields within their limits. Hosted filesystem paths and executable Python remain managed by the runner.</p><textarea aria-label="Default spec JSON" rows={16} value={spec} onChange={e=>setSpec(e.target.value)} spellCheck={false}/></details><button className="button-primary" disabled={busy}>Save site settings</button>
   </form>
-  <section className="admin-panel"><h2>Evaluations</h2>{jobs.length?jobs.map(j=><div className="admin-job" key={j.id}><span>{j.name}<small>{j.state} · {data.members.find(m=>m.user_id===j.user_id)?.email||j.user_id}</small></span>{['queued','running','provisioning'].includes(j.state)&&<button disabled={busy} onClick={()=>void perform(async()=>{await request(`/admin/evaluations/${j.id}/cancel`,{method:'POST'});},'Evaluation cancelled. GPU cleanup is handled by the scheduler.')}>Cancel evaluation</button>}</div>):<p>No evaluations yet.</p>}</section>
+  <section className="admin-panel"><h2>Evaluations</h2><p>Live status and logs for all participants. Updates every 5 seconds.</p>{jobs.length?jobs.map(j=><article className="admin-run" key={j.id}><header><h3>{j.name}</h3><small>{data.members.find(m=>m.user_id===j.user_id)?.email||j.user_id} · {j.constitution} · {j.models_count} models · {j.scenario_count} scenarios</small></header><RunMonitor job={j} admin onUpdate={updated=>setJobs(current=>current.map(item=>item.id===updated.id?{...item,...updated}:item))}/></article>):<p>No evaluations yet.</p>}</section>
   <section className="admin-panel"><h2>Admin activity</h2>{data.audit.map(a=><div className="admin-job" key={a.id}><span>{title(a.action)}<small>{data.members.find(m=>m.user_id===a.target)?.email||a.target}</small></span><time>{new Date(a.created_at*1000).toLocaleString()}</time></div>)}</section>
  </div>;
 }

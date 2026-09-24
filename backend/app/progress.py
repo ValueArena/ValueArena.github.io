@@ -16,10 +16,16 @@ ERRORS = {
 def progress(job, now=None):
     now = int(time.time()) if now is None else now
     state = job['state']; stage = job['stage']
+    error = job.get('error_code') or ''
+    provider_error = error.startswith('provider_create_')
+    provider_detail = ('RunPod returned HTTP '+error.removeprefix('provider_create_http_')+'. ' if error.startswith('provider_create_http_') else 'The RunPod allocation request did not return a confirmed result. ')
+    provider_detail += 'No GPU allocation has been confirmed. The scheduler checks for a late-created instance instead of sending another request.'
     if state == 'queued':
         title, detail, step = 'Queued', 'Waiting for the scheduler to allocate a GPU. Admin concurrency settings or a dispatch pause can keep a job queued.', 0
     elif state == 'provisioning':
-        if job.get('pod_id'):
+        if provider_error and not job.get('pod_id'):
+            title, detail, step = 'GPU allocation not confirmed', provider_detail, 1
+        elif job.get('pod_id'):
             title, detail, step = 'GPU allocated · waiting for worker', 'A RunPod instance has been allocated. The container has not reported ready yet; image download and container startup happen before worker output is available.', 1
         else:
             title, detail, step = 'Requesting GPU', 'The scheduler requested an instance and is waiting for confirmation from RunPod. Model evaluation has not started.', 1
@@ -33,7 +39,7 @@ def progress(job, now=None):
     elif state == 'succeeded':
         title, detail, step = 'Completed', 'Rankings and transcripts are ready.', 6
     else:
-        title, detail, step = ('Cancelled' if state == 'cancelled' else 'Failed'), ERRORS.get(job.get('error_code'), 'The evaluation stopped. See worker output for details.'), -1
+        title, detail, step = ('Cancelled' if state == 'cancelled' else 'Failed'), (provider_detail if provider_error else ERRORS.get(job.get('error_code'), 'The evaluation stopped. See worker output for details.')), -1
     end = job.get('finished_at') or now
     return {'title': title, 'detail': detail, 'step': step, 'checked_at': now,
             'elapsed_seconds': max(0, end-job['created_at']),

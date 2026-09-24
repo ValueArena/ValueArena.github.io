@@ -1,4 +1,5 @@
 import logging
+import httpx
 import time
 from contextlib import ExitStack
 
@@ -52,7 +53,7 @@ def tick(db, pods, cfg, now=None):
                 continue
             if job['state'] in ACTIVE:
                 if matches and not job['pod_id']:
-                    db.patch(job['id'], ACTIVE, pod_id=matches[0]['id'])
+                    db.patch(job['id'], ACTIVE, pod_id=matches[0]['id'], error_code=None)
                 if len(matches) > 1:
                     db.finish(job['id'], 'failed', 'duplicate_pods')
                 elif job['config'].get('max_runtime_seconds') is not None and now - job['started_at'] >= job['config']['max_runtime_seconds']:
@@ -60,7 +61,7 @@ def tick(db, pods, cfg, now=None):
                 elif job['heartbeat_at'] and now-job['heartbeat_at'] > cfg.heartbeat_timeout:
                     db.finish(job['id'], 'failed', 'worker_unresponsive')
                 elif not job['heartbeat_at'] and now-job['started_at'] > cfg.startup_timeout:
-                    db.finish(job['id'], 'failed', 'worker_start_timeout')
+                    db.finish(job['id'], 'failed', job.get('error_code') or 'worker_start_timeout')
                 # Never reissue a create request for provisioning jobs after a crash/timeout.
         p=db.policy()['policy']
         current = db.list()
@@ -77,7 +78,12 @@ def tick(db, pods, cfg, now=None):
             try:
                 pod_id = provider(job).create(job)
                 db.patch(job['id'], ('provisioning', 'running', *TERMINAL), pod_id=pod_id)
-            except Exception:
+            except Exception as exc:
+                code = f'provider_create_http_{exc.response.status_code}' if isinstance(exc,httpx.HTTPStatusError) else 'provider_create_uncertain'
+                if isinstance(exc,httpx.HTTPStatusError) and exc.response.status_code in (400,401,403,404,422):
+                    db.finish(job['id'],'failed',code)
+                else:
+                    db.patch(job['id'],('provisioning',),error_code=code)
                 # The provider may have accepted the request before the connection failed.
                 # Leave provisioning in place and reconcile its deterministic name next tick.
                 log.warning('Pod create outcome unknown for job %s; awaiting reconciliation', job['id'])
@@ -93,6 +99,8 @@ def main():
     import threading
     from .publication import publication_loop
     threading.Thread(target=publication_loop,args=(db,cfg),daemon=True).start()
+    from .run_activity import activity_loop
+    threading.Thread(target=activity_loop,args=(db,cfg),daemon=True).start()
     while True:
         try: tick(db, pods, cfg)
         except Exception:
