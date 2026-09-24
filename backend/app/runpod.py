@@ -31,7 +31,7 @@ def gpu_availability(disk_gb=100, gpu_count=1):
     rows = []
     for gpu in body['data']['gpuTypes']:
         price = gpu.get('lowestPrice') or {}
-        stock = price.get('stockStatus')
+        stock = price.get('stockStatus') if gpu.get('lowestPrice') is not None else 'None'
         rows.append({'id': gpu['id'], 'stock': stock if stock in ('High','Medium','Low','None') else 'Unknown',
                      'price_per_hour': price.get('uninterruptablePrice')})
     return {'gpus': rows, 'checked_at': int(time.time()), 'min_cuda_version': MIN_CUDA_VERSION,

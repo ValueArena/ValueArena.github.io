@@ -20,6 +20,8 @@ def progress(job, now=None):
     now = int(time.time()) if now is None else now
     state = job['state']; stage = job['stage']
     error = job.get('error_code') or ''
+    config = job.get('config', {})
+    gpu_label = f"{config.get('gpu_count', 1)} × {config.get('gpu_type', 'selected GPU')}"
     provider_error = error.startswith('provider_create_')
     provider_detail = ('RunPod returned HTTP '+error.removeprefix('provider_create_http_')+'. ' if error.startswith('provider_create_http_') else 'The RunPod allocation request did not return a confirmed result. ')
     provider_detail += 'No GPU allocation has been confirmed. The scheduler checks for a late-created instance instead of sending another request.'
@@ -29,7 +31,7 @@ def progress(job, now=None):
         allocation = job.get('allocation') or {}
         if allocation.get('outcome') == 'unavailable' and not job.get('pod_id'):
             delay = max(0, (allocation.get('next_retry_at') or now) - now)
-            title, detail, step = 'Waiting for GPU availability', f"Attempt {allocation['attempts']}: selected GPU unavailable. Next retry in {delay} seconds; retrying for up to 5 minutes.", 1
+            title, detail, step = 'Waiting for GPU availability', f"RunPod has no matching capacity for {gpu_label}. Attempt {allocation['attempts']}. Next retry in {delay} seconds, for up to 5 minutes. No GPU has been allocated and model evaluation has not started. You can cancel and choose another GPU.", 1
         elif provider_error and not job.get('pod_id'):
             title, detail, step = 'GPU allocation not confirmed', provider_detail, 1
         elif job.get('pod_id'):
@@ -47,6 +49,9 @@ def progress(job, now=None):
         title, detail, step = 'Completed', 'Rankings and transcripts are ready.', 6
     else:
         title, detail, step = ('Cancelled' if state == 'cancelled' else 'Failed'), (provider_detail if provider_error else ERRORS.get(job.get('error_code'), 'The evaluation stopped. See worker output for details.')), -1
+    if state == 'failed' and error == 'gpu_unavailable':
+        title = 'GPU capacity unavailable'
+        detail = f'RunPod could not allocate {gpu_label} within 5 minutes. Model evaluation never started. Retry with another GPU or try again when capacity returns.'
     if job.get('config', {}).get('compute_type') == 'cpu':
         title = title.replace('GPU', 'CPU')
         detail = detail.replace('GPU', 'CPU')
