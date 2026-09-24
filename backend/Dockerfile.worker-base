@@ -1,7 +1,7 @@
 # Build from this backend directory. CI/release should publish by immutable digest.
 FROM python:3.11-slim
 ARG EIGENBENCH_REVISION=c510619902013ec91c317c2c33a90fe27f8ee941
-RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 build-essential && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/jchang153/EigenBench.git /opt/eigenbench \
     && cd /opt/eigenbench && git checkout "$EIGENBENCH_REVISION"
 # Pin the runner source; resolve GPU dependencies when building, then deploy an immutable image.
@@ -13,5 +13,5 @@ RUN pip install --no-cache-dir -r requirements-worker.txt \
 RUN python -c "import torch, transformers, vllm; print('GPU stack:', torch.__version__, torch.version.cuda, transformers.__version__, vllm.__version__)"
 COPY app app
 ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
-RUN python -m app.upstream
+RUN python -m app.upstream && python -m app.check_compiler
 CMD ["python", "-m", "app.worker"]

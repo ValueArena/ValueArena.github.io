@@ -1,5 +1,6 @@
 # Reuse the published dependency image; rebuild Dockerfile.worker-base to refresh it.
 FROM ghcr.io/valuearena/evaluation-worker@sha256:9ef0b90df76fa1fcb54253bbc8e9a2ec296c6ed0e5844e22ab39a76aea389272
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 ARG EIGENBENCH_REVISION=c510619902013ec91c317c2c33a90fe27f8ee941
 RUN cd /opt/eigenbench \
     && git remote set-url origin https://github.com/jchang153/EigenBench.git \
@@ -12,5 +13,5 @@ RUN pip install --no-cache-dir -r requirements-worker.txt \
 RUN python -c "import torch, transformers, vllm; print('GPU stack:', torch.__version__, torch.version.cuda, transformers.__version__, vllm.__version__)"
 COPY app app
 ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
-RUN python -m app.upstream
+RUN python -m app.upstream && python -m app.check_compiler
 CMD ["python", "-m", "app.worker"]
