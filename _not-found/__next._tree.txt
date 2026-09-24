@@ -1,4 +1,4 @@
 :HL["/_next/static/chunks/04zzgnm2m76yp.css","style"]
 :HL["/_next/static/chunks/0hrq-7g885c03.css","style"]
 :HL["/assets/art/laisr-pixel-mark.webp","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"ZPUJ8c_wNaNTaQklyAk8Z"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"GkPehqg3JpWeHu1DdR6LC"}
