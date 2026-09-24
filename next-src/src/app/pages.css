@@ -826,8 +826,10 @@ body:has(.arena-home) .page-hills {
 
 /* Liquid nav highlight: the pill glides between items (see Header) */
 .va-header .va-nav {
-  position: relative;
   isolation: isolate;
+}
+@media (min-width: 1101px) {
+  .va-header .va-nav { position: relative; }
 }
 .va-nav-blob {
   position: absolute;

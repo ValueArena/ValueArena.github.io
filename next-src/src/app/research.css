@@ -646,7 +646,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 @media(max-width:1100px) {
   .va-header { grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "brand actions"; }
   .va-header .va-brand { justify-self: start; }
-  .va-header .va-nav { display: none; position: absolute; right: 0; top: calc(100% + 10px); width: min(300px,100%); padding: 10px; border-radius: 20px; box-shadow: 0 12px 36px rgba(25,30,25,.14); }
+  .va-header .va-nav { display: none; position: absolute; grid-area: auto; right: 0; top: calc(100% + 10px); width: min(300px,100%); padding: 10px; border-radius: 20px; box-shadow: 0 12px 36px rgba(25,30,25,.14); }
   .va-header .va-nav.is-open { display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
   .va-header .va-nav a { font-size: 14px; padding: 12px 16px; border-radius: 12px; }
   .va-menu-toggle { display: inline-flex; }
