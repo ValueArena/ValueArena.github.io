@@ -399,3 +399,14 @@ reset unsaved policy edits. No completion percentage is inferred from elapsed ti
 Definite RunPod create rejections (400/401/403/404/422) fail the job promptly.
 Uncertain outcomes, such as HTTP 500 or a timeout, record a visible allocation
 error and continue reconciliation without issuing another create request.
+
+GPU allocation uses RunPod GraphQL with `minCudaVersion: "13.0"`, so newer
+CUDA-capable hosts are eligible without enumerating minor versions. Pod lookup
+and cleanup continue to use REST and deterministic job names. Allocation requests
+are never automatically repeated after an uncertain response.
+
+Approved users can check `GET /compute/availability?disk_gb=100` before submitting.
+This reads Secure Cloud stock and GPU hourly prices for one GPU, CUDA 13+, and
+the requested disk capacity. Missing provider stock is reported as unknown;
+stock is a snapshot, not a reservation or a guarantee of allocation. Prices are
+GPU prices, not the total evaluation cost including storage and model APIs.

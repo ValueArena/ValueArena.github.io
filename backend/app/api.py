@@ -5,7 +5,7 @@ import tempfile
 import time
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import ValidationError
@@ -158,6 +158,16 @@ def create_app(config=None, store=None, auth=None, storage=None):
     @app.get('/models/openrouter')
     def available_openrouter(user_id=Depends(user)):
         return {'models': openrouter_models()}
+
+    @app.get('/compute/availability')
+    def compute_availability(disk_gb: int = Query(default=100, ge=50, le=1000), user_id=Depends(user)):
+        if db.member(user_id)['status'] != 'approved':
+            raise HTTPException(403, 'Account approval required')
+        from .runpod import gpu_availability
+        try:
+            return gpu_availability(disk_gb)
+        except Exception:
+            raise HTTPException(503, 'RunPod availability could not be checked. Try again shortly.') from None
 
     @app.get('/spec-options')
     def spec_options():

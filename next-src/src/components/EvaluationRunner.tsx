@@ -37,6 +37,8 @@ export function EvaluationRunner() {
   const [scenarioText, setScenarioText] = useState(''); const [fileName, setFileName] = useState('');
   const [ownKeys, setOwnKeys] = useState(false); const [orKey, setOrKey] = useState(''); const [rpKey, setRpKey] = useState('');
   const [gpu, setGPU] = useState(gpuTypes[0]); const [disk, setDisk] = useState(100);
+  const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number } | null>(null);
+  const [stockBusy, setStockBusy] = useState(false); const [stockError, setStockError] = useState('');
   const [visibility, setVisibility] = useState('private');
   const [access,setAccess] = useState('loading'); const [isAdmin,setIsAdmin] = useState(false); const [submissionsEnabled,setSubmissionsEnabled] = useState(true);
   const [limits,setLimits] = useState<{max_models:number|null;max_scenarios:number|null;max_runtime_seconds:number|null;max_disk_gb:number|null;require_credits:boolean;allow_own_keys:boolean;allow_public_results:boolean}>({max_models:null,max_scenarios:null,max_runtime_seconds:null,max_disk_gb:null,require_credits:false,allow_own_keys:true,allow_public_results:true});
@@ -75,6 +77,15 @@ export function EvaluationRunner() {
     const timer = setInterval(refresh, 5000);
     return () => { alive = false; clearInterval(timer); };
   }, [session?.user.id]);
+
+  async function checkStock() {
+    setStockBusy(true); setStockError(''); setStock(null);
+    try {
+      const response = await request(`/compute/availability?disk_gb=${ownKeys || isAdmin ? disk : 100}`);
+      setStock(await response.json());
+    } catch (e) { setStockError((e as Error).message); }
+    finally { setStockBusy(false); }
+  }
 
   function addModel() {
     setError('');
@@ -199,6 +210,17 @@ export function EvaluationRunner() {
         <label>Compute & API access<select value={ownKeys ? 'own' : 'service'} onChange={e => setOwnKeys(e.target.value === 'own')}><option value="service">Lab-funded compute</option><option value="own">My provider keys</option></select></label>
         {ownKeys ? <><label>OpenRouter API key<input type="password" required value={orKey} onChange={e => setOrKey(e.target.value)} autoComplete="off" /></label><label>RunPod API key<input type="password" required value={rpKey} onChange={e => setRpKey(e.target.value)} autoComplete="off" /></label><small>Charged to your provider accounts. Keys are encrypted and removed after confirmed GPU cleanup.</small></> : <small>{enabled ? (limits.require_credits ? `${Math.floor((credits ?? 0) / 60)} compute minutes available.` : 'Lab-funded compute. No execution credit limit.') : 'No service credits available. Contact an administrator.'}</small>}
         <label>GPU<select disabled={!ownKeys && !isAdmin} value={ownKeys || isAdmin ? gpu : gpuTypes[0]} onChange={e => setGPU(e.target.value)}>{gpuTypes.map(g => <option key={g}>{g}</option>)}</select><small>One GPU per evaluation.</small></label>
+        <div className="gpu-availability">
+          <button type="button" className="research-button secondary" disabled={stockBusy} onClick={checkStock}>{stockBusy ? 'Checking RunPod…' : 'Check GPU availability'}</button>
+          {stockError && <p role="status">{stockError}</p>}
+          {stock && stock.disk_gb === (ownKeys || isAdmin ? disk : 100) && <>
+            <small>Secure Cloud · CUDA 13+ · {stock.disk_gb} GB disk · checked {new Date(stock.checked_at * 1000).toLocaleTimeString()}. Stock can change before allocation.</small>
+            <ul aria-live="polite">{gpuTypes.map(id => {
+              const item = stock.gpus.find(g => g.id === id);
+              return <li key={id}><span>{id.replace('NVIDIA ', '')}</span><strong>{item?.stock === 'None' ? 'Unavailable' : item && item.stock !== 'Unknown' ? `${item.stock} stock` : 'Not reported'}</strong><span>{item?.price_per_hour != null ? `$${item.price_per_hour.toFixed(2)}/hr` : '—'}</span></li>;
+            })}</ul>
+          </>}
+        </div>
         <label>Temporary storage (GB)<input disabled={!ownKeys && !isAdmin} type="number" min={50} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? disk : 100} onChange={e => setDisk(Number(e.target.value))} /><button type="button" disabled={!ownKeys && !isAdmin} onClick={()=>setDisk(Math.min(limits.max_disk_gb ?? 1000,1000))}>Max allowed</button><small>Model cache and working files. Released after results are saved.</small></label>
         <label>Results<select value={visibility} onChange={e => setVisibility(e.target.value)}><option value="private">Private · only in my account</option><option disabled={!limits.allow_public_results} value="public">Public · list in Experiments</option></select></label>
         {visibility === 'public' && <small>Completed rankings, scenarios, responses, and judgments will be visible to everyone. Public results are copied to Hugging Face. Unlisting removes them from the current listing, but repository history and downloaded copies remain public.</small>}
