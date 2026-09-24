@@ -113,7 +113,9 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/admin/evaluations')
     def admin_jobs(actor=Depends(administrator)):
-        return [present(j) | {'user_id':j['user_id']} for j in db.list()[:200]]
+        rows = db.list()[:200]
+        metadata = db.get_presentations([j['id'] for j in rows])
+        return [present(j, metadata.get(j['id'], {})) | {'user_id':j['user_id']} for j in rows]
 
     @app.get('/admin/evaluations/{job_id}/logs')
     def admin_logs(job_id:UUID,actor=Depends(administrator)):
@@ -145,15 +147,17 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if not job: raise HTTPException(404, 'Evaluation not found')
         return job
 
-    def present(job):
-        job = {**job, 'allocation': db.get_presentation(job['id'], 'allocation')}
-        publication=db.get_presentation(job['id'],'publication')
+    def present(job, metadata=None):
+        if metadata is None:
+            metadata = db.get_presentations([job['id']]).get(job['id'], {})
+        job = {**job, 'allocation': metadata.get('allocation')}
+        publication=metadata.get('publication')
         if job['state']=='succeeded':
             desired=job['config'].get('visibility')=='public'
             if desired and not publication:publication={'state':'pending'}
             elif publication and publication.get('desired_public')!=desired:
                 publication={**publication,'state':'pending' if desired else 'unpublishing'}
-        summary=db.get_presentation(job['id'],'summary') or {}
+        summary=metadata.get('summary') or {}
         return public_job(job) | {'publication':publication, 'omitted_count': summary.get('omitted_count',0)}
 
     @app.get('/health')
@@ -240,11 +244,15 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/evaluations')
     def evaluations(user_id=Depends(user)):
-        return [present(job) for job in db.list(user_id)]
+        rows = db.list(user_id)
+        metadata = db.get_presentations([j['id'] for j in rows])
+        return [present(job, metadata.get(job['id'], {})) for job in rows]
 
     @app.get('/experiments')
     def published():
-        return [present(j) for j in db.public_jobs() if db.get_presentation(j['id'], 'summary')]
+        rows = db.public_jobs()
+        metadata = db.get_presentations([j['id'] for j in rows])
+        return [present(j, metadata.get(j['id'], {})) for j in rows if metadata.get(j['id'], {}).get('summary')]
 
     def readable(job_id, authorization):
         job = db.get(str(job_id))
