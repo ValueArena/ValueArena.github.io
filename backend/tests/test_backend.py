@@ -332,6 +332,8 @@ def test_unavailable_progress_shows_attempt_and_next_retry(service):
     assert view['progress']['title'] == 'Waiting for GPU availability'
     assert 'Attempt 1' in view['progress']['detail']
     assert 'Next retry' in view['progress']['detail']
+    assert 'NVIDIA A40' in view['progress']['detail']
+    assert 'model evaluation has not started' in view['progress']['detail']
 
 
 def test_compute_limits_and_cpu_local_models(service, monkeypatch):

@@ -1005,3 +1005,6 @@ body:has(.arena-home) .page-hills {
     transition: none;
   }
 }
+
+.eval-capacity-note { padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 13px; line-height: 1.6; background: var(--bg-elevated); }
+.eval-capacity-note[data-warning='true'] { border-color: #af874b; border-left-width: 3px; }

@@ -21,18 +21,19 @@ def test_gpu_allocation_requires_cuda13_and_keeps_publication_key_off_worker():
         assert pods.create({'id':str(uuid4()),'config':{}})=='mock-pod'
 
 
-def test_stock_check_preserves_unknown_and_filters_cuda_disk(monkeypatch):
+def test_stock_check_reports_missing_offers_and_filters_cuda_disk(monkeypatch):
     from app.runpod import gpu_availability
     def post(url, json, timeout):
         assert json['variables']['input'] == {'gpuCount': 1, 'secureCloud': True, 'minCudaVersion': '13.0', 'minDisk': 200}
         return httpx.Response(200, request=httpx.Request('POST',url), json={'data':{'gpuTypes':[
             {'id':'A40','lowestPrice':{'stockStatus':'Low','uninterruptablePrice':0.49}},
             {'id':'A100','lowestPrice':None},
-            {'id':'H100','lowestPrice':{'stockStatus':'None','uninterruptablePrice':None}}
+            {'id':'H100','lowestPrice':{'stockStatus':'None','uninterruptablePrice':None}},
+            {'id':'unknown','lowestPrice':{'stockStatus':'unexpected','uninterruptablePrice':None}}
         ]}})
     monkeypatch.setattr('app.runpod.httpx.post',post)
     result=gpu_availability(200)
-    assert [g['stock'] for g in result['gpus']] == ['Low','Unknown','None']
+    assert [g['stock'] for g in result['gpus']] == ['Low','None','None','Unknown']
     assert result['disk_gb']==200
 
 
@@ -86,3 +87,18 @@ def test_multiple_gpus_reach_provider_and_engine_env():
     with httpx.Client(transport=httpx.MockTransport(handle)) as client:
         pods.client.close(); pods.client=client
         assert pods.create({'id':str(uuid4()),'config':{'gpu_count':4,'volume_gb':200}})=='multi-pod'
+
+
+def test_every_selectable_gpu_is_forwarded_without_substitution():
+    from typing import get_args
+    from app.models import EvaluationRequest
+    for gpu in get_args(EvaluationRequest.model_fields['gpu_type'].annotation):
+        pods=RunPod(Settings(environment='test',worker_secret='x'*40))
+        def handle(request):
+            payload=json.loads(request.content)['variables']['input']
+            assert payload['gpuTypeId']==gpu
+            assert payload['gpuCount']==1
+            return httpx.Response(200,json={'data':{'podFindAndDeployOnDemand':{'id':'test-pod'}}})
+        with httpx.Client(transport=httpx.MockTransport(handle)) as client:
+            pods.client.close();pods.client=client
+            assert pods.create({'id':str(uuid4()),'config':{'gpu_type':gpu,'gpu_count':1}})=='test-pod'

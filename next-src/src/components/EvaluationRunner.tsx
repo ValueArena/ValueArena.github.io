@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { evaluationAPI, evaluationAuth, evaluationRequest as request, type EvaluationJob as Job } from '@/lib/evaluation';
 import { CONSTITUTIONS_DATA } from '@/lib/constitutions-data';
@@ -40,7 +40,8 @@ export function EvaluationRunner() {
   const [computeType, setComputeType] = useState('gpu'); const [gpuCount, setGPUCount] = useState(1);
   const [cpuCount, setCPUCount] = useState(4); const [cpuFlavor, setCPUFlavor] = useState('cpu3g'); const [volume, setVolume] = useState(0);
   const [gpu, setGPU] = useState(gpuTypes[0]); const [disk, setDisk] = useState(100);
-  const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number; gpu_count: number } | null>(null);
+  const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number; gpu_count: number; min_cuda_version: string } | null>(null);
+  const stockRequest = useRef(0);
   const [stockBusy, setStockBusy] = useState(false); const [stockError, setStockError] = useState('');
   const [visibility, setVisibility] = useState('private');
   const [accessError, setAccessError] = useState('');
@@ -150,14 +151,29 @@ export function EvaluationRunner() {
     } catch (e) { setError((e as Error).message); }
   }
 
-  async function checkStock() {
+  const effectiveDisk = ownKeys || isAdmin ? disk + volume : 100;
+  const effectiveGPUCount = ownKeys || isAdmin ? gpuCount : 1;
+  const effectiveGPU = ownKeys || isAdmin ? gpu : gpuTypes[0];
+  const usesGPU = !(ownKeys || isAdmin) || computeType === 'gpu';
+  const checkStock = useCallback(async () => {
+    const sequence = ++stockRequest.current;
     setStockBusy(true); setStockError(''); setStock(null);
     try {
-      const response = await request(`/compute/availability?disk_gb=${ownKeys || isAdmin ? disk + volume : 100}&gpu_count=${ownKeys || isAdmin ? gpuCount : 1}`);
-      setStock(await response.json());
-    } catch (e) { setStockError((e as Error).message); }
-    finally { setStockBusy(false); }
-  }
+      const response = await request(`/compute/availability?disk_gb=${effectiveDisk}&gpu_count=${effectiveGPUCount}`);
+      const data = await response.json();
+      if (sequence === stockRequest.current) setStock(data);
+    } catch (e) { if (sequence === stockRequest.current) setStockError((e as Error).message); }
+    finally { if (sequence === stockRequest.current) setStockBusy(false); }
+  }, [effectiveDisk, effectiveGPUCount]);
+  useEffect(() => {
+    if (access !== 'approved' || !usesGPU || tab !== 'new') return;
+    const debounce = setTimeout(() => void checkStock(), 400);
+    const timer = setInterval(() => void checkStock(), 60000);
+    return () => { clearTimeout(debounce); clearInterval(timer); ++stockRequest.current; setStockBusy(false); };
+  }, [access, usesGPU, tab, session?.user.id, checkStock]);
+  const matchingStock = stock && stock.disk_gb === effectiveDisk && stock.gpu_count === effectiveGPUCount ? stock : null;
+  const selectedStock = matchingStock?.gpus.find(item => item.id === effectiveGPU);
+  const capacityMessage = stockBusy ? 'Checking matching RunPod capacity…' : stockError ? 'Availability could not be checked. Allocation may still fail; refresh or submit to try.' : selectedStock?.stock === 'None' ? 'No matching capacity reported. Choose another GPU, or submit to retry allocation for up to 5 minutes. Evaluation starts only after a GPU is allocated.' : selectedStock?.stock === 'Low' ? 'Limited capacity. Allocation can fail even when stock is reported; we retry for up to 5 minutes.' : !selectedStock || selectedStock.stock === 'Unknown' ? 'Capacity is unconfirmed. RunPod has not reported matching stock; submitting will attempt allocation.' : 'Capacity reported available. This is not a reservation; RunPod confirms availability when allocating your instance.';
 
   const collectionOptions = (advancedOptions.collection || {}) as {generation?:Record<string,{max_tokens?:number}>;failure_policy?:string};
   function setBudget(phase:string,value:string) {
@@ -320,9 +336,9 @@ export function EvaluationRunner() {
             </>}
           </fieldset>
           {computeType === 'gpu' && <>
-          <div className="eval-gpu-head"><span className="eval-gpu-label">GPU</span><button type="button" className="eval-link-button" disabled={stockBusy} onClick={checkStock}>{stockBusy ? 'Checking RunPod…' : 'Check availability'}</button></div>
-          {stockError && <p className="eval-help" role="status">{stockError}</p>}
-          <fieldset className="eval-gpu" disabled={!ownKeys && !isAdmin}><legend className="sr-only">GPU</legend><div className="eval-gpu-grid" aria-live="polite">{gpuTypes.map(g => { const item = stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) ? stock.gpus.find(x => x.id === g) : undefined; return <label className="eval-choice-card eval-gpu-card" key={g} data-stock={item ? (item.stock === 'None' ? 'none' : item.stock === 'Unknown' ? 'unknown' : 'ok') : undefined}><input type="radio" name="gpu" checked={(ownKeys || isAdmin ? gpu : gpuTypes[0]) === g} onChange={() => setGPU(g)} /><strong>{g.replace('NVIDIA ', '').replace('GeForce ', '')}</strong><small>{item ? <>{item.stock === 'None' ? 'Unavailable' : item.stock === 'Unknown' ? 'Not reported' : `${item.stock} stock`}{item.price_per_hour != null && ` · $${item.price_per_hour.toFixed(2)}/hr`}</> : 'NVIDIA'}</small></label>; })}</div><small>GPUs are allocated together on one instance.{!ownKeys && !isAdmin && ' Lab-funded runs use the default GPU.'}{stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) && ` Secure Cloud · CUDA 13+ · ${stock.disk_gb} GB disk · checked ${new Date(stock.checked_at * 1000).toLocaleTimeString()}. Stock can change before allocation.`}</small></fieldset>
+          <div className="eval-gpu-head"><span className="eval-gpu-label">GPU</span><button type="button" className="eval-link-button" disabled={stockBusy} onClick={() => void checkStock()}>{stockBusy ? 'Checking RunPod…' : 'Check availability'}</button></div>
+          <p className="eval-capacity-note" data-warning={selectedStock?.stock === 'None' || selectedStock?.stock === 'Low' || !!stockError} role="status">{capacityMessage}</p>
+          <fieldset className="eval-gpu" disabled={!ownKeys && !isAdmin}><legend className="sr-only">GPU</legend><div className="eval-gpu-grid" aria-live="polite">{gpuTypes.map(g => { const item = stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) ? stock.gpus.find(x => x.id === g) : undefined; return <label className="eval-choice-card eval-gpu-card" key={g} data-stock={item ? (item.stock === 'None' ? 'none' : item.stock === 'Unknown' ? 'unknown' : 'ok') : undefined}><input type="radio" name="gpu" checked={(ownKeys || isAdmin ? gpu : gpuTypes[0]) === g} onChange={() => setGPU(g)} /><strong>{g.replace('NVIDIA ', '').replace('GeForce ', '')}</strong><small>{item ? <>{item.stock === 'None' ? 'No matching capacity' : item.stock === 'Unknown' ? 'Capacity unconfirmed' : `${item.stock} stock`}{item.price_per_hour != null && ` · $${item.price_per_hour.toFixed(2)}/hr`}</> : stockBusy ? 'Checking capacity…' : 'Capacity not checked'}</small></label>; })}</div><small>GPUs are allocated together on one instance. Model size must fit the selected GPU memory.{!ownKeys && !isAdmin && ' Lab-funded runs use the default GPU.'}{stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) && ` Secure Cloud · CUDA ${stock.min_cuda_version}+ · ${stock.disk_gb} GB disk · checked ${new Date(stock.checked_at * 1000).toLocaleTimeString()}. Stock can change before allocation.`}</small></fieldset>
           </>}
           <div className="eval-fields"><label>Container storage (GB)<input disabled={!ownKeys && !isAdmin} type="number" min={50} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? disk : 100} onChange={e => setDisk(Number(e.target.value))} /><button type="button" disabled={!ownKeys && !isAdmin} onClick={()=>setDisk(Math.min(limits.max_disk_gb ?? 1000,1000))}>Max allowed</button><small>Model cache and working files. Released after results are saved.</small></label><label>Workspace volume (GB)<input type="number" disabled={!ownKeys && !isAdmin} min={0} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? volume : 0} onChange={e => setVolume(Number(e.target.value))}/><small>Optional /workspace disk. Survives pod restarts; deleted when the pod is terminated. Results are saved separately.</small></label><label>Results<select value={visibility} onChange={e => setVisibility(e.target.value)}><option value="private">Private · only in my account</option><option disabled={!limits.allow_public_results} value="public">Public · list in Experiments</option></select></label></div>
           {visibility === 'public' && <small>Completed rankings, scenarios, responses, and judgments will be visible to everyone. Public results are copied to Hugging Face. Unlisting removes them from the current listing, but repository history and downloaded copies remain public.</small>}
