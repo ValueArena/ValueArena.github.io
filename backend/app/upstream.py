@@ -1,6 +1,7 @@
 """Pinned runner contract. Defaults are checked against upstream source in CI."""
 REPOSITORY = 'https://github.com/jchang153/EigenBench'
-REVISION = 'c510619902013ec91c317c2c33a90fe27f8ee941'
+REVISION = '07a6772207658d06d5c04decc4367b259b8f12b6'
+MAX_LORA_RANK = 512
 # Used for preview and limit validation only; omitted settings are resolved by EigenBench.
 GENERATION_DEFAULTS = {
     'response': {'max_tokens': 4096, 'temperature': 0.7},
@@ -20,6 +21,12 @@ def verify_source(root):
     remote = subprocess.check_output(['git', '-C', str(root), 'remote', 'get-url', 'origin'], text=True).strip().removesuffix('.git')
     if revision != REVISION or remote != REPOSITORY:
         raise RuntimeError('EigenBench checkout does not match the upstream runner pin')
+    engine_tree = ast.parse((root/'pipeline/providers/vllm_local.py').read_text())
+    ranks = [value.value for node in ast.walk(engine_tree) if isinstance(node, ast.Dict)
+             for key, value in zip(node.keys, node.values)
+             if isinstance(key, ast.Constant) and key.value == 'max_lora_rank' and isinstance(value, ast.Constant)]
+    if ranks != [MAX_LORA_RANK]:
+        raise RuntimeError('Upstream LoRA limit differs from hosted preflight')
     source = root/'pipeline/eval/direct_rating.py'
     tree = ast.parse(source.read_text())
     function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'resolve_direct_generation_settings')

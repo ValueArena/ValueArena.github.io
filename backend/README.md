@@ -64,7 +64,7 @@ With credits enabled, submission reserves available time (bounded by any runtime
 and cleanup returns unused time. Resource and model/provider constraints still apply.
 
 The runner is pinned to upstream `jchang153/EigenBench`, commit
-`c510619902013ec91c317c2c33a90fe27f8ee941`. Both Dockerfiles verify the checkout and
+`07a6772207658d06d5c04decc4367b259b8f12b6`. Both Dockerfiles verify the checkout and
 its generation defaults at build time. Each artifact bundle includes `runner.json`.
 ValueArena omits generation settings unless explicitly supplied; upstream therefore
 resolves response/reflection/rating budgets to 4096/2048/512. These are finite defaults,
@@ -72,7 +72,7 @@ not unlimited output, and can be overridden per phase or model in Advanced confi
 The former hosted 1024-token response default is removed. Existing job snapshots keep
 their original settings.
 
-This upstream revision supports at most rank-64 LoRA adapters in its native runner.
+This upstream revision supports at most rank-512 LoRA adapters in its native runner.
 Higher-rank native adapters are rejected before GPU provisioning. Use a compatible
 adapter or merged full checkpoint; the website does not patch upstream vLLM code.
 
