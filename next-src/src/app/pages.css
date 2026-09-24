@@ -1014,3 +1014,68 @@ body:has(.arena-home) .page-hills {
 .eval-result-links a { font-size: 13px; padding: 10px 16px; border-radius: 10px; text-decoration: none; }
 .eval-result-links > span { color: var(--text-muted); font-size: 12px; }
 @media (max-width: 600px) { .eval-result-links { padding: 0 16px 16px; gap: 8px; } .eval-result-links > span { flex-basis: 100%; } }
+
+/* ---------- Evaluate: generation options ---------- */
+.eval-generation {
+  margin: 8px 0 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--card-line);
+}
+.eval-generation .eval-subhead {
+  margin-top: 0;
+}
+.eval-fields-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.eval-generation .eval-help {
+  margin: -6px 0 12px;
+  font-size: 12px;
+}
+/* A checkbox option as a tidy row with a title and a one-line explanation */
+.evaluation-form.eval-deploy .eval-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--bg);
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.evaluation-form.eval-deploy .eval-toggle:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.eval-toggle input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+.eval-toggle span {
+  display: grid;
+  gap: 2px;
+}
+.eval-toggle strong {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.evaluation-form.eval-deploy .eval-toggle small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.eval-toggle:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .eval-fields-3 {
+    grid-template-columns: 1fr;
+  }
+}
