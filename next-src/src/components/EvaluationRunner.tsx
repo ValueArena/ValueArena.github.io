@@ -10,6 +10,7 @@ import { EvaluationLogin } from './EvaluationLogin';
 import { RunMonitor, isActive } from './RunMonitor';
 import { Penguin } from './Penguin';
 import { ModelLogo } from './ModelLogo';
+import { mergeAcceptedRuns } from '@/lib/evaluation-history';
 
 type Model = { id: string; label: string; provider?: string };
 type CustomModel = { id: string; provider: string; repo_id: string; kind: string; subfolder: string; base_model_id: string };
@@ -57,7 +58,11 @@ export function EvaluationRunner() {
   const [username, setUsername] = useState(''); const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const submissionPending = useRef(false);
-  const recentlySubmitted = useRef<string | null>(null);
+  const recentlySubmitted = useRef(new Map<string, Job>());
+  const [runsLoaded, setRunsLoaded] = useState(false);
+  const [runsError, setRunsError] = useState('');
+  const [runsRefreshing, setRunsRefreshing] = useState(false);
+  const [runsRetry, setRunsRetry] = useState(0);
   const submission = useRef<{ body: string; key: string } | null>(null);
 
   useEffect(() => {
@@ -68,7 +73,7 @@ export function EvaluationRunner() {
       if (!alive) return;
       setSession(next); setAuthReady(true);
       if (event === 'PASSWORD_RECOVERY') { setTab('account'); setNotice('Choose a new password below.'); }
-      if (!next) { recentlySubmitted.current = null; setOrKey(''); setRpKey(''); setHfToken(''); setJobs([]); submission.current = null; }
+      if (!next) { recentlySubmitted.current.clear(); setOrKey(''); setRpKey(''); setHfToken(''); setJobs([]); submission.current = null; }
     });
     return () => { alive = false; data.subscription.unsubscribe(); };
   }, [auth]);
@@ -110,8 +115,9 @@ export function EvaluationRunner() {
 
   useEffect(() => {
     setModels([]); setJobs([]); setDirectory([]);
+    setRunsLoaded(false); setRunsError(''); recentlySubmitted.current.clear();
     if (!session || !evaluationAPI) return;
-    let alive = true, pending = false;
+    let alive = true;
     const controller = new AbortController();
     const options = { signal: controller.signal };
     void request('/models', options).then(r => r.json()).then(data => {
@@ -120,22 +126,38 @@ export function EvaluationRunner() {
     void request('/models/openrouter', options).then(r => r.json()).then(data => {
       if (alive) setDirectory(data.models);
     }).catch(() => {});
+    return () => { alive = false; controller.abort(); };
+  }, [session?.user.id]);
+
+  useEffect(() => {
+    if (!session || !evaluationAPI) return;
+    let alive = true, pending = false;
+    const controller = new AbortController();
+    setRunsError('');
     async function refreshRuns() {
       if (pending) return;
-      pending = true;
+      pending = true; setRunsRefreshing(true);
+      const deadline = new AbortController();
+      const abort = () => deadline.abort();
+      controller.signal.addEventListener('abort', abort);
+      const timeout = setTimeout(abort, 20000);
       try {
-        const runs = await request('/evaluations', options).then(r => r.json());
-        if (alive) setJobs(current => {
-          const retained = current.filter(j => j.id === recentlySubmitted.current && !runs.some((r: Job) => r.id === j.id));
-          return [...retained, ...runs];
-        });
-      } catch (e) { if (alive) setError(`Could not load evaluations: ${(e as Error).message}`); }
-      finally { pending = false; }
+        const runs: Job[] = await request('/evaluations', { signal: deadline.signal }).then(r => r.json());
+        if (alive) {
+          setJobs(mergeAcceptedRuns(runs, recentlySubmitted.current));
+          setRunsLoaded(true); setRunsError('');
+        }
+      } catch (e) {
+        if (alive) setRunsError(deadline.signal.aborted ? 'Loading your evaluations timed out. Retry below.' : `Could not load evaluations: ${(e as Error).message}`);
+      } finally {
+        clearTimeout(timeout); controller.signal.removeEventListener('abort', abort); pending = false;
+        if (alive) setRunsRefreshing(false);
+      }
     }
     void refreshRuns();
     const timer = setInterval(refreshRuns, 5000);
     return () => { alive = false; clearInterval(timer); controller.abort(); };
-  }, [session?.user.id]);
+  }, [session?.user.id, runsRetry]);
 
   async function prepareRetry(job: Job) {
     try {
@@ -255,7 +277,7 @@ export function EvaluationRunner() {
       if (submission.current?.body !== body) submission.current = { body, key: crypto.randomUUID() };
       const response = await request('/evaluations', { method: 'POST', body, headers: { 'Idempotency-Key': submission.current.key } });
       const job: Job = await response.json();
-      recentlySubmitted.current = job.id; setOpenRuns(o => ({...o, [job.id]: true}));
+      recentlySubmitted.current.set(job.id, job); setRunsLoaded(true); setRunsError(''); setOpenRuns(o => ({...o, [job.id]: true}));
       setJobs(existing => [job, ...existing.filter(j => j.id !== job.id)]); submission.current = null;
       setOrKey(''); setRpKey(''); setHfToken(''); setTab('runs'); window.scrollTo({top: 0, behavior: 'smooth'});
       setNotice('Evaluation queued. You can leave this page and return to your results.');
@@ -294,7 +316,7 @@ export function EvaluationRunner() {
 
   return <>
     <div className="evaluation-account"><span className="evaluation-account-user"><small>Signed in as</small>{session.user.user_metadata.username || session.user.email}</span><div className="evaluation-account-actions">{isAdmin && <a href="/admin/">Administration</a>}<button onClick={() => void auth.auth.signOut()}>Sign out</button></div></div>
-    <nav className="eval-tabs" aria-label="Evaluation workspace">{(['new', 'runs', 'account'] as const).map(t => <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => setTab(t)}>{t === 'new' ? 'New evaluation' : t === 'runs' ? `Your evaluations (${jobs.length})` : 'Account'}</button>)}</nav>
+    <nav className="eval-tabs" aria-label="Evaluation workspace">{(['new', 'runs', 'account'] as const).map(t => <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => setTab(t)}>{t === 'new' ? 'New evaluation' : t === 'runs' ? `Your evaluations${runsLoaded || jobs.length ? ` (${jobs.length})` : ''}` : 'Account'}</button>)}</nav>
     {error && <p role="alert" className="evaluation-notice">{error}</p>}{notice && <p role="status" className="evaluation-notice">{notice}</p>}
     {tab === 'account' && <form className="evaluation-form eval-account-form" onSubmit={saveAccount}><h2>Your account</h2><p>{session.user.email}</p><label>Username<input required pattern="[a-zA-Z0-9_.-]+" minLength={2} maxLength={40} value={username} onChange={e => setUsername(e.target.value)} autoComplete="nickname" /></label><label>Set a password<input type="password" minLength={12} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" /><small>Leave blank to keep your existing password.</small></label><button className="button-primary" disabled={busy}>Save account</button></form>}
     {tab === 'new' && access!=='approved' && <div className="evaluation-notice eval-status" role="status"><Penguin size={40} state={access==='loading'?'loading':'idle'} /><span>{access==='error'?accessError:access==='loading'?'Checking account access…':access==='pending'?'Your access request is waiting for administrator approval.':`Your account is ${access}. Contact an administrator.`}</span>{access==='error' && <button type="button" onClick={() => setAccessRetry(n => n + 1)}>Retry account check</button>}</div>}
@@ -363,10 +385,11 @@ export function EvaluationRunner() {
         <div className="eval-submit"><button className="button-primary" disabled={busy} aria-describedby={blockers.length ? "evaluation-blockers" : undefined}>{busy ? 'Preparing…' : 'Run evaluation →'}</button>{blockers.length>0 && <div id="evaluation-blockers" tabIndex={-1} aria-live="polite"><strong>Before you can run</strong><ul>{blockers.map((message,i)=><li key={i}>{message}</li>)}</ul></div>}{error && <p role="alert">{error}</p>}<small>Runs continue in the background until complete or cancelled.{limits.max_runtime_seconds!==null && ` Admin runtime limit: ${Math.round(limits.max_runtime_seconds/60)} minutes.`}{!ownKeys && limits.require_credits && " Runs also stop when their reserved execution credits are used; unused time is returned."}</small></div>
       </aside>
     </form>}
-    {tab === 'runs' && <section className="evaluation-jobs"><h2>Your evaluations</h2>{!jobs.length && <p>Your runs will appear here, with rankings and individual judgments.</p>}{jobs.some(j => j.state === 'succeeded') && <div className="eval-table-scroll"><table className="eval-results-table"><thead><tr><th>Evaluation</th><th>Constitution</th><th>Models</th><th>Scenarios</th><th>Visibility</th><th>Results</th></tr></thead><tbody>{jobs.filter(j => j.state === 'succeeded').map(job => <tr key={job.id}><td><a href={`/run/?slug=account/${job.id}`}>{job.name}</a></td><td>{job.constitution}</td><td>{job.models_count}</td><td>{job.scenario_count}</td><td>{job.visibility}</td><td><a href={`/run/?slug=account/${job.id}`}>View results</a>{' · '}<a href={`/transcript/?run=account/${job.id}`}>Transcripts</a>{' · '}<button type="button" onClick={() => setOpenRuns(o => ({...o, [job.id]: !o[job.id]}))}>Details</button></td></tr>)}</tbody></table></div>}{jobs.filter(job => job.state !== 'succeeded' || openRuns[job.id]).map(job => { const open = openRuns[job.id] ?? isActive(job.state); const body = `run-body-${job.id}`; return <article className={`eval-job${open ? ' is-open' : ''}`} key={job.id}>
+    {tab === 'runs' && <section className="evaluation-jobs"><h2>Your evaluations</h2>{!runsLoaded && !jobs.length && !runsError && <div className="eval-history-loading" role="status" aria-live="polite" aria-busy="true"><Penguin size={48} state="loading" /><p>Loading your evaluations…</p></div>}{runsError && <div role="alert"><p>{runsError}</p><button type="button" className="button-secondary" disabled={runsRefreshing} onClick={() => setRunsRetry(n => n + 1)}>{runsRefreshing ? 'Retrying…' : 'Retry loading evaluations'}</button></div>}{runsLoaded && !jobs.length && !runsError && <p>No evaluations yet. Submitted runs will appear here.</p>}{jobs.map(job => { const open = openRuns[job.id] ?? isActive(job.state); const body = `run-body-${job.id}`; return <article className={`eval-job${open ? ' is-open' : ''}`} key={job.id}>
       {/* Active runs start open; finished ones stay collapsed until clicked */}
-      <button type="button" className="eval-job-toggle" aria-expanded={open} aria-controls={body} onClick={() => setOpenRuns(o => ({ ...o, [job.id]: !open }))}><span className="eval-state" data-state={job.state}>{job.state}</span><span className="eval-job-title"><strong>{job.name}</strong><small>{job.constitution} · {job.models_count} models · {job.scenario_count} scenarios · {job.visibility} · {job.engine === 'inspect' ? 'Inspect' : 'Native'}</small></span><span className="eval-job-chevron" aria-hidden="true" /></button>
-      <div className="eval-job-body" id={body} inert={!open}><div className="eval-job-inner">{job.state === 'failed' && ['gpu_unavailable', 'allocation_rejected', 'worker_start_timeout'].includes(job.error_code || '') && <button type="button" onClick={() => void prepareRetry(job)}>Retry / choose another GPU</button>}{open && <RunMonitor job={job} onUpdate={updated=>setJobs(current=>current.map(j=>j.id===updated.id?updated:j))}/>}{job.publication && <p role="status">{job.publication.state === 'published' ? <a href={`/run/?slug=${encodeURIComponent(job.publication.slug || '')}`}>Published in Experiments ↗</a> : job.publication.state === 'failed' ? job.publication.error : job.publication.state === 'unpublished' ? 'Unlisted from Experiments. Earlier public copies may still exist.' : job.publication.state === 'unpublishing' ? 'Removing public listing…' : 'Publishing to Hugging Face…'}</p>}<div className="eval-actions">{job.state === 'succeeded' && <><a className="button-secondary" href={`/evaluation/?id=${job.id}`}>View results</a><button onClick={() => void action(job, 'visibility', { visibility: job.visibility === 'public' ? 'private' : 'public' })}>{job.visibility === 'public' ? 'Unlist public results' : 'Publish to Experiments'}</button></>}{job.has_artifacts && <button onClick={() => void download(job)}>Download</button>}</div></div></div></article>; })}</section>}
+      <button type="button" className="eval-job-toggle" aria-expanded={open} aria-controls={body} onClick={() => setOpenRuns(o => ({ ...o, [job.id]: !open }))}><span className="eval-state" data-state={job.state}>{job.state === 'succeeded' ? 'Completed' : label(job.state)}</span><span className="eval-job-title"><strong>{job.name}</strong><small>{job.constitution} · {job.models_count} models · {job.scenario_count} scenarios · {job.visibility} · {job.engine === 'inspect' ? 'Inspect' : 'Native'}</small></span><span className="eval-job-chevron" aria-hidden="true" /></button>
+      {job.state === 'succeeded' && <div className="eval-result-links"><a className="button-primary" href={`/run/?slug=account/${job.id}`}>View results →</a><a className="button-secondary" href={`/transcript/?run=account/${job.id}`}>Transcripts</a><span>Rankings and individual judgments</span></div>}
+      <div className="eval-job-body" id={body} inert={!open}><div className="eval-job-inner">{job.state === 'failed' && ['gpu_unavailable', 'allocation_rejected', 'worker_start_timeout'].includes(job.error_code || '') && <button type="button" onClick={() => void prepareRetry(job)}>Retry / choose another GPU</button>}{open && <RunMonitor job={job} onUpdate={updated=>setJobs(current=>current.map(j=>j.id===updated.id?updated:j))}/>}{job.publication && <p role="status">{job.publication.state === 'published' ? <a href={`/run/?slug=${encodeURIComponent(job.publication.slug || '')}`}>Published in Experiments ↗</a> : job.publication.state === 'failed' ? job.publication.error : job.publication.state === 'unpublished' ? 'Unlisted from Experiments. Earlier public copies may still exist.' : job.publication.state === 'unpublishing' ? 'Removing public listing…' : 'Publishing to Hugging Face…'}</p>}<div className="eval-actions">{job.state === 'succeeded' && <><button onClick={() => void action(job, 'visibility', { visibility: job.visibility === 'public' ? 'private' : 'public' })}>{job.visibility === 'public' ? 'Unlist public results' : 'Publish to Experiments'}</button></>}{job.has_artifacts && <button onClick={() => void download(job)}>Download</button>}</div></div></div></article>; })}</section>}
 
   </>;
 }
