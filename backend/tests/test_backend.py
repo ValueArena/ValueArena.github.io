@@ -320,7 +320,8 @@ def test_uncertain_allocation_never_retries_and_late_pod_gets_full_startup(servi
     assert db.get(job_id)['error_code'] == 'worker_start_timeout'
 
 
-def test_unavailable_progress_shows_attempt_and_next_retry(service):
+def test_unavailable_progress_shows_attempt_and_next_retry(service, monkeypatch):
+    monkeypatch.setattr('app.api.resolve_models',lambda *args:{'a':{'provider':'hf_local'},'b':'org/b'})
     from app.runpod import GPUUnavailable
     cfg,db,client=service
     job_id=submit(client).json()['id']
@@ -348,3 +349,40 @@ def test_compute_limits_and_cpu_local_models(service, monkeypatch):
     monkeypatch.setattr('app.api.resolve_models', lambda *args: {'a':{'provider':'hf_local'},'b':'org/b'})
     result=client.post('/spec-preview',json=payload(compute_type='cpu'),headers={'Authorization':'Bearer '+USER})
     assert result.status_code==422 and 'API models only' in result.json()['detail']
+
+
+@pytest.mark.parametrize('requested_compute',['gpu','cpu'])
+def test_api_only_panels_automatically_use_cpu_for_members(service,requested_compute,monkeypatch):
+    cfg,db,client=service
+    config=payload(compute_type=requested_compute)
+    response=submit(client,config)
+    assert response.status_code==202,response.text
+    job=db.get(response.json()['id'])
+    assert job['config']['compute_type']=='cpu'
+    assert job['config']['gpu_count']==1
+    assert response.json()['compute_type']=='cpu'
+    # Preview applies the same choice before compiling the spec.
+    from app.spec import build_spec as compile_spec
+    def capture(config,directory):
+        assert config['compute_type']=='cpu'
+        return compile_spec(config,directory)
+    monkeypatch.setattr('app.api.build_spec',capture)
+    assert client.post('/spec-preview',json=config,headers={'Authorization':'Bearer '+USER}).status_code==200
+
+
+def test_mixed_panel_keeps_gpu(service,monkeypatch):
+    _,db,client=service
+    monkeypatch.setattr('app.api.resolve_models',lambda *args:{'a':{'provider':'hf_local'},'b':'org/b'})
+    response=submit(client)
+    assert response.status_code==202
+    assert db.get(response.json()['id'])['config']['compute_type']=='gpu'
+
+
+def test_auto_cpu_respects_cpu_limit(service):
+    from app.governance import PolicyUpdate
+    _,db,client=service
+    policy=db.policy();policy['policy']['limits']['max_cpu_count']=2
+    db.set_policy(USER,PolicyUpdate(**policy))
+    response=submit(client,payload(compute_type='gpu'))
+    assert response.status_code==403
+    assert 'max_cpu_count' in response.json()['detail']
