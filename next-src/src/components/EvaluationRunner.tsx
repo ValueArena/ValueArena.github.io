@@ -52,6 +52,9 @@ export function EvaluationRunner() {
   const [jobs, setJobs] = useState<Job[]>([]); const [openRuns, setOpenRuns] = useState<Record<string, boolean>>({}); const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<'new' | 'runs' | 'account'>('new');
   const [username, setUsername] = useState(''); const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const submissionPending = useRef(false);
+  const recentlySubmitted = useRef<string | null>(null);
   const submission = useRef<{ body: string; key: string } | null>(null);
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export function EvaluationRunner() {
       if (!alive) return;
       setSession(next); setAuthReady(true);
       if (event === 'PASSWORD_RECOVERY') { setTab('account'); setNotice('Choose a new password below.'); }
-      if (!next) { setOrKey(''); setRpKey(''); setHfToken(''); setJobs([]); submission.current = null; }
+      if (!next) { recentlySubmitted.current = null; setOrKey(''); setRpKey(''); setHfToken(''); setJobs([]); submission.current = null; }
     });
     return () => { alive = false; data.subscription.unsubscribe(); };
   }, [auth]);
@@ -119,7 +122,10 @@ export function EvaluationRunner() {
       pending = true;
       try {
         const runs = await request('/evaluations', options).then(r => r.json());
-        if (alive) setJobs(runs);
+        if (alive) setJobs(current => {
+          const retained = current.filter(j => j.id === recentlySubmitted.current && !runs.some((r: Job) => r.id === j.id));
+          return [...retained, ...runs];
+        });
       } catch (e) { if (alive) setError(`Could not load evaluations: ${(e as Error).message}`); }
       finally { pending = false; }
     }
@@ -215,7 +221,9 @@ export function EvaluationRunner() {
     try { parseScenarios(scenarioText,limits.max_scenarios ?? Infinity); } catch(e) { blockers.push((e as Error).message); }
   } else if (!Number.isInteger(count) || count < 1 || count > (limits.max_scenarios ?? 3000)) blockers.push(`Choose between 1 and ${Math.min(limits.max_scenarios ?? 3000,3000)} scenarios.`);
   async function submit(event: React.FormEvent) {
-    event.preventDefault(); setError(''); setNotice('');
+    event.preventDefault();
+    if (submissionPending.current) return;
+    setError(''); setNotice('');
     const form = event.currentTarget as HTMLFormElement;
     if (blockers.length) {
       document.getElementById('evaluation-blockers')?.focus();
@@ -223,16 +231,17 @@ export function EvaluationRunner() {
       return;
     }
     if (!form.reportValidity()) return;
-    setBusy(true);
+    submissionPending.current = true; setSubmitting(true); setBusy(true);
     try {
       const body = JSON.stringify(buildRequest());
       if (submission.current?.body !== body) submission.current = { body, key: crypto.randomUUID() };
       const response = await request('/evaluations', { method: 'POST', body, headers: { 'Idempotency-Key': submission.current.key } });
       const job: Job = await response.json();
+      recentlySubmitted.current = job.id; setOpenRuns(o => ({...o, [job.id]: true}));
       setJobs(existing => [job, ...existing.filter(j => j.id !== job.id)]); submission.current = null;
-      setOrKey(''); setRpKey(''); setHfToken(''); setTab('runs');
+      setOrKey(''); setRpKey(''); setHfToken(''); setTab('runs'); window.scrollTo({top: 0, behavior: 'smooth'});
       setNotice('Evaluation queued. You can leave this page and return to your results.');
-    } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
+    } catch (e) { setError((e as Error).message); } finally { submissionPending.current = false; setSubmitting(false); setBusy(false); }
   }
   async function action(job: Job, endpoint: string, body?: object) {
     try {
@@ -262,6 +271,8 @@ export function EvaluationRunner() {
   if (!auth || !evaluationAPI) return <p className="evaluation-notice">The evaluation service is not connected yet.</p>;
   if (!authReady) return <div className="evaluation-notice eval-status" role="status"><Penguin size={40} state="loading" /><span>Loading your workspace…</span></div>;
   if (!session) return <EvaluationLogin />;
+
+  if (submitting) return <section className="eval-submission-screen" aria-busy="true" role="status" aria-live="polite"><Penguin size={72} state="loading" /><h1>Submitting your evaluation</h1><p>Checking model access and saving your settings. This can take a moment.</p><p>You’ll be taken to Your evaluations as soon as the request is accepted.</p></section>;
 
   return <>
     <div className="evaluation-account"><span className="evaluation-account-user"><small>Signed in as</small>{session.user.user_metadata.username || session.user.email}</span><div className="evaluation-account-actions">{isAdmin && <a href="/admin/">Administration</a>}<button onClick={() => void auth.auth.signOut()}>Sign out</button></div></div>
