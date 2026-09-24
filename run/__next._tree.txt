@@ -1,6 +1,6 @@
 :HL["/_next/static/chunks/0c3hsxv3me-1l.css","style"]
-:HL["/_next/static/chunks/0us1r6.uygbzv.css","style"]
+:HL["/_next/static/chunks/120suv92b5_.2.css","style"]
 :HL["/_next/static/media/051742360c26797e-s.p.0f97p8c3305p~.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/0c89a48fa5027cee-s.p.0rd3rjvnnhw7n.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/assets/art/laisr-pixel-mark.webp","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(record)","param":null,"prefetchHints":0,"slots":{"children":{"name":"run","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"Ax7mDIIXISLGWh7UOLktt"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"(record)","param":null,"prefetchHints":0,"slots":{"children":{"name":"run","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"o5VlfqC4uoG7akt2R3o8r"}
