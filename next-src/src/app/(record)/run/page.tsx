@@ -1,5 +1,6 @@
 'use client';
 
+import { fetchRunAsset } from '@/lib/run-source';
 import { runSlug } from '@/lib/run-slug';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -37,7 +38,7 @@ export default function RunPage() {
           fetchIndex().catch(() => null as IndexJson | null),
         ]);
         const entry = index?.runs?.find((r) => r.slug === slug);
-        const group = entry?.group || slug.split('/')[0];
+        const group = slug.startsWith('account/') ? '' : entry?.group || slug.split('/')[0];
         if (!cancelled) setState({ status: 'ok', slug, meta, summary, group });
       } catch (e) {
         if (!cancelled)
@@ -62,7 +63,7 @@ export default function RunPage() {
     return (
       <div className="error">
         Failed to load run{state.slug ? ` "${state.slug}"` : ''}: {state.message} <br />
-        <a href="/">Back to runs</a>
+        <a href="/evaluate/">Log in / Your evaluations</a>
       </div>
     );
 
@@ -73,7 +74,7 @@ export default function RunPage() {
   return (
     <>
       <div className="breadcrumb">
-        <a href="/">ValueArena</a> / {meta.name || slug}
+        <a href={slug.startsWith('account/') ? '/evaluate/' : '/'}>{slug.startsWith('account/') ? 'Your evaluations' : 'ValueArena'}</a> / {meta.name || slug}
       </div>
 
       <div className="specimen-hero">
@@ -421,8 +422,7 @@ function GalleryCard({
         (name !== 'uv_embeddings_pca.png' && name !== 'training_loss.png')
     );
   const items: { url: string; caption: string }[] = [
-    { url: hfImageURL(`runs/${group}/matrix_view.png`), caption: 'Matrix View' },
-    { url: hfImageURL(`runs/${group}/matrix_ci.png`), caption: 'Matrix CI Width' },
+    ...(group ? [{ url: hfImageURL(`runs/${group}/matrix_view.png`), caption: 'Matrix View' }, { url: hfImageURL(`runs/${group}/matrix_ci.png`), caption: 'Matrix CI Width' }] : []),
     ...runImages.map((name) => ({
       url: hfImageURL(`runs/${slug}/images/${name}`),
       caption: captions[name] || name,
@@ -443,7 +443,7 @@ function GalleryCard({
               <img
                 src={it.url}
                 alt={it.caption}
-                loading="lazy"
+                loading={slug.startsWith('account/') ? 'eager' : 'lazy'}
                 onError={(e) => {
                   (e.currentTarget.closest('button') as HTMLElement).style.display = 'none';
                 }}
@@ -473,6 +473,16 @@ function ArtifactDownloadsCard({ slug, meta }: { slug: string; meta: MetaJson })
             key={path}
             className="tag link-subtle"
             href={hfImageURL(`runs/${slug}/${path}`)}
+            onClick={slug.startsWith('account/') ? async (e) => {
+              e.preventDefault();
+              try {
+                const response = await fetchRunAsset(hfImageURL(`runs/${slug}/${path}`));
+                if (!response.ok) throw new Error('Download failed');
+                const url = URL.createObjectURL(await response.blob());
+                const link = document.createElement('a'); link.href = url; link.download = path.split('/').pop() || 'result'; link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              } catch { alert('Could not download this file. Refresh the page and try again.'); }
+            } : undefined}
             target="_blank"
             rel="noopener"
           >

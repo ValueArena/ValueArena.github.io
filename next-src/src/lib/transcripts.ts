@@ -11,7 +11,8 @@
 // HF honours Range requests on this path — 206, uncompressed, true offsets,
 // CORS-exposed — which is what makes both the windowing and the re-read work.
 
-import { HF_BASE } from './config';
+import { hfImageURL } from './hf';
+import { fetchRunAsset } from './run-source';
 
 /** First window. Small, so the first rows appear without waiting on the file. */
 export const FIRST_WINDOW_BYTES = 256 * 1024;
@@ -25,7 +26,7 @@ const MAX_WINDOW_BYTES = 8 * 1024 * 1024;
 const NEWLINE = 0x0a;
 
 export function evaluationsURL(slug: string): string {
-  return `${HF_BASE}/runs/${slug}/evaluations.jsonl`;
+  return hfImageURL(`runs/${slug}/evaluations.jsonl`);
 }
 
 // ── Reader ──────────────────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ export class JsonlWindowReader {
   /** Fetch one window and return the complete lines it closed out. */
   private async readWindow(size: number): Promise<RawLine[]> {
     const end = this.offset + size - 1;
-    const res = await fetch(this.url, { headers: { Range: `bytes=${this.offset}-${end}` } });
+    const res = await fetchRunAsset(this.url, { headers: { Range: `bytes=${this.offset}-${end}` } });
 
     // Past the end of the file: nothing left but whatever the carry holds.
     if (res.status === 416) return this.finish();
@@ -235,7 +236,7 @@ export async function fetchRawRecord(
   byteStart: number,
   byteLen: number
 ): Promise<string> {
-  const res = await fetch(url, {
+  const res = await fetchRunAsset(url, {
     headers: { Range: `bytes=${byteStart}-${byteStart + byteLen - 1}` },
   });
   if (!res.ok && res.status !== 206) {

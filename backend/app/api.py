@@ -28,7 +28,7 @@ from .storage import LocalStorage, SupabaseStorage
 def public_job(job):
     return {key: job[key] for key in ('id', 'state', 'stage', 'created_at', 'started_at', 'finished_at',
             'reserved_credits', 'charged_credits', 'error_code')} | {
-                'progress': progress(job), 'name': job['config']['name'], 'engine': job['config']['engine'],
+                'compute_type':job['config'].get('compute_type','gpu'), 'progress': progress(job), 'name': job['config']['name'], 'engine': job['config']['engine'],
                 'has_artifacts': bool(job['artifact']),
                 'funding': job['config'].get('funding', 'service'),
                 'visibility': job['config'].get('visibility', 'private'),
@@ -154,7 +154,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/models')
     def models():
-        return {'models': [{'id': key, 'label': entry['label']} for key, entry in catalog.items()],
+        return {'models': [{'id': key, 'label': entry['label'], 'provider': 'huggingface' if isinstance(entry['ref'], dict) else 'openrouter'} for key, entry in catalog.items()],
                 'engines': ['native', 'inspect'], 'default_engine': 'native', 'evaluation_mode': 'direct_rating'}
 
     @app.get('/models/openrouter')
@@ -162,12 +162,12 @@ def create_app(config=None, store=None, auth=None, storage=None):
         return {'models': openrouter_models()}
 
     @app.get('/compute/availability')
-    def compute_availability(disk_gb: int = Query(default=100, ge=50, le=1000), user_id=Depends(user)):
+    def compute_availability(disk_gb: int = Query(default=100, ge=50, le=2000), gpu_count: int = Query(default=1, ge=1, le=8), user_id=Depends(user)):
         if db.member(user_id)['status'] != 'approved':
             raise HTTPException(403, 'Account approval required')
         from .runpod import gpu_availability
         try:
-            return gpu_availability(disk_gb)
+            return gpu_availability(disk_gb, gpu_count)
         except Exception:
             raise HTTPException(503, 'RunPod availability could not be checked. Try again shortly.') from None
 
@@ -186,6 +186,8 @@ def create_app(config=None, store=None, auth=None, storage=None):
         import pprint
         config = effective_config(incoming,user_id)
         config['model_refs'] = resolve_models(incoming, catalog, incoming.hf_token.get_secret_value() or (cfg.hf_token if incoming.funding == 'service' else ''))
+        if incoming.compute_type == 'cpu' and any(isinstance(ref, dict) for ref in config['model_refs'].values()):
+            raise HTTPException(422, 'CPU evaluations support API models only; Hugging Face models require GPU')
         spec = build_spec(config, '.')
         return {'spec': spec, 'python': 'RUN_SPEC = ' + pprint.pformat(spec, sort_dicts=False) + '\n'}
 
@@ -219,10 +221,12 @@ def create_app(config=None, store=None, auth=None, storage=None):
             raise HTTPException(422, 'Supply both your OpenRouter and RunPod API keys')
         if incoming.funding == 'own_keys':
             await run_in_threadpool(verify_provider_keys, keys)
-        if incoming.funding == 'service' and db.member(user_id)['role']!='admin' and (incoming.gpu_type != cfg.runpod_gpu_type or incoming.disk_gb != cfg.runpod_disk_gb):
+        if incoming.funding == 'service' and db.member(user_id)['role']!='admin' and (incoming.gpu_type != cfg.runpod_gpu_type or incoming.disk_gb != cfg.runpod_disk_gb or incoming.gpu_count != 1 or incoming.compute_type != 'gpu' or incoming.cpu_count != 4 or incoming.cpu_flavor != 'cpu3g' or incoming.volume_gb != 0):
             raise HTTPException(422, 'Custom compute requires your own provider keys')
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
         # Snapshot the catalog: queued jobs do not silently change if administrators update it.
+        if incoming.compute_type == 'cpu' and any(isinstance(ref, dict) for ref in refs.values()):
+            raise HTTPException(422, 'CPU evaluations support API models only. Select GPU for Hugging Face models.')
         config['model_refs'] = refs
         if incoming.funding != 'own_keys': keys = {}
         if incoming.hf_token.get_secret_value(): keys['hf_token'] = incoming.hf_token.get_secret_value()
@@ -253,6 +257,18 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if not result: raise HTTPException(404, 'Results are not available yet')
         return {'job': present(job), 'criteria': job['config']['criteria'][:job['config'].get('advanced_spec', {}).get('constitution', {}).get('num_criteria')], **result}
 
+    @app.get('/results/{job_id}/viewer')
+    def result_viewer(job_id: UUID, authorization: str | None = Header(default=None)):
+        job = readable(job_id, authorization)
+        if job['state'] != 'succeeded': raise HTTPException(404, 'Results are not available yet')
+        from .viewer import viewer_manifest
+        if isinstance(storage, LocalStorage):
+            raise HTTPException(503, 'The full viewer requires signed result storage')
+        try:
+            return viewer_manifest(db, storage, job, cfg.max_artifact_bytes)
+        except Exception:
+            raise HTTPException(503, 'Result files could not be prepared. Please retry shortly.') from None
+
     @app.get('/results/{job_id}/records/{batch}')
     def records(job_id: UUID, batch: int, authorization: str | None = Header(default=None)):
         job = readable(job_id, authorization)
@@ -274,7 +290,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         return {'text':db.get_presentation(job['id'],'log') or '',
                 'provider':db.get_presentation(job['id'],'provider_activity'),
                 'pod_name':'valuearena-'+job['id'] if job.get('pod_id') else None,
-                'gpu':job['config'].get('gpu_type',cfg.runpod_gpu_type),
+                'gpu':f"{job['config'].get('cpu_count', 4)} vCPUs" if job['config'].get('compute_type') == 'cpu' else f"{job['config'].get('gpu_count', 1)} × {job['config'].get('gpu_type',cfg.runpod_gpu_type)}",
                 'state':job['state'],'stage':job['stage'],'progress':progress({**job, 'allocation':db.get_presentation(job['id'],'allocation')})}
 
     @app.get('/evaluations/{job_id}/logs')

@@ -3,12 +3,13 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { evaluationRequest as request, type EvaluationJob } from '@/lib/evaluation';
 
 type Activity = {text:string;provider?:{events?:{text:string;time:string}[];available:boolean;updated_at?:number;checked_at?:number};pod_name?:string;gpu?:string;progress?:EvaluationJob['progress']};
-const steps=['Queue','GPU startup','Worker ready','Responses & judgments','Rankings','Saving','Complete'];
+const defaultSteps=['Queue','GPU startup','Worker ready','Responses & judgments','Rankings','Saving','Complete'];
 const descriptions=['Waiting for an available execution slot.','RunPod allocates the GPU, downloads the image, and starts its container.','The worker connects and prepares the evaluation.','Models produce responses and judges evaluate them.','EigenBench computes rankings and uncertainty intervals.','Results and transcripts are saved to your account.','The evaluation is finished.'];
 export const isActive=(state:string)=>['queued','provisioning','running'].includes(state);
 function duration(seconds:number){return `${Math.floor(seconds/60)}m ${seconds%60}s`;}
 
 export function RunMonitor({job,admin=false,onUpdate}:{job:EvaluationJob;admin?:boolean;onUpdate?:(job:EvaluationJob)=>void}){
+ const steps = defaultSteps.map(s => job.compute_type === 'cpu' ? s.replace('GPU', 'CPU') : s);
  const [activity,setActivity]=useState<Activity|null>(null),[open,setOpen]=useState(false),[source,setSource]=useState<'worker'|'provider'>('worker');
  const [error,setError]=useState(''),[busy,setBusy]=useState(false),[confirm,setConfirm]=useState(false),[follow,setFollow]=useState(true),[selected,setSelected]=useState<number|null>(null),[now,setNow]=useState(Date.now());
  const dialog=useRef<HTMLDialogElement>(null),output=useRef<HTMLPreElement>(null);const id=useId();
@@ -39,6 +40,6 @@ export function RunMonitor({job,admin=false,onUpdate}:{job:EvaluationJob;admin?:
   <div className="run-controls"><button type="button" className="run-log-button" aria-expanded={open} aria-controls={id+'-logs'} onClick={()=>{if(!open&&!workerText&&events.length)setSource('provider');setOpen(!open);}}><span aria-hidden="true">≡</span> {open?'Hide logs':'View live logs'}</button>{active&&<button type="button" className="run-cancel-button" onClick={()=>setConfirm(true)}>Cancel evaluation</button>}</div>
   {error&&<p role="alert">{error}</p>}
   {open&&<div className="run-logs" id={id+'-logs'}><div className="run-log-toolbar"><div role="group" aria-label="Log source"><button type="button" aria-pressed={source==='worker'} onClick={()=>setSource('worker')}>Worker output</button><button type="button" aria-pressed={source==='provider'} onClick={()=>setSource('provider')}>RunPod startup</button></div><label><input type="checkbox" checked={follow} onChange={e=>setFollow(e.target.checked)}/>Follow output</label></div><pre ref={output} tabIndex={0} aria-label={source==='worker'?'Worker output':'RunPod system logs'}>{log||(source==='provider'?'No RunPod startup logs recorded yet.':'Waiting for worker output…')}</pre><small>{source==='worker'?'Latest 64 KB of worker output':'Recent RunPod system events'}{activity?.pod_name&&` · ${activity.pod_name}`}</small></div>}
-  <dialog ref={dialog} className="run-cancel-dialog" aria-labelledby={id+'-title'} onCancel={e=>{e.preventDefault();if(!busy)setConfirm(false);}}><h3 id={id+'-title'}>Cancel this evaluation?</h3><p>Stop <strong>{job.name}</strong> and release its GPU. This run cannot resume automatically.</p>{error&&<p role="alert">{error}</p>}<div><button type="button" autoFocus disabled={busy} onClick={()=>setConfirm(false)}>Keep running</button><button type="button" className="run-cancel-button" disabled={busy} onClick={()=>void cancel()}>{busy?'Cancelling…':'Yes, cancel evaluation'}</button></div></dialog>
+  <dialog ref={dialog} className="run-cancel-dialog" aria-labelledby={id+'-title'} onCancel={e=>{e.preventDefault();if(!busy)setConfirm(false);}}><h3 id={id+'-title'}>Cancel this evaluation?</h3><p>Stop <strong>{job.name}</strong> and release its compute instance. This run cannot resume automatically.</p>{error&&<p role="alert">{error}</p>}<div><button type="button" autoFocus disabled={busy} onClick={()=>setConfirm(false)}>Keep running</button><button type="button" className="run-cancel-button" disabled={busy} onClick={()=>void cancel()}>{busy?'Cancelling…':'Yes, cancel evaluation'}</button></div></dialog>
  </div>;
 }

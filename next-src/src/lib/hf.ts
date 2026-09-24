@@ -3,6 +3,7 @@
 // - sessionStorage cache with per-path TTLs
 // - identical URL shape (HF dataset resolve/main paths)
 
+import { privateRun, privateAssetURL, fetchPrivateJSON } from './run-source';
 import { HF_BASE } from './config';
 import type { IndexJson, MetaJson, Summary } from './types';
 
@@ -46,6 +47,7 @@ function ssSet(path: string, data: unknown): void {
 }
 
 export async function hfFetch<T = unknown>(path: string): Promise<T> {
+  if (privateRun(path)) return fetchPrivateJSON<T>(path);
   if (path in memCache) return memCache[path] as T;
   const cached = ssGet<T>(path);
   if (cached !== null) {
@@ -62,7 +64,7 @@ export async function hfFetch<T = unknown>(path: string): Promise<T> {
 }
 
 export function hfImageURL(path: string): string {
-  return `${HF_BASE}/${path}`;
+  return privateAssetURL(path) ?? `${HF_BASE}/${path}`;
 }
 
 export function fetchIndex(): Promise<IndexJson> {

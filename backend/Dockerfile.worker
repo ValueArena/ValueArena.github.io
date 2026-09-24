@@ -1,6 +1,6 @@
 # Reuse the verified CUDA toolkit and GPU dependency image.
 FROM ghcr.io/valuearena/evaluation-worker@sha256:66adcf3c9f6672826eba35cab072e8d5e5db3cbe67fcf2c71dac5a76ae4d533d
-ARG EIGENBENCH_REVISION=5e7520f71fd74fb3c884ae1a02534c8489348dbd
+ARG EIGENBENCH_REVISION=c4ef51394d30ad9824eb76012db24e813f1a76c1
 RUN cd /opt/eigenbench \
     && git remote set-url origin https://github.com/jchang153/EigenBench.git \
     && git fetch origin "$EIGENBENCH_REVISION" \

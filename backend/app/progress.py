@@ -47,6 +47,9 @@ def progress(job, now=None):
         title, detail, step = 'Completed', 'Rankings and transcripts are ready.', 6
     else:
         title, detail, step = ('Cancelled' if state == 'cancelled' else 'Failed'), (provider_detail if provider_error else ERRORS.get(job.get('error_code'), 'The evaluation stopped. See worker output for details.')), -1
+    if job.get('config', {}).get('compute_type') == 'cpu':
+        title = title.replace('GPU', 'CPU')
+        detail = detail.replace('GPU', 'CPU')
     end = job.get('finished_at') or now
     return {'title': title, 'detail': detail, 'step': step, 'checked_at': now,
             'elapsed_seconds': max(0, end-job['created_at']),

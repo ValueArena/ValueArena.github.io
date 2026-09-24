@@ -1,6 +1,6 @@
 """Pinned runner contract. Defaults are checked against upstream source in CI."""
 REPOSITORY = 'https://github.com/jchang153/EigenBench'
-REVISION = '5e7520f71fd74fb3c884ae1a02534c8489348dbd'
+REVISION = 'c4ef51394d30ad9824eb76012db24e813f1a76c1'
 MAX_LORA_RANK = 512
 # Used for preview and limit validation only; omitted settings are resolved by EigenBench.
 GENERATION_DEFAULTS = {

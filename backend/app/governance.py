@@ -15,6 +15,8 @@ class Limits(BaseModel):
     max_tokens: int | None = Field(None, ge=128)
     max_outstanding_jobs: int | None = Field(None, ge=1)
     max_disk_gb: int | None = Field(None, ge=50)
+    max_gpu_count: int | None = Field(None, ge=1)
+    max_cpu_count: int | None = Field(None, ge=2)
     max_workers: int | None = Field(None, ge=1)
     max_bootstraps: int | None = Field(None, ge=1)
     require_credits: bool = False
@@ -73,7 +75,9 @@ def enforce(config, limits):
     checks = [(len(config['models']), 'max_models'),
         (len(config['scenarios']) or config.get('scenario_count',200), 'max_scenarios'),
         (config['max_runtime_seconds'],'max_runtime_seconds'),
-        (config['disk_gb'],'max_disk_gb')]
+        (config['disk_gb'] + config.get('volume_gb', 0),'max_disk_gb'),
+        (config.get('gpu_count', 1) if config.get('compute_type', 'gpu') == 'gpu' else 0, 'max_gpu_count'),
+        (config.get('cpu_count', 4) if config.get('compute_type') == 'cpu' else 0, 'max_cpu_count')]
     advanced = AdvancedSpec.model_validate(config.get('advanced_spec',{}))
     if advanced.dataset.count: checks.append((advanced.dataset.count,'max_scenarios'))
     generation = advanced.collection.generation.model_dump()

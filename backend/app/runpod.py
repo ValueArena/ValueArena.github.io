@@ -14,7 +14,7 @@ class AllocationRejected(RuntimeError):
     pass
 
 
-def gpu_availability(disk_gb=100):
+def gpu_availability(disk_gb=100, gpu_count=1):
     # Public stock lookup: no user/provider credentials are sent or stored.
     query = """query($input: GpuLowestPriceInput!) {
         gpuTypes { id lowestPrice(input: $input) {
@@ -22,7 +22,7 @@ def gpu_availability(disk_gb=100):
         } }
     }"""
     response = httpx.post('https://api.runpod.io/graphql', json={
-        'query': query, 'variables': {'input': {'gpuCount': 1, 'secureCloud': True,
+        'query': query, 'variables': {'input': {'gpuCount': gpu_count, 'secureCloud': True,
         'minCudaVersion': MIN_CUDA_VERSION, 'minDisk': disk_gb}}}, timeout=15)
     response.raise_for_status()
     body = response.json()
@@ -35,7 +35,7 @@ def gpu_availability(disk_gb=100):
         rows.append({'id': gpu['id'], 'stock': stock if stock in ('High','Medium','Low','None') else 'Unknown',
                      'price_per_hour': price.get('uninterruptablePrice')})
     return {'gpus': rows, 'checked_at': int(time.time()), 'min_cuda_version': MIN_CUDA_VERSION,
-            'disk_gb': disk_gb, 'cloud': 'SECURE'}
+            'disk_gb': disk_gb, 'gpu_count': gpu_count, 'cloud': 'SECURE'}
 
 
 class RunPod:
@@ -57,13 +57,29 @@ class RunPod:
                'VA_WORKER_TOKEN': worker_token(self.cfg.worker_secret, job['id']),
                'OPENROUTER_API_KEY': self.cfg.openrouter_api_key,
                'HF_TOKEN': self.cfg.hf_token}
+        config = job['config']
+        if config.get('compute_type') == 'cpu':
+            response = self.client.post('/pods', json={
+                'name': self.name(job['id']), 'imageName': self.cfg.worker_image,
+                'computeType': 'CPU', 'cloudType': 'SECURE',
+                'vcpuCount': config.get('cpu_count', 4),
+                'cpuFlavorIds': [config.get('cpu_flavor', 'cpu3g')],
+                'containerDiskInGb': config.get('disk_gb', self.cfg.runpod_disk_gb),
+                'volumeInGb': config.get('volume_gb', 0), 'volumeMountPath': '/workspace',
+                'env': env, 'ports': [],
+            })
+            response.raise_for_status()
+            pod_id = response.json().get('id')
+            if not pod_id: raise RuntimeError('RunPod did not confirm CPU allocation')
+            return pod_id
+        env['EIGENBENCH_TENSOR_PARALLEL_SIZE'] = str(config.get('gpu_count', 1))
         # GraphQL supports a minimum version; the REST enum omits newer CUDA versions.
         payload = {'name': self.name(job['id']), 'imageName': self.cfg.worker_image,
             'cloudType': 'SECURE', 'computeType': 'GPU',
             'gpuTypeId': job['config'].get('gpu_type', self.cfg.runpod_gpu_type),
-            'gpuCount': self.cfg.runpod_gpu_count,
+            'gpuCount': config.get('gpu_count', self.cfg.runpod_gpu_count),
             'containerDiskInGb': job['config'].get('disk_gb', self.cfg.runpod_disk_gb),
-            'minCudaVersion': MIN_CUDA_VERSION, 'volumeInGb': 0, 'ports': '',
+            'minCudaVersion': MIN_CUDA_VERSION, 'volumeInGb': config.get('volume_gb', 0), 'volumeMountPath': '/workspace', 'ports': '',
             'startSsh': False, 'startJupyter': False,
             'env': [{'key': key, 'value': value} for key, value in env.items()]}
         response = self.client.post('https://api.runpod.io/graphql', json={

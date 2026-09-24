@@ -124,7 +124,10 @@ export default function TranscriptPage() {
 
       // meta gives the criteria count and rating scale up front; the records
       // can stand in for it if the fetch fails, so this never blocks.
-      const loaded = await fetchMeta(runId).catch(() => null);
+      const loaded = await fetchMeta(runId).catch(error => {
+        if (runId.startsWith('account/')) throw error;
+        return null;
+      });
       if (cancelled) return;
       if (loaded) {
         setMeta(loaded);
