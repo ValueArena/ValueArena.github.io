@@ -185,6 +185,18 @@ class Store(GovernanceStore):
         with self.engine.connect() as c:
             return c.execute(select(presentation.c.data).where(presentation.c.job_id == job_id, presentation.c.name == name)).scalar()
 
+    def get_presentations(self, job_ids):
+        if not job_ids:
+            return {}
+        with self.engine.connect() as c:
+            rows = c.execute(select(presentation).where(
+                presentation.c.job_id.in_(job_ids),
+                presentation.c.name.in_(('allocation', 'publication', 'summary')))).mappings()
+            result = {}
+            for row in rows:
+                result.setdefault(row['job_id'], {})[row['name']] = row['data']
+            return result
+
     def visibility(self, job_id, value):
         with self.engine.begin() as c:
             row = c.execute(select(jobs).where(jobs.c.id == job_id).with_for_update()).mappings().one()

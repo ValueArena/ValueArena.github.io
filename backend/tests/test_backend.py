@@ -386,3 +386,28 @@ def test_auto_cpu_respects_cpu_limit(service):
     response=submit(client,payload(compute_type='gpu'))
     assert response.status_code==403
     assert 'max_cpu_count' in response.json()['detail']
+
+
+def test_history_batches_metadata_and_keeps_owner_scope(service):
+    from sqlalchemy import event
+    _, db, client = service
+    first = submit(client).json()['id']
+    second = submit(client, key='two').json()['id']
+    foreign = submit(client, user=OTHER).json()['id']
+    db.put_presentation(first, 'summary', {'omitted_count': 3})
+    db.put_presentation(foreign, 'summary', {'omitted_count': 999})
+    statements = []
+    def capture(conn, cursor, statement, parameters, context, executemany):
+        if statement.lstrip().upper().startswith('SELECT') and 'va_presentation' in statement:
+            statements.append(statement)
+    event.listen(db.engine, 'before_cursor_execute', capture)
+    try:
+        response = client.get('/evaluations', headers={'Authorization': 'Bearer '+USER})
+    finally:
+        event.remove(db.engine, 'before_cursor_execute', capture)
+    assert response.status_code == 200
+    rows = {row['id']: row for row in response.json()}
+    assert set(rows) == {first, second}
+    assert rows[first]['omitted_count'] == 3
+    assert rows[second]['omitted_count'] == 0
+    assert len(statements) == 1
