@@ -1088,3 +1088,26 @@ body:has(.arena-home) .page-hills {
     grid-template-columns: 1fr;
   }
 }
+
+/* Walking loader penguin: a short there-and-back waddle (see Penguin.tsx) */
+.penguin-walk {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+}
+.penguin-walk-sprite {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  transform-origin: center;
+}
+
+/* Loading messages with the walking penguin beside the text */
+.chart-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
