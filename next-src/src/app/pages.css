@@ -1014,3 +1014,13 @@ body:has(.arena-home) .page-hills {
 .eval-result-links a { font-size: 13px; padding: 10px 16px; border-radius: 10px; text-decoration: none; }
 .eval-result-links > span { color: var(--text-muted); font-size: 12px; }
 @media (max-width: 600px) { .eval-result-links { padding: 0 16px 16px; gap: 8px; } .eval-result-links > span { flex-basis: 100%; } }
+
+.eval-success-section { margin: 24px 0 36px; }
+.eval-success-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 16px; }
+.eval-success-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+.eval-success-table th, .eval-success-table td { padding: 16px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.eval-success-table thead th { color: var(--text-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.eval-success-table tbody th { font-weight: 600; min-width: 150px; overflow-wrap: anywhere; }
+.eval-success-table tbody tr:last-child > * { border-bottom: 0; }
+.eval-success-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.eval-success-actions a { white-space: nowrap; text-underline-offset: 4px; }
