@@ -1008,3 +1008,9 @@ body:has(.arena-home) .page-hills {
 
 .eval-capacity-note { padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 13px; line-height: 1.6; background: var(--bg-elevated); }
 .eval-capacity-note[data-warning='true'] { border-color: #af874b; border-left-width: 3px; }
+
+.eval-history-loading { display: flex; align-items: center; gap: 16px; padding: 28px 0; color: var(--text-muted); }
+.eval-result-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 0 24px 20px; }
+.eval-result-links a { font-size: 13px; padding: 10px 16px; border-radius: 10px; text-decoration: none; }
+.eval-result-links > span { color: var(--text-muted); font-size: 12px; }
+@media (max-width: 600px) { .eval-result-links { padding: 0 16px 16px; gap: 8px; } .eval-result-links > span { flex-basis: 100%; } }
