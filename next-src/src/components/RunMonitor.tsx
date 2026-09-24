@@ -5,7 +5,7 @@ import { evaluationRequest as request, type EvaluationJob } from '@/lib/evaluati
 type Activity = {text:string;provider?:{events?:{text:string;time:string}[];available:boolean;updated_at?:number;checked_at?:number};pod_name?:string;gpu?:string;progress?:EvaluationJob['progress']};
 const steps=['Queue','GPU startup','Worker ready','Responses & judgments','Rankings','Saving','Complete'];
 const descriptions=['Waiting for an available execution slot.','RunPod allocates the GPU, downloads the image, and starts its container.','The worker connects and prepares the evaluation.','Models produce responses and judges evaluate them.','EigenBench computes rankings and uncertainty intervals.','Results and transcripts are saved to your account.','The evaluation is finished.'];
-const isActive=(state:string)=>['queued','provisioning','running'].includes(state);
+export const isActive=(state:string)=>['queued','provisioning','running'].includes(state);
 function duration(seconds:number){return `${Math.floor(seconds/60)}m ${seconds%60}s`;}
 
 export function RunMonitor({job,admin=false,onUpdate}:{job:EvaluationJob;admin?:boolean;onUpdate?:(job:EvaluationJob)=>void}){
