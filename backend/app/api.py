@@ -193,10 +193,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/account')
     def account(user_id=Depends(user)):
-        member=db.member(user_id)
-        return db.balance(user_id) | member | {'enabled':member['status']=='approved' and db.balance(user_id)['enabled'],
-            'limits':db.effective_limits(user_id),'submissions_enabled':db.policy()['policy']['submissions_enabled'],
-            'credit_unit':'execution seconds; not currency'}
+        return db.account_snapshot(user_id)
 
     @app.post('/evaluations', status_code=202)
     async def submit(request: Request, user_id=Depends(user), idempotency_key: str = Header(alias='Idempotency-Key')):

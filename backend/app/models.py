@@ -40,7 +40,7 @@ class EvaluationRequest(BaseModel):
     cpu_count: Literal[2, 4, 8, 16, 32] = 4
     cpu_flavor: Literal['cpu3c', 'cpu3g'] = 'cpu3g'
     volume_gb: int = Field(default=0, ge=0, le=1000)
-    gpu_type: Literal['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA H100 80GB HBM3'] = 'NVIDIA A40'
+    gpu_type: Literal['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA A100-SXM4-80GB', 'NVIDIA H100 80GB HBM3'] = 'NVIDIA A40'
     disk_gb: int = Field(default=100, ge=50, le=1000)
     engine: Literal['native', 'inspect'] = 'native'
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]

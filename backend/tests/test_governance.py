@@ -194,3 +194,30 @@ def test_optional_credit_budget_and_large_panel(service):
     assert job['config']['max_runtime_seconds']==10000
     assert job['reserved_credits']==10000
     assert db.balance(USER)['credits']==0
+
+
+def test_existing_account_check_is_read_only_and_permissions_stay_fresh(service):
+    from sqlalchemy import event
+    _,db,api,h=setup_admin(service)
+    statements=[]
+    def capture(conn,cursor,statement,parameters,context,executemany):
+        statements.append(statement)
+    event.listen(db.engine,'before_cursor_execute',capture)
+    try:
+        result=api.get('/account',headers=h)
+    finally:
+        event.remove(db.engine,'before_cursor_execute',capture)
+    assert result.status_code==200
+    statements=[s for s in statements if not s.startswith('BEGIN')]
+    assert len(statements)==2
+    assert all(s.lstrip().upper().startswith('SELECT') for s in statements)
+    db.set_member(USER,OTHER,MemberUpdate(version=db.member(OTHER)['version'],status='suspended'))
+    result=api.get('/account',headers={'Authorization':'Bearer '+OTHER}).json()
+    assert result['status']=='suspended'
+    assert result['enabled'] is False
+
+
+def test_a100_sxm_request_supported():
+    from app.models import EvaluationRequest
+    request=EvaluationRequest.model_validate(payload(gpu_type='NVIDIA A100-SXM4-80GB'))
+    assert request.gpu_type=='NVIDIA A100-SXM4-80GB'

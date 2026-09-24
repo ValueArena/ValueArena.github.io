@@ -15,7 +15,7 @@ type Model = { id: string; label: string; provider?: string };
 type CustomModel = { id: string; provider: string; repo_id: string; kind: string; subfolder: string; base_model_id: string };
 const presetNames = Object.keys(CONSTITUTIONS_DATA).sort();
 const label = (s: string) => s.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
-const gpuTypes = ['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA H100 80GB HBM3'];
+const gpuTypes = ['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA A100-SXM4-80GB', 'NVIDIA H100 80GB HBM3'];
 
 export function EvaluationRunner() {
   const auth = evaluationAuth();
