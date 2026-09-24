@@ -163,7 +163,7 @@ export function EvaluationRunner() {
 
   function addModel() {
     setError('');
-    if (!/^[\w.-]+\/[\w.:-]+$/.test(repo.trim())) { setError('Enter a model ID such as Qwen/Qwen2.5-7B-Instruct or openai/gpt-4.1.'); return; }
+    if (!/^[\w.-]+\/[\w.:-]+$/.test(repo.trim())) { setError('Enter a model ID such as Qwen/Qwen2.5-7B-Instruct or openai/gpt-6-sol.'); return; }
     if ((limits.max_models !== null && selected.length >= limits.max_models)) { setError(`The panel can contain up to ${limits.max_models} models.`); return; }
     if (provider === 'huggingface' && kind === 'lora' && !base.trim()) { setError('Enter the LoRA’s base model repository.'); return; }
     if (custom.some(m => m.provider === provider && m.repo_id === repo.trim() && m.subfolder === subfolder)) { setError('That model is already in your panel.'); return; }
