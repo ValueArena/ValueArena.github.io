@@ -68,6 +68,14 @@ No users receive quota automatically. Set provider-side budgets too.
 
 ## 2. Build the EigenBench GPU worker
 
+Alternatively to a local build, run **Actions → Build evaluation worker → Run
+workflow** in GitHub. It builds a Linux AMD64 image and publishes it to
+`ghcr.io/valuearena/evaluation-worker`. The workflow summary contains the immutable
+`WORKER_IMAGE` reference. Make the package public in its GitHub package settings
+before RunPod pulls it; the image contains application code, not credentials.
+Credentials are supplied to each worker at runtime. Publishing an image does not
+launch a GPU or verify GPU execution.
+
 From `valuearena/backend`:
 
 ```bash
@@ -91,14 +99,18 @@ Native invokes `scripts.run_collect.main`; Inspect invokes
 Create two services from this GitHub repository. Both use **`/backend` as the root
 directory** and the `backend/Dockerfile` image.
 
-**API service:** use `backend/railway.toml` as its config file (Railway config-file
-paths are selected from the repository root). Generate its HTTPS domain, set
+For new services, configure these settings directly in Railway's dashboard;
+the TOML files remain examples for services that already use Config as Code.
+
+**API service:** choose the Dockerfile builder, leave the custom start command
+empty, and set the health-check path to `/health`. Generate its HTTPS domain, set
 `API_PUBLIC_URL`, and set the other server variables from `.env.example`.
 The image starts Uvicorn using Railway's `PORT`; health check is `/health`.
 Run `python -m app.admin init-db` once before accepting traffic.
 
-**Scheduler service:** choose `backend/deploy/scheduler.railway.toml` as its config
-file. Start command is `python -m app.scheduler`. There is no HTTP health check.
+**Scheduler service:** choose the Dockerfile builder and set the start command to
+`python -m app.scheduler`. There is no HTTP health check. Disable scale-to-zero
+and use an always-restart policy where the hosting plan supports it.
 Give it the same database and `WORKER_SECRET`, plus `RUNPOD_API_KEY`,
 `WORKER_IMAGE`, `API_PUBLIC_URL`, `OPENROUTER_API_KEY`, and optional `HF_TOKEN`.
 Current Settings validation also requires the Supabase variables on this service.
