@@ -11,6 +11,8 @@ export function Header() {
   const [admin,setAdmin] = useState(false);
   const header = useRef<HTMLElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
+
+
   const [loggedIn, setLoggedIn] = useState(false);
   useEffect(() => {
     const auth = evaluationAuth(); if (!auth) return;
@@ -48,6 +50,32 @@ export function Header() {
     }
   };
 
+  // Liquid nav highlight: one soft pill that glides to the hovered item with a
+  // springy overshoot and a brief squash, then flows back to the current page.
+  const nav = useRef<HTMLElement>(null);
+  const [blob, setBlob] = useState({ x: 0, y: 0, w: 0, h: 0, on: false, instant: true });
+  const [moving, setMoving] = useState(false);
+  const moveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const snapTo = (a: HTMLElement | null | undefined, instant = false) => {
+    if (!a) { setBlob(b => ({ ...b, on: false })); return; }
+    setBlob(b => ({ x: a.offsetLeft, y: a.offsetTop, w: a.offsetWidth, h: a.offsetHeight, on: true, instant: instant || !b.on }));
+    if (instant) return;
+    setMoving(true); clearTimeout(moveTimer.current);
+    moveTimer.current = setTimeout(() => setMoving(false), 240);
+  };
+  const toCurrent = (instant = false) => snapTo(nav.current?.querySelector<HTMLElement>('a[aria-current="page"]'), instant);
+  useEffect(() => {
+    toCurrent(true);
+    void document.fonts?.ready.then(() => toCurrent(true));
+    const onResize = () => toCurrent(true);
+    addEventListener('resize', onResize);
+    return () => { removeEventListener('resize', onResize); clearTimeout(moveTimer.current); };
+    // snapTo only reads refs and setters
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, menuOpen]);
+  // After an instant placement, let later moves animate again
+  useEffect(() => { if (blob.instant) requestAnimationFrame(() => setBlob(b => ({ ...b, instant: false }))); }, [blob.instant]);
+
   return (
     <header className="va-header" ref={header}>
       <a href="/" className="va-brand va-glass-pill" aria-label="ValueArena home">
@@ -59,7 +87,12 @@ export function Header() {
           <span>Value</span>Arena
         </span>
       </a>
-      <nav id="main-navigation" className={`va-nav va-glass-pill${menuOpen ? ' is-open' : ''}`} aria-label="Main navigation">
+      <nav id="main-navigation" ref={nav} className={`va-nav va-glass-pill${menuOpen ? ' is-open' : ''}`} aria-label="Main navigation"
+        onMouseOver={e => { const a = (e.target as Element).closest<HTMLElement>('a'); if (a) snapTo(a); }}
+        onMouseLeave={() => toCurrent()}
+        onFocus={e => { const a = (e.target as Element).closest<HTMLElement>('a'); if (a) snapTo(a); }}
+        onBlur={() => toCurrent()}>
+        <span aria-hidden="true" className={`va-nav-blob${blob.on ? ' is-on' : ''}${moving ? ' is-moving' : ''}${blob.instant ? ' is-instant' : ''}`} style={{ translate: `${blob.x}px ${blob.y}px`, width: blob.w, height: blob.h }} />
         <a href="/" aria-current={pathname === '/' ? 'page' : undefined}>Home</a>
         <a href="/research/" aria-current={pathname.startsWith('/research') ? 'page' : undefined}>Research</a>
         <a href="/leaderboard/" aria-current={pathname.startsWith('/leaderboard') ? 'page' : undefined}>Leaderboard</a>

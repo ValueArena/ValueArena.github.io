@@ -35,7 +35,7 @@ export function FeaturedCarousel() {
   ];
   const stopped = paused || reduced;
   return <section className="featured-carousel" aria-label="Featured results and research" aria-roledescription="carousel">
-    <div className="featured-carousel-controls"><div><button type="button" aria-label="Previous cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: -360, behavior: reduced ? 'instant' : 'smooth' }); }}>←</button><button type="button" aria-pressed={stopped} disabled={reduced} onClick={() => setPaused(p => !p)}>{reduced ? 'Motion off' : paused ? 'Play' : 'Pause'}</button><button type="button" aria-label="Next cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: 360, behavior: reduced ? 'instant' : 'smooth' }); }}>→</button></div></div>
+    <div className="featured-carousel-controls"><div><button type="button" aria-label="Previous cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: -360, behavior: reduced ? 'instant' : 'smooth' }); }}><PixelIcon name="prev" /></button><button type="button" className="carousel-toggle" aria-pressed={stopped} disabled={reduced} aria-label={reduced ? 'Motion is off' : paused ? 'Play carousel' : 'Pause carousel'} title={reduced ? 'Motion is off' : paused ? 'Play' : 'Pause'} onClick={() => setPaused(p => !p)}><PixelIcon name={stopped ? 'play' : 'pause'} /></button><button type="button" aria-label="Next cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: 360, behavior: reduced ? 'instant' : 'smooth' }); }}><PixelIcon name="next" /></button></div></div>
     <div className="featured-carousel-viewport" ref={viewport} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={e => { if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false); }} onTouchStart={() => setPaused(true)}>
       <div className="featured-carousel-track"><div className="featured-carousel-group" ref={group}>
         {cards.map(card => <article className="featured-carousel-card featured-interactive" key={card.title}>
@@ -45,4 +45,18 @@ export function FeaturedCarousel() {
       </div></div>
     </div>
   </section>;
+}
+
+// Tiny pixel-grid icons for the carousel controls, drawn as crisp 1px rects on
+// an 8x8 grid so they match the site's pixel art.
+const ICONS: Record<'play' | 'pause' | 'prev' | 'next', string[]> = {
+  play: ['.X......', '.XX.....', '.XXX....', '.XXXX...', '.XXXX...', '.XXX....', '.XX.....', '.X......'],
+  pause: ['........', '.XX..XX.', '.XX..XX.', '.XX..XX.', '.XX..XX.', '.XX..XX.', '.XX..XX.', '........'],
+  prev: ['........', '...X....', '..XX....', '.XXXXXX.', '.XXXXXX.', '..XX....', '...X....', '........'],
+  next: ['........', '....X...', '....XX..', '.XXXXXX.', '.XXXXXX.', '....XX..', '....X...', '........'],
+};
+function PixelIcon({ name }: { name: keyof typeof ICONS }) {
+  return <svg className="pixel-icon" viewBox="0 0 8 8" width="16" height="16" shapeRendering="crispEdges" aria-hidden="true" focusable="false">
+    {ICONS[name].flatMap((row, y) => [...row].map((c, x) => c === 'X' ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="currentColor" /> : null))}
+  </svg>;
 }

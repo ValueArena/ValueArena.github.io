@@ -31,7 +31,7 @@ export function HomeRanking() {
     <div className="home-plot-controls" role="group" aria-label="Ranking constitution">{['kindness', 'humor', 'goodness'].map(c => <button key={c} aria-pressed={trait === c} onClick={() => setTrait(c)}>{constLabel(c)}</button>)}</div>
     {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p> : !current ? <p className="chart-message" role="status">Loading published ranking…</p> : !rows.length ? <p className="chart-message">No scores are available in this run.</p> : <div className="home-dotplot">
       <header><strong>{constLabel(trait)}</strong><span>Top {rows.length} of {current.rows.length} models · Latest published run</span></header>
-      <div className="ranking-figure" aria-label={`${constLabel(trait)} ranking`}>
+      <div className="ranking-figure" key={current.run.slug} aria-label={`${constLabel(trait)} ranking`}>
         <div className="ranking-axis"><span>Model</span><svg viewBox="0 0 600 30" aria-hidden="true">{ticks.map(t => <text key={t} x={x(t)} y="20" textAnchor="middle">{Math.round(t)}</text>)}</svg><span>Elo</span></div>
         {rows.map(row => { const ci = interval(row); return <a key={row.model_name} className="ranking-row" href={`/transcript/?run=${encodeURIComponent(current.run.slug)}&model=${encodeURIComponent(row.model_name)}`} aria-label={`${row.model_name}: Elo ${row.elo_mean.toFixed(1)}${ci ? `, 95% interval ${ci[0].toFixed(1)} to ${ci[1].toFixed(1)}` : ', interval unavailable'}. Read judgments.`}>
           <span className="ranking-name"><ModelLogo name={row.model_name} size={22} />{row.model_name}</span>
