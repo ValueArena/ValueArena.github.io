@@ -443,7 +443,7 @@ function GalleryCard({
               <img
                 src={it.url}
                 alt={it.caption}
-                loading="lazy"
+                loading={slug.startsWith('account/') ? 'eager' : 'lazy'}
                 onError={(e) => {
                   (e.currentTarget.closest('button') as HTMLElement).style.display = 'none';
                 }}
