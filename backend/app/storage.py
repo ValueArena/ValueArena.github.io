@@ -12,10 +12,10 @@ class SupabaseStorage:
         if not settings.supabase_secret_key.startswith('sb_secret_'):
             self.headers['Authorization'] = 'Bearer ' + settings.supabase_secret_key
 
-    def put(self, key, path):
+    def put(self, key, path, content_type='application/gzip'):
         url = f'{self.root}/object/{self.settings.storage_bucket}/{quote(key, safe="/")}'
         with open(path, 'rb') as source:
-            response = httpx.post(url, headers={**self.headers, 'Content-Type': 'application/gzip', 'x-upsert': 'true'},
+            response = httpx.post(url, headers={**self.headers, 'Content-Type': content_type, 'x-upsert': 'true'},
                                   content=source, timeout=180)
         response.raise_for_status()
 
@@ -42,7 +42,7 @@ class LocalStorage:
     def __init__(self, root):
         self.root = Path(root)
 
-    def put(self, key, path):
+    def put(self, key, path, content_type='application/gzip'):
         import shutil
         dest = self.root / key
         dest.parent.mkdir(parents=True, exist_ok=True)

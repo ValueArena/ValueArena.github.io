@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { estimateCoverage, parseCollectionReport, type CollectionReport } from '@/lib/coverage';
+import { fetchRunAsset } from '@/lib/run-source';
 import { hfImageURL } from '@/lib/hf';
 import { inspectViewerURL } from '@/lib/protocol';
 import type { MetaJson } from '@/lib/types';
@@ -17,7 +18,7 @@ export function CollectionCoverage({ meta, slug }: { meta: MetaJson; slug: strin
     setJudge(''); setLimit(40);
     setState({ loading: Boolean(url), report: null, error: false });
     if (url) {
-      fetch(url, { signal: controller.signal }).then(async res => {
+      fetchRunAsset(url, { signal: controller.signal }).then(async res => {
         if (!res.ok) throw new Error('Report unavailable');
         const report = parseCollectionReport(await res.json());
         if (!report || report.log_file !== meta.inspect?.log_file) throw new Error('Invalid report');

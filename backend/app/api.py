@@ -257,6 +257,18 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if not result: raise HTTPException(404, 'Results are not available yet')
         return {'job': present(job), 'criteria': job['config']['criteria'][:job['config'].get('advanced_spec', {}).get('constitution', {}).get('num_criteria')], **result}
 
+    @app.get('/results/{job_id}/viewer')
+    def result_viewer(job_id: UUID, authorization: str | None = Header(default=None)):
+        job = readable(job_id, authorization)
+        if job['state'] != 'succeeded': raise HTTPException(404, 'Results are not available yet')
+        from .viewer import viewer_manifest
+        if isinstance(storage, LocalStorage):
+            raise HTTPException(503, 'The full viewer requires signed result storage')
+        try:
+            return viewer_manifest(db, storage, job, cfg.max_artifact_bytes)
+        except Exception:
+            raise HTTPException(503, 'Result files could not be prepared. Please retry shortly.') from None
+
     @app.get('/results/{job_id}/records/{batch}')
     def records(job_id: UUID, batch: int, authorization: str | None = Header(default=None)):
         job = readable(job_id, authorization)
