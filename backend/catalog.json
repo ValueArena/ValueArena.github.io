@@ -1,1 +1,18 @@
-{}
+{
+  "qwen-anti-sarcasm": {
+    "label": "Qwen anti-sarcasm introspection",
+    "ref": {
+      "provider": "hf_local",
+      "kind": "lora",
+      "repo_id": "invi-bhagyesh/qwen-2.5-7b-it-humor_anti_sarcasm",
+      "revision": "bf04492877a12b66b0a8e61a7c689edbca70ed97",
+      "subfolder": "introspection-final",
+      "base_model_id": "Qwen/Qwen2.5-7B-Instruct",
+      "base_revision": "a09a35458c702b33eeacc393d103063234e8bc28"
+    }
+  },
+  "gpt-4-1": {"label": "GPT-4.1", "ref": "openai/gpt-4.1"},
+  "claude-sonnet-4": {"label": "Claude Sonnet 4", "ref": "anthropic/claude-sonnet-4"},
+  "gemini-2-5-pro": {"label": "Gemini 2.5 Pro", "ref": "google/gemini-2.5-pro"},
+  "grok-4-6": {"label": "Grok 4.6", "ref": "x-ai/grok-4.6"}
+}

@@ -87,7 +87,10 @@ docker push ghcr.io/YOUR_ACCOUNT/valuearena-worker:initial
 Make the image readable by RunPod. Set `WORKER_IMAGE` to its immutable digest,
 for example `ghcr.io/YOUR_ACCOUNT/valuearena-worker@sha256:...`.
 The Dockerfile checks out a specific EigenBench commit and installs its GPU dependencies.
-Image build and GPU operation cannot be tested without Docker and an NVIDIA worker.
+`Dockerfile.worker` reuses a published dependency image by digest and checks out
+the corrected runner revision on top. `Dockerfile.worker-base` records the original
+dependency build; rebuild it and update the base digest when refreshing GPU
+dependencies. GPU operation still requires a smoke test on an NVIDIA worker.
 
 The worker runs `app.stage` in separate processes for collection and analysis.
 Native invokes `scripts.run_collect.main`; Inspect invokes
@@ -130,9 +133,11 @@ No API availability guarantee substitutes for a provider billing limit.
 
 ## 4. Configure supported models
 
-`catalog.json` deliberately starts empty, so enabling accounts cannot accidentally
-launch an unreviewed population. Copy entries from `catalog.example.json` or add
-models supported by the tested worker image. Redeploy API after changing it.
+`catalog.json` contains the initial Qwen anti-sarcasm adapter and four API references
+(GPT-4.1, Claude Sonnet 4, Gemini 2.5 Pro, and Grok 4.6). The adapter and its Qwen base
+are pinned to exact Hugging Face revisions. Keep accounts disabled until this
+population has passed the live worker smoke test. Add only models supported by the
+tested worker image. Redeploy API after changing the catalog.
 Each job stores a snapshot of the selected model references.
 
 ```json
@@ -156,8 +161,9 @@ Use `kind: "base"` with `repo_id` and `revision` for full checkpoints. Configure
 an appropriate GPU/disk for the supported model sizes. The catalog is an operator
 boundary: validate architecture, adapter/base compatibility, and memory use before
 adding a model. This version uses one GPU per job and provisions it even for an API-only panel.
-The pinned native runner caps LoRA rank at 64; verify adapters against both engines
-before adding them. Increasing GPU count does not configure tensor parallelism.
+The native runner reads adapter configurations to size LoRA capacity, including
+the selected rank-128 composed adapter. Verify adapters against both engines before
+adding them. Increasing GPU count does not configure tensor parallelism.
 
 ## 5. Connect the website
 

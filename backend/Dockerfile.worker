@@ -1,11 +1,9 @@
-# Build from this backend directory. CI/release should publish by immutable digest.
-FROM python:3.11-slim
-ARG EIGENBENCH_REVISION=a3ec82ad9d351f96f7c735275732a0f2aaffcc07
-RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/invi-bhagyesh/EigenBench-inspect.git /opt/eigenbench \
-    && cd /opt/eigenbench && git checkout "$EIGENBENCH_REVISION"
-# Pin the runner source; resolve GPU dependencies when building, then deploy an immutable image.
-RUN pip install --no-cache-dir -r /opt/eigenbench/requirements.txt
+# Reuse the published dependency image; rebuild Dockerfile.worker-base to refresh it.
+FROM ghcr.io/valuearena/evaluation-worker@sha256:9ef0b90df76fa1fcb54253bbc8e9a2ec296c6ed0e5844e22ab39a76aea389272
+ARG EIGENBENCH_REVISION=bd03a1d762f61838adeea4a2d0ada263b83e8cf2
+RUN cd /opt/eigenbench \
+    && git fetch origin "$EIGENBENCH_REVISION" \
+    && git checkout --detach "$EIGENBENCH_REVISION"
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

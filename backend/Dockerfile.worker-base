@@ -1,0 +1,14 @@
+# Build from this backend directory. CI/release should publish by immutable digest.
+FROM python:3.11-slim
+ARG EIGENBENCH_REVISION=a3ec82ad9d351f96f7c735275732a0f2aaffcc07
+RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 && rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/invi-bhagyesh/EigenBench-inspect.git /opt/eigenbench \
+    && cd /opt/eigenbench && git checkout "$EIGENBENCH_REVISION"
+# Pin the runner source; resolve GPU dependencies when building, then deploy an immutable image.
+RUN pip install --no-cache-dir -r /opt/eigenbench/requirements.txt
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app app
+ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
+CMD ["python", "-m", "app.worker"]
