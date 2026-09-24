@@ -84,8 +84,15 @@ def create_app(config=None, store=None, auth=None, storage=None):
         except (ValueError,ValidationError):
             raise HTTPException(422,'Spec overrides conflict with site defaults or model panel') from None
         config['advanced_spec']=advanced.model_dump(exclude_unset=True,exclude_none=True)
-        enforce(config,db.effective_limits(user_id))
         return config
+
+    def select_compute(config,refs,user_id):
+        local = any(isinstance(ref,dict) for ref in refs.values())
+        if local and config['compute_type']=='cpu':
+            raise HTTPException(422,'CPU evaluations support API models only; Hugging Face models require GPU')
+        if not local:
+            config.update(compute_type='cpu',gpu_count=1)
+        enforce(config,db.effective_limits(user_id))
 
     @app.get('/admin')
     def admin_data(actor=Depends(administrator)):
@@ -186,8 +193,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         import pprint
         config = effective_config(incoming,user_id)
         config['model_refs'] = resolve_models(incoming, catalog, incoming.hf_token.get_secret_value() or (cfg.hf_token if incoming.funding == 'service' else ''))
-        if incoming.compute_type == 'cpu' and any(isinstance(ref, dict) for ref in config['model_refs'].values()):
-            raise HTTPException(422, 'CPU evaluations support API models only; Hugging Face models require GPU')
+        select_compute(config,config['model_refs'],user_id)
         spec = build_spec(config, '.')
         return {'spec': spec, 'python': 'RUN_SPEC = ' + pprint.pformat(spec, sort_dicts=False) + '\n'}
 
@@ -218,12 +224,11 @@ def create_app(config=None, store=None, auth=None, storage=None):
             raise HTTPException(422, 'Supply both your OpenRouter and RunPod API keys')
         if incoming.funding == 'own_keys':
             await run_in_threadpool(verify_provider_keys, keys)
-        if incoming.funding == 'service' and db.member(user_id)['role']!='admin' and (incoming.gpu_type != cfg.runpod_gpu_type or incoming.disk_gb != cfg.runpod_disk_gb or incoming.gpu_count != 1 or incoming.compute_type != 'gpu' or incoming.cpu_count != 4 or incoming.cpu_flavor != 'cpu3g' or incoming.volume_gb != 0):
+        if incoming.funding == 'service' and db.member(user_id)['role']!='admin' and (incoming.gpu_type != cfg.runpod_gpu_type or incoming.disk_gb != cfg.runpod_disk_gb or incoming.gpu_count != 1 or incoming.cpu_count != 4 or incoming.cpu_flavor != 'cpu3g' or incoming.volume_gb != 0):
             raise HTTPException(422, 'Custom compute requires your own provider keys')
+        select_compute(config,refs,user_id)
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
         # Snapshot the catalog: queued jobs do not silently change if administrators update it.
-        if incoming.compute_type == 'cpu' and any(isinstance(ref, dict) for ref in refs.values()):
-            raise HTTPException(422, 'CPU evaluations support API models only. Select GPU for Hugging Face models.')
         config['model_refs'] = refs
         if incoming.funding != 'own_keys': keys = {}
         if incoming.hf_token.get_secret_value(): keys['hf_token'] = incoming.hf_token.get_secret_value()
