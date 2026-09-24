@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Penguin } from './Penguin';
 import { ModelLogo } from './ModelLogo';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
 import { normConst, constLabel } from '@/lib/nicks';
@@ -29,7 +30,7 @@ export function HomeRanking() {
   const ticks = Array.from({ length: 4 }, (_, i) => domain[0] + (domain[1] - domain[0]) * i / 3);
   return <div className="home-ranking">
     <div className="home-plot-controls" role="group" aria-label="Ranking constitution">{['kindness', 'humor', 'goodness'].map(c => <button key={c} aria-pressed={trait === c} onClick={() => setTrait(c)}>{constLabel(c)}</button>)}</div>
-    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p> : !current ? <p className="chart-message" role="status">Loading published ranking…</p> : !rows.length ? <p className="chart-message">No scores are available in this run.</p> : <div className="home-dotplot">
+    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p> : !current ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading published ranking…</span></p> : !rows.length ? <p className="chart-message">No scores are available in this run.</p> : <div className="home-dotplot">
       <header><strong>{constLabel(trait)}</strong><span>Top {rows.length} of {current.rows.length} models · Latest published run</span></header>
       <div className="ranking-figure" key={current.run.slug} aria-label={`${constLabel(trait)} ranking`}>
         <div className="ranking-axis"><span>Model</span><svg viewBox="0 0 600 30" aria-hidden="true">{ticks.map(t => <text key={t} x={x(t)} y="20" textAnchor="middle">{Math.round(t)}</text>)}</svg><span>Elo</span></div>

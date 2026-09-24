@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Penguin } from './Penguin';
 import { ModelLogo } from './ModelLogo';
 import { fetchIndex, fetchMeta, fetchSummary } from '@/lib/hf';
 import { constLabel, normConst } from '@/lib/nicks';
@@ -101,7 +102,7 @@ export function ResultsExplorer({ embedded = false }: { embedded?: boolean }) {
   const choose = (name: string) => { setSelected(name); setHovered(''); };
   const chartReady = Boolean(x.value && (view === 'ranking' || (y.value && !issues.length)));
   if (indexError) return <p role="alert" className="chart-message">{indexError}</p>;
-  if (!ready) return <p role="status" className="chart-message">Loading experiments…</p>;
+  if (!ready) return <p role="status" className="chart-message chart-loading"><Penguin size={36} state="loading" /><span>Loading experiments…</span></p>;
   if (!runs.length) return <p className="chart-message">No published runs yet.</p>;
   return <section className={`results-explorer${embedded ? ' home-tradeoff' : ''}`} aria-label="Interactive results">
     {!embedded && <><div className="explorer-tabs" role="group" aria-label="Chart type">
@@ -123,7 +124,7 @@ export function ResultsExplorer({ embedded = false }: { embedded?: boolean }) {
       <span>{rows.length} of {allRows.length} models</span>
     </div>
     {/deprecated/i.test(`${xRun?.name} ${xRun?.note} ${yRun?.name} ${yRun?.note}`) && <p className="chart-message" role="status">One of these runs is deprecated. Read its notes before trusting the results.</p>}
-    {(x.error || (view === 'tradeoff' && y.error)) ? <p className="chart-message" role="alert">{x.error || y.error}</p> : view === 'tradeoff' && !ySlug ? <p className="chart-message">This experiment only covers one constitution. Pick a run from an experiment that covers two or more.</p> : !x.value || (view === 'tradeoff' && !y.value) ? <p className="chart-message" role="status">Loading scores and run settings…</p> : issues.length ? <div className="chart-message" role="status"><strong>These two runs can’t be compared directly.</strong><ul>{issues.map(issue => <li key={issue}>{issue}</li>)}</ul><a href={runURL(xSlug)}>Open the first run →</a></div> : !rows.length ? <p className="chart-message">No matching models. Try clearing the search or family filter.</p> : <>
+    {(x.error || (view === 'tradeoff' && y.error)) ? <p className="chart-message" role="alert">{x.error || y.error}</p> : view === 'tradeoff' && !ySlug ? <p className="chart-message">This experiment only covers one constitution. Pick a run from an experiment that covers two or more.</p> : !x.value || (view === 'tradeoff' && !y.value) ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading scores and run settings…</span></p> : issues.length ? <div className="chart-message" role="status"><strong>These two runs can’t be compared directly.</strong><ul>{issues.map(issue => <li key={issue}>{issue}</li>)}</ul><a href={runURL(xSlug)}>Open the first run →</a></div> : !rows.length ? <p className="chart-message">No matching models. Try clearing the search or family filter.</p> : <>
       {!embedded && <header className="chart-heading"><h2>{view === 'ranking' ? `${label(xRun)}: model rankings` : `${label(xRun)} and ${label(yRun)}`}</h2><p>{view === 'ranking' ? 'A higher score means the answers fit the constitution better.' : 'Each axis is Elo within its own run. Higher means more of that trait, which isn’t always a good thing.'}</p></header>}
       {view === 'ranking' ? <div className="ranking-figure" role="group" aria-label={`${label(xRun)} rankings with confidence intervals`}>
         <div className="ranking-axis"><span>Model</span><svg viewBox="0 0 600 30" aria-hidden="true">{ticks(domain).map(t => <text key={t} x={position(t, domain, 20, 560)} y={20} textAnchor="middle">{Math.round(t)}</text>)}</svg><span>Elo</span></div>

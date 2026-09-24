@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
+import { Penguin } from './Penguin';
 import { evaluationAuth, evaluationRequest as request } from '@/lib/evaluation';
 import { RunMonitor } from './RunMonitor';
 import type { EvaluationJob } from '@/lib/evaluation';
@@ -36,7 +37,7 @@ export function AdminConsole() {
  const member=data?.members.find(m=>m.user_id===memberId);
  function choose(m:Member){setMemberId(m.user_id);setStatus(m.status);setOverride(!!m.limits);setLimits(m.limits||data!.policy.limits);setReason('');}
  async function perform(fn:()=>Promise<void>,message:string){setBusy(true);setError('');setNotice('');try{await fn();await refresh();setNotice(message);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
- if(!ready)return <p>Loading admin access…</p>;
+ if(!ready)return <p role="status" className="chart-loading"><Penguin size={36} state="loading" /><span>Loading admin access…</span></p>;
  if(!loggedIn)return <EvaluationLogin/>;
  if(!data||!policy)return <p role="alert">{error||'Checking administrator access…'}</p>;
  return <div className="admin-console">
