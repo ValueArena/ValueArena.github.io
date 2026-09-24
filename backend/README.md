@@ -410,3 +410,9 @@ This reads Secure Cloud stock and GPU hourly prices for one GPU, CUDA 13+, and
 the requested disk capacity. Missing provider stock is reported as unknown;
 stock is a snapshot, not a reservation or a guarantee of allocation. Prices are
 GPU prices, not the total evaluation cost including storage and model APIs.
+
+The worker includes NVIDIA's CUDA 13.0 development toolkit (nvcc, headers and
+libraries) for FlashInfer JIT compilation. Both worker Dockerfiles compile and
+load a CUDA extension at image build time, in addition to the Triton C-extension
+check. This catches missing toolchains without a GPU; it does not replace a
+GPU inference smoke test.
