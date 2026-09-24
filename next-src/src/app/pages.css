@@ -374,3 +374,542 @@ body:has(.arena-home) .page-hills {
 .va-main .coverage-actions:empty {
   display: none;
 }
+
+/* ---------- Home carousel: cards dissolve into pixels at the edge ---------- */
+@supports (-webkit-mask-box-image: none) {
+  .featured-carousel-card {
+    border: 0;
+    border-radius: 0;
+    padding: 30px;
+    background: var(--card-bg);
+    -webkit-mask-box-image: url('/assets/art/pixel-dissolve-mask.png') 18 / 18px repeat;
+    transition: background-color 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .featured-carousel-card:hover {
+    background: color-mix(in srgb, var(--accent) 7%, var(--card-bg));
+    transform: translateY(-3px);
+  }
+}
+
+/* ---------- Evaluate: RunPod-style deploy layout ---------- */
+.eval-deploy {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+}
+.eval-deploy .eval-section {
+  padding: 22px 24px 24px;
+  border-radius: 12px;
+}
+.eval-deploy .eval-section header {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.eval-deploy .eval-section header > span {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 11px;
+}
+.eval-deploy .eval-section h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.eval-count {
+  margin-left: auto;
+  font: 500 11px var(--font-mono);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+}
+.eval-deploy .eval-section > p {
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.eval-deploy label,
+.eval-deploy legend,
+.eval-subhead {
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.evaluation-form.eval-deploy label :is(input, select, textarea),
+.evaluation-form.eval-deploy label > small {
+  font-family: var(--font-body);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.eval-subhead {
+  margin: 20px 0 8px;
+}
+.eval-search {
+  width: 100%;
+  margin: 2px 0 12px;
+}
+
+/* Model cards: logo, name, id and a check mark in the corner */
+.eval-deploy .eval-model-grid {
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.eval-deploy .eval-model-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 14px 40px 14px 14px;
+  border-radius: 8px;
+  background: var(--bg);
+  text-transform: none;
+  letter-spacing: normal;
+  font: inherit;
+  color: var(--text);
+}
+.eval-deploy .eval-model-card > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.eval-deploy .eval-model-card:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.eval-deploy .eval-model-card .model-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.eval-model-text {
+  display: grid;
+  min-width: 0;
+}
+.eval-model-text strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.eval-model-text small {
+  font: 11px var(--font-mono);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eval-check {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.eval-model-card:has(input:checked) .eval-check {
+  border-color: var(--accent);
+  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+.eval-deploy .eval-model-chip {
+  border-radius: 8px;
+}
+
+/* Two-way choices and GPUs as option cards */
+.eval-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 4px 0 16px;
+}
+.eval-deploy .eval-gpu {
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  min-width: 0;
+}
+.eval-gpu legend {
+  margin-bottom: 8px;
+}
+.eval-gpu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.eval-deploy .eval-choice-card {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.eval-deploy .eval-choice-card > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.eval-deploy .eval-choice-card strong {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.eval-deploy .eval-choice-card small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.eval-deploy .eval-choice-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.eval-deploy .eval-choice-card:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--card-bg));
+}
+.eval-deploy .eval-choice-card:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.eval-gpu:disabled .eval-choice-card {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.eval-gpu > small,
+.eval-deploy .eval-section > small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+/* Summary panel: key/value rows like a pricing summary */
+.eval-summary {
+  padding: 22px 22px 20px;
+  border-radius: 12px;
+}
+.eval-summary h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.eval-summary-list {
+  margin: 0 0 16px;
+}
+.eval-summary-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border-light);
+  font-size: 13px;
+}
+.eval-summary-list dt {
+  color: var(--text-muted);
+}
+.eval-summary-list dd {
+  margin: 0;
+  font: 500 12.5px var(--font-mono);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.eval-deploy .eval-submit {
+  border-top: 0;
+  padding-top: 4px;
+}
+.eval-deploy .eval-submit .button-primary {
+  min-height: 46px;
+  font-weight: 600;
+}
+
+/* Your evaluations: state pill with a status dot */
+.eval-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: 10px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  font: 500 11px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.eval-state::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.eval-state[data-state='running']::before,
+.eval-state[data-state='provisioning']::before {
+  background: #d9a441;
+  animation: eval-pulse 1.4s ease-in-out infinite;
+}
+.eval-state[data-state='queued']::before { background: #8a8f99; }
+.eval-state[data-state='succeeded']::before { background: var(--accent); }
+.eval-state[data-state='failed']::before,
+.eval-state[data-state='cancelled']::before { background: #b94a4a; }
+@keyframes eval-pulse {
+  50% { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eval-state::before { animation: none !important; }
+}
+
+@media (max-width: 900px) {
+  .eval-deploy {
+    grid-template-columns: 1fr;
+  }
+  .eval-summary {
+    position: static;
+  }
+}
+@media (max-width: 560px) {
+  .eval-choice {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Home: soft transitions instead of jumps ---------- */
+@keyframes va-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes va-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Picking a model: its details rise in, and the panel keeps its height */
+.chart-detail,
+.chart-detail-empty {
+  animation: va-rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.home-tradeoff .chart-inspector {
+  min-height: 168px;
+  align-items: start;
+}
+/* The selected dot grows instead of snapping, and its name fades in */
+.tradeoff-figure .scatter-dot {
+  r: 5px;
+  transition: r 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.25s ease;
+}
+.tradeoff-figure .scatter-dot.is-active {
+  r: 7px;
+}
+.tradeoff-figure .scatter-point-label {
+  animation: va-fade 0.2s ease both;
+}
+.tradeoff-figure g {
+  animation: va-fade 0.3s ease both;
+}
+/* Switching constitution: rows fade in one after another */
+.home-ranking .ranking-row {
+  animation: va-rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.home-ranking .ranking-row:nth-child(2) { animation-delay: 0.03s; }
+.home-ranking .ranking-row:nth-child(3) { animation-delay: 0.06s; }
+.home-ranking .ranking-row:nth-child(4) { animation-delay: 0.09s; }
+.home-ranking .ranking-row:nth-child(5) { animation-delay: 0.12s; }
+.home-ranking .ranking-row:nth-child(6) { animation-delay: 0.15s; }
+.home-ranking .ranking-row:nth-child(7) { animation-delay: 0.18s; }
+.home-ranking .ranking-row:nth-child(n + 8) { animation-delay: 0.21s; }
+/* Toggle buttons ease their colour changes */
+.va-main :is(.home-plot-controls, .chart-legend, .explorer-tabs, .featured-carousel-controls) button {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.va-main :is(.home-plot-controls, .chart-legend) button:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chart-detail,
+  .chart-detail-empty,
+  .tradeoff-figure g,
+  .tradeoff-figure .scatter-point-label,
+  .home-ranking .ranking-row {
+    animation: none;
+  }
+  .tradeoff-figure .scatter-dot {
+    transition: none;
+  }
+}
+
+/* Carousel strip: fade out at the left and right instead of cutting cards off */
+.featured-carousel-viewport {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+}
+
+/* ---------- Evaluate page: flat surfaces ---------- */
+/* Hairline borders, tighter corners and no drop shadows, like typical
+   dashboard setup pages; the rest of the site keeps its softer cards */
+.evaluation-page {
+  --card-line: #24292224;
+  --card-line-hover: #24292252;
+  --card-shadow: none;
+  --card-shadow-hover: none;
+  --panel-radius: 12px;
+  --control-radius: 8px;
+}
+:root[data-theme='dark'] .evaluation-page {
+  --card-line: #ffffff1f;
+  --card-line-hover: #ffffff45;
+}
+/* .va-main prefix: the shared card rule above is more specific (its :is() list
+   includes a :not()), so match it and win on order */
+.va-main .evaluation-page :is(.eval-section, .eval-setup, .evaluation-login, .eval-job, .eval-account-form, .evaluation-notice, .eval-tabs, .admin-panel) {
+  border-radius: 12px;
+  box-shadow: none;
+  transform: none;
+}
+.evaluation-page :is(.eval-job, .admin-panel):hover {
+  border-color: var(--card-line-hover);
+}
+.evaluation-page :is(.button-primary, .button-secondary, button, input, select, textarea) {
+  box-shadow: none;
+}
+.evaluation-page .eval-add-model,
+.evaluation-page .eval-upload {
+  border-radius: 10px;
+}
+.evaluation-page .evaluation-model:hover,
+.evaluation-page .eval-choice-card:hover {
+  transform: none;
+}
+
+/* Carousel controls: pixel icons in square-ish buttons */
+.featured-carousel-controls button {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+}
+.featured-carousel-controls .pixel-icon {
+  display: block;
+}
+.featured-carousel-controls .carousel-toggle[aria-pressed='false'] {
+  color: var(--accent);
+}
+.featured-carousel-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Navbar pills: a little less see-through than the original 78% */
+.va-glass-pill {
+  background: rgba(248, 242, 232, 0.9);
+}
+[data-theme='dark'] .va-glass-pill {
+  background: rgba(27, 29, 27, 0.9);
+}
+
+/* Liquid nav highlight: the pill glides between items (see Header) */
+.va-header .va-nav {
+  position: relative;
+  isolation: isolate;
+}
+.va-nav-blob {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    translate 0.5s cubic-bezier(0.34, 1.35, 0.64, 1),
+    width 0.5s cubic-bezier(0.34, 1.35, 0.64, 1),
+    height 0.4s ease,
+    scale 0.24s ease,
+    opacity 0.25s ease;
+}
+.va-nav-blob.is-on {
+  opacity: 1;
+}
+/* A quick squash while it travels, like a drop stretching */
+.va-nav-blob.is-moving {
+  scale: 1.1 0.84;
+}
+.va-nav-blob.is-instant {
+  transition: none;
+}
+/* The pill replaces the old underline and hover background */
+.va-header .va-nav a,
+.va-header .va-nav a:hover,
+.va-header .va-nav a[aria-current='page'] {
+  background: transparent;
+  text-decoration: none;
+}
+.va-header .va-nav a {
+  transition: color 0.25s ease;
+}
+.va-header .va-nav a:hover,
+.va-header .va-nav a[aria-current='page'] {
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .va-nav-blob {
+    transition: opacity 0.2s ease;
+  }
+  .va-nav-blob.is-moving {
+    scale: 1;
+  }
+}
+
+/* GPU heading row with the availability check beside it */
+.eval-gpu-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+.eval-gpu-label {
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.va-main .eval-link-button {
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.va-main .eval-link-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.eval-gpu-card[data-stock='none'] {
+  opacity: 0.55;
+}
+.eval-gpu-card[data-stock='ok'] small {
+  color: var(--accent);
+}
