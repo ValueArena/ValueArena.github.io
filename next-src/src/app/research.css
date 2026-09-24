@@ -337,8 +337,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .home-contents a[aria-current='location'] { color: var(--accent); font-weight: 600; }
 .home-tradeoff .chart-tools { padding: 0 0 10px; border-bottom: 0; }
 .home-tradeoff .tradeoff-figure { max-height: none; min-width: 480px; }
-.home-tradeoff .chart-legend { margin: 10px 0 12px; gap: 8px; }
-.home-tradeoff .chart-legend button { font-size: 12px; padding: 8px 12px; background: var(--bg-elevated); border-radius: 5px; }
+.home-tradeoff .chart-legend { margin: 10px 0 12px; gap: 6px; }
+.home-tradeoff .chart-legend button { font-size: 10.5px; gap: 6px; padding: 4px 8px; background: var(--bg-elevated); border-radius: 4px; }
+.home-tradeoff .chart-legend .model-logo { width: 15px; height: 15px; }
+.home-tradeoff .chart-legend i { width: 6px; height: 6px; }
 .home-tradeoff .chart-legend button:hover { border-color: var(--accent); }
 .home-tradeoff .chart-legend button[aria-pressed='true'] { background: var(--accent-dim); border-color: var(--accent); }
 .home-tradeoff .chart-inspector { border: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0; padding: 18px 0; margin-top: 16px; min-height: 100px; }
