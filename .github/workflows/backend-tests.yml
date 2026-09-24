@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: jchang153/EigenBench
-          ref: 07a6772207658d06d5c04decc4367b259b8f12b6
+          ref: 5e7520f71fd74fb3c884ae1a02534c8489348dbd
           path: upstream-eigenbench
       - uses: actions/setup-python@v5
         with:

@@ -24,6 +24,8 @@ class TranscriptRow(BaseModel):
 class ResultSummary(BaseModel):
     model_config = ConfigDict(extra='forbid')
     summary: list[RatingRow] = Field(min_length=1)
+    omitted_count: int = Field(default=0, ge=0)
+    planned_count: int | None = Field(default=None, ge=0)
     record_count: int = Field(ge=0)
     batch_count: int = Field(ge=0)
 

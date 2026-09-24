@@ -1,11 +1,6 @@
-# CUDA development files are required for FlashInfer's runtime compilation.
-FROM nvidia/cuda:13.0.2-devel-ubuntu22.04@sha256:6b6617592b94e7dcc6ffbe6d00720eed27bc6e3b4f06b26b93b4070c31f57391 AS cuda-toolkit
-# Reuse the published dependency image; rebuild Dockerfile.worker-base to refresh it.
-FROM ghcr.io/valuearena/evaluation-worker@sha256:9ef0b90df76fa1fcb54253bbc8e9a2ec296c6ed0e5844e22ab39a76aea389272
-COPY --from=cuda-toolkit /usr/local/cuda-13.0 /usr/local/cuda
-ENV CUDA_HOME=/usr/local/cuda PATH=/usr/local/cuda/bin:$PATH LD_LIBRARY_PATH=/usr/local/cuda/lib64
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
-ARG EIGENBENCH_REVISION=07a6772207658d06d5c04decc4367b259b8f12b6
+# Reuse the verified CUDA toolkit and GPU dependency image.
+FROM ghcr.io/valuearena/evaluation-worker@sha256:66adcf3c9f6672826eba35cab072e8d5e5db3cbe67fcf2c71dac5a76ae4d533d
+ARG EIGENBENCH_REVISION=5e7520f71fd74fb3c884ae1a02534c8489348dbd
 RUN cd /opt/eigenbench \
     && git remote set-url origin https://github.com/jchang153/EigenBench.git \
     && git fetch origin "$EIGENBENCH_REVISION" \

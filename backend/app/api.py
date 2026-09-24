@@ -74,7 +74,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         return user_id
 
     def effective_config(incoming,user_id):
-        config=incoming.model_dump(exclude={'openrouter_key','runpod_key'})
+        config=incoming.model_dump(exclude={'openrouter_key','runpod_key','hf_token'})
         defaults=db.policy()['policy']['spec_defaults']
         overrides=incoming.advanced_spec.model_dump(exclude_unset=True,exclude_none=True)
         merged=merge_options(defaults,overrides)
@@ -145,7 +145,8 @@ def create_app(config=None, store=None, auth=None, storage=None):
             if desired and not publication:publication={'state':'pending'}
             elif publication and publication.get('desired_public')!=desired:
                 publication={**publication,'state':'pending' if desired else 'unpublishing'}
-        return public_job(job) | {'publication':publication}
+        summary=db.get_presentation(job['id'],'summary') or {}
+        return public_job(job) | {'publication':publication, 'omitted_count': summary.get('omitted_count',0)}
 
     @app.get('/health')
     def health(): return {'status': 'ok'}
@@ -183,7 +184,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if db.member(user_id)['status']!='approved': raise HTTPException(403,'Account approval required')
         import pprint
         config = effective_config(incoming,user_id)
-        config['model_refs'] = resolve_models(incoming, catalog)
+        config['model_refs'] = resolve_models(incoming, catalog, incoming.hf_token.get_secret_value() or (cfg.hf_token if incoming.funding == 'service' else ''))
         spec = build_spec(config, '.')
         return {'spec': spec, 'python': 'RUN_SPEC = ' + pprint.pformat(spec, sort_dicts=False) + '\n'}
 
@@ -211,7 +212,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if not db.policy()['policy']['submissions_enabled']: raise HTTPException(403,'New evaluations are temporarily paused')
         config=effective_config(incoming,user_id)
         from starlette.concurrency import run_in_threadpool
-        refs = await run_in_threadpool(resolve_models, incoming, catalog)
+        refs = await run_in_threadpool(resolve_models, incoming, catalog, incoming.hf_token.get_secret_value() or (cfg.hf_token if incoming.funding == 'service' else ''))
         keys = {name: getattr(incoming, name).get_secret_value() for name in ('openrouter_key', 'runpod_key')}
         if incoming.funding == 'own_keys' and not all(keys.values()):
             raise HTTPException(422, 'Supply both your OpenRouter and RunPod API keys')
@@ -222,7 +223,9 @@ def create_app(config=None, store=None, auth=None, storage=None):
         digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
         # Snapshot the catalog: queued jobs do not silently change if administrators update it.
         config['model_refs'] = refs
-        encrypted = encrypt(cfg.worker_secret, keys) if incoming.funding == 'own_keys' else None
+        if incoming.funding != 'own_keys': keys = {}
+        if incoming.hf_token.get_secret_value(): keys['hf_token'] = incoming.hf_token.get_secret_value()
+        encrypted = encrypt(cfg.worker_secret, keys) if keys else None
         return present(db.submit(user_id, idempotency_key, digest, config, encrypted))
 
     @app.get('/evaluation-schema')

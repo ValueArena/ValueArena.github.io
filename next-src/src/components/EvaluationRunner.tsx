@@ -35,7 +35,7 @@ export function EvaluationRunner() {
   const [criteria, setCriteria] = useState(CONSTITUTIONS_DATA.humor.join('\n'));
   const [source, setSource] = useState('airiskdilemmas'); const [count, setCount] = useState(200);
   const [scenarioText, setScenarioText] = useState(''); const [fileName, setFileName] = useState('');
-  const [ownKeys, setOwnKeys] = useState(false); const [orKey, setOrKey] = useState(''); const [rpKey, setRpKey] = useState('');
+  const [ownKeys, setOwnKeys] = useState(false); const [orKey, setOrKey] = useState(''); const [rpKey, setRpKey] = useState(''); const [hfToken, setHfToken] = useState('');
   const [gpu, setGPU] = useState(gpuTypes[0]); const [disk, setDisk] = useState(100);
   const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number } | null>(null);
   const [stockBusy, setStockBusy] = useState(false); const [stockError, setStockError] = useState('');
@@ -57,7 +57,7 @@ export function EvaluationRunner() {
       if (!alive) return;
       setSession(next); setAuthReady(true);
       if (event === 'PASSWORD_RECOVERY') { setTab('account'); setNotice('Choose a new password below.'); }
-      if (!next) { setOrKey(''); setRpKey(''); setJobs([]); submission.current = null; }
+      if (!next) { setOrKey(''); setRpKey(''); setHfToken(''); setJobs([]); submission.current = null; }
     });
     return () => { alive = false; data.subscription.unsubscribe(); };
   }, [auth]);
@@ -87,6 +87,16 @@ export function EvaluationRunner() {
     finally { setStockBusy(false); }
   }
 
+  const collectionOptions = (advancedOptions.collection || {}) as {generation?:Record<string,{max_tokens?:number}>;failure_policy?:string};
+  function setBudget(phase:string,value:string) {
+    const options = parseAdvancedSpec(advanced);
+    const collection = (options.collection || {}) as Record<string,unknown>;
+    const generation = (collection.generation || {}) as Record<string,Record<string,unknown>>;
+    const updated = {...generation[phase]};
+    if (value === '') delete updated.max_tokens; else updated.max_tokens = Number(value);
+    setAdvanced(JSON.stringify({...options,collection:{...collection,generation:{...generation,[phase]:updated}}},null,2));
+  }
+
   function addModel() {
     setError('');
     if (!/^[\w.-]+\/[\w.:-]+$/.test(repo.trim())) { setError('Enter a model ID such as Qwen/Qwen2.5-7B-Instruct or openai/gpt-4.1.'); return; }
@@ -111,6 +121,7 @@ export function EvaluationRunner() {
     return { name, engine, advanced_spec: parseAdvancedSpec(advanced), models: selected, custom_models: custom.filter(m => selected.includes(m.id)),
         criteria: criteria.split('\n').map(s => s.trim()).filter(Boolean), constitution_name: constitution === 'custom' ? 'Custom' : label(constitution),
         scenario_source: source, scenario_count: count, scenarios: source === 'custom' ? parseScenarios(scenarioText,limits.max_scenarios ?? Infinity) : [], visibility,
+        hf_token: hfToken,
         funding: ownKeys ? 'own_keys' : 'service', ...(ownKeys && includeKeys ? { openrouter_key: orKey, runpod_key: rpKey } : {}),
         gpu_type: ownKeys || isAdmin ? gpu : gpuTypes[0], disk_gb: ownKeys || isAdmin ? disk : 100 };
   }
@@ -149,7 +160,7 @@ export function EvaluationRunner() {
       const response = await request('/evaluations', { method: 'POST', body, headers: { 'Idempotency-Key': submission.current.key } });
       const job: Job = await response.json();
       setJobs(existing => [job, ...existing.filter(j => j.id !== job.id)]); submission.current = null;
-      setOrKey(''); setRpKey(''); setTab('runs');
+      setOrKey(''); setRpKey(''); setHfToken(''); setTab('runs');
       setNotice('Evaluation queued. You can leave this page and return to your results.');
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
@@ -195,7 +206,7 @@ export function EvaluationRunner() {
           {custom.map(m => <div className="eval-model-chip" key={m.id}><span><strong>{m.repo_id}</strong><small>{m.provider === 'openrouter' ? 'OpenRouter' : m.kind === 'lora' ? `LoRA · ${m.base_model_id}` : 'Hugging Face'}{m.subfolder && ` / ${m.subfolder}`}</small></span><button type="button" aria-label={`Remove ${m.repo_id}`} onClick={() => { setCustom(ms => ms.filter(x => x.id !== m.id)); setSelected(ids => ids.filter(id => id !== m.id)); }}>Remove</button></div>)}
           <div className="eval-add-model"><div className="eval-fields"><label>Provider<select value={provider} onChange={e => setProvider(e.target.value)}><option value="openrouter">OpenRouter</option><option value="huggingface">Hugging Face</option></select></label><label>Model ID<input value={repo} onChange={e => setRepo(e.target.value)} list={provider === 'openrouter' ? 'openrouter-models' : undefined} placeholder={provider === 'openrouter' ? 'Search or paste provider/model' : 'owner/model'} /></label></div>
             <datalist id="openrouter-models">{directory.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}</datalist>
-            {provider === 'huggingface' && <><label>Weights<select value={kind} onChange={e => setKind(e.target.value)}><option value="base">Full model</option><option value="lora">LoRA adapter</option></select></label>{kind === 'lora' && <div className="eval-fields"><label>Base model<input value={base} onChange={e => setBase(e.target.value)} placeholder="Qwen/Qwen2.5-7B-Instruct" /></label><label>Adapter subfolder (optional)<input value={subfolder} onChange={e => setSubfolder(e.target.value)} placeholder="introspection-final" /></label></div>}<small>Public, ungated safetensors repositories. Revisions are pinned at submission. The model must fit your GPU and be supported by vLLM.</small></>}
+            {provider === 'huggingface' && <><label>Weights<select value={kind} onChange={e => setKind(e.target.value)}><option value="base">Full model</option><option value="lora">LoRA adapter</option></select></label>{kind === 'lora' && <div className="eval-fields"><label>Base model<input value={base} onChange={e => setBase(e.target.value)} placeholder="Qwen/Qwen2.5-7B-Instruct" /></label><label>Adapter subfolder (optional)<input value={subfolder} onChange={e => setSubfolder(e.target.value)} placeholder="introspection-final" /></label></div>}<small>Public or gated safetensors repositories. Gated models require approval and a Hugging Face token. Revisions are pinned at submission. The model must fit your GPU and be supported by vLLM.</small></>}
             <button type="button" className="button-secondary" onClick={addModel}>+ Add model</button>
           </div>
         </section>
@@ -209,6 +220,10 @@ export function EvaluationRunner() {
       <aside className="eval-setup"><h2>Run setup</h2><label>Evaluation name<input required maxLength={120} value={name} onChange={e => setName(e.target.value)} placeholder="Humor / Qwen comparison" /></label><label>Engine<select value={engine} onChange={e => setEngine(e.target.value)}><option value="native">Native EigenBench</option><option value="inspect">Inspect</option></select></label>
         <label>Compute & API access<select value={ownKeys ? 'own' : 'service'} onChange={e => setOwnKeys(e.target.value === 'own')}><option value="service">Lab-funded compute</option><option value="own">My provider keys</option></select></label>
         {ownKeys ? <><label>OpenRouter API key<input type="password" required value={orKey} onChange={e => setOrKey(e.target.value)} autoComplete="off" /></label><label>RunPod API key<input type="password" required value={rpKey} onChange={e => setRpKey(e.target.value)} autoComplete="off" /></label><small>Charged to your provider accounts. Keys are encrypted and removed after confirmed GPU cleanup.</small></> : <small>{enabled ? (limits.require_credits ? `${Math.floor((credits ?? 0) / 60)} compute minutes available.` : 'Lab-funded compute. No execution credit limit.') : 'No service credits available. Contact an administrator.'}</small>}
+        <label>Hugging Face token (optional)<input type="password" value={hfToken} onChange={e=>setHfToken(e.target.value)} autoComplete="off" placeholder="hf_…"/><small>Used only for this run. Your Hugging Face account must have access to gated models. Stored encrypted and removed after GPU cleanup.</small></label>
+        <div className="eval-fields">{(['response','reflection','direct_rating'] as const).map(phase=><label key={phase}>{phase==='direct_rating'?'Rating':label(phase)} token budget<input type="number" min="1" step="1" disabled={!advancedValid} value={collectionOptions.generation?.[phase]?.max_tokens ?? ''} placeholder={{response:'Default: 4096',reflection:'Default: 2048',direct_rating:'Default: 512'}[phase]} onChange={e=>setBudget(phase,e.target.value)}/></label>)}</div>
+        <small>Increase reflection tokens for reasoning models. Per-model overrides are available in Advanced configuration.</small>
+        {engine==='native'&&<label><input type="checkbox" checked={collectionOptions.failure_policy!=='strict'} disabled={!advancedValid} onChange={e=>setAdvanced(JSON.stringify({...advancedOptions,collection:{...collectionOptions,failure_policy:e.target.checked?'omit_invalid_judgments':'strict'}},null,2))}/>Continue after invalid judgments; omit affected samples after retries.</label>}
         <label>GPU<select disabled={!ownKeys && !isAdmin} value={ownKeys || isAdmin ? gpu : gpuTypes[0]} onChange={e => setGPU(e.target.value)}>{gpuTypes.map(g => <option key={g}>{g}</option>)}</select><small>One GPU per evaluation.</small></label>
         <div className="gpu-availability">
           <button type="button" className="research-button secondary" disabled={stockBusy} onClick={checkStock}>{stockBusy ? 'Checking RunPod…' : 'Check GPU availability'}</button>

@@ -58,6 +58,7 @@ class OpenRouter(Options):
     max_workers: int = Field(default=10, ge=1)
 
 class Collection(Options):
+    failure_policy: Literal['strict', 'omit_invalid_judgments'] = 'omit_invalid_judgments'
     enabled: Literal[True] = True
     sampler_mode: Literal['all_to_all', 'partitioned_random_judge', 'balanced_unique_judge'] = 'all_to_all'
     sampler_seed: Seed = 42

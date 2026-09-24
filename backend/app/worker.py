@@ -87,7 +87,10 @@ def publish_results(client, directory):
     if batch:
         client.put_result(f'records-{batch_count}', {'records': batch}); batch_count += 1
     summary = read_summary(directory)
-    client.put_result('summary', {'summary': summary, 'record_count': count, 'batch_count': batch_count})
+    omitted_path = directory/'omitted_samples.json'
+    coverage = json.loads(omitted_path.read_text()) if omitted_path.exists() else {}
+    client.put_result('summary', {'summary': summary, 'record_count': count, 'batch_count': batch_count,
+        'omitted_count': coverage.get('omitted',0), 'planned_count': coverage.get('planned')})
 
 
 def bundle(directory, target):
