@@ -106,6 +106,12 @@ class GovernanceStore:
 
     def ensure_member(self,user_id,email='',username='',bootstrap=False):
         from .db import members,accounts,policy,ledger
+        # Most authenticated requests only need to read an existing member.
+        # Avoid serializing all users behind the global policy row lock.
+        with self.engine.connect() as c:
+            existing=c.execute(select(members).where(members.c.user_id==user_id)).mappings().first()
+            if existing and (not email or existing['email']==email) and (not username or existing['username']==username[:100]) and (not bootstrap or (existing['role']=='admin' and existing['status']=='approved')):
+                return dict(existing)
         with self.engine.begin() as c:
             p=c.execute(select(policy).where(policy.c.id==1).with_for_update()).mappings().one()
             row=c.execute(select(members).where(members.c.user_id==user_id).with_for_update()).mappings().first()
@@ -125,6 +131,21 @@ class GovernanceStore:
                 if values: c.execute(update(members).where(members.c.user_id==user_id).values(**values))
             if bootstrap: c.execute(update(accounts).where(accounts.c.user_id==user_id).values(enabled=True))
             return dict(c.execute(select(members).where(members.c.user_id==user_id)).mappings().one())
+
+    def account_snapshot(self,user_id):
+        from .db import members,accounts,policy
+        with self.engine.connect() as c:
+            row=c.execute(select(members,accounts.c.credits,accounts.c.enabled,policy.c.data.label('site_policy'))
+                .outerjoin(accounts,accounts.c.user_id==members.c.user_id)
+                .join(policy,policy.c.id==1).where(members.c.user_id==user_id)).mappings().one()
+            result=dict(row)
+        site=result.pop('site_policy')
+        result['credits']=result['credits'] or 0
+        result['enabled']=bool(result['enabled']) and result['status']=='approved'
+        result['limits']=Limits.model_validate(result['limits'] or site['limits']).model_dump()
+        result['submissions_enabled']=site['submissions_enabled']
+        result['credit_unit']='execution seconds; not currency'
+        return result
 
     def member(self,user_id):
         from .db import members
