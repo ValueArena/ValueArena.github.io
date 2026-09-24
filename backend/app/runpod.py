@@ -24,6 +24,9 @@ class RunPod:
         payload = {'name': self.name(job['id']), 'imageName': self.cfg.worker_image,
             'cloudType': 'SECURE', 'computeType': 'GPU', 'gpuTypeIds': [job['config'].get('gpu_type', self.cfg.runpod_gpu_type)],
             'gpuCount': self.cfg.runpod_gpu_count, 'containerDiskInGb': job['config'].get('disk_gb', self.cfg.runpod_disk_gb),
+            # CUDA 13 worker wheels cannot initialize on CUDA 12.x hosts.
+            # 13.0 is currently the highest version accepted by RunPod's v1 API.
+            'allowedCudaVersions': ['13.0'],
             'volumeInGb': 0, 'interruptible': False, 'ports': [], 'env': env}
         response = self.client.post('/pods', json=payload)
         response.raise_for_status()

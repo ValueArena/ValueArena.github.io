@@ -372,3 +372,7 @@ Hugging Face commit history or downloaded copies. Private runs are never publish
 until their owner chooses public visibility. Failed runs are not published.
 Exports use a file allowlist and atomic commits against the latest dataset revision
 to preserve other researchers' concurrent uploads.
+
+GPU allocation requires a CUDA 13.0 host (`allowedCudaVersions: ["13.0"]`),
+the highest version currently accepted by the RunPod v1 API. There is no
+fallback to CUDA 12.x hosts, which cannot initialize this worker’s PyTorch build.
