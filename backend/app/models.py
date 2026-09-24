@@ -33,7 +33,7 @@ class EvaluationRequest(BaseModel):
     advanced_spec: AdvancedSpec = Field(default_factory=AdvancedSpec)
     funding: Literal['service', 'own_keys'] = 'service'
     openrouter_key: SecretStr = Field(default=SecretStr(''), max_length=512)
-    hf_token: SecretStr = Field(default=SecretStr(''), max_length=512)
+    hf_token: SecretStr = Field(default=SecretStr(''), max_length=512, exclude=True)
     runpod_key: SecretStr = Field(default=SecretStr(''), max_length=512)
     gpu_type: Literal['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA H100 80GB HBM3'] = 'NVIDIA A40'
     disk_gb: int = Field(default=100, ge=50, le=1000)
