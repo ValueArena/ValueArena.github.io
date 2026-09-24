@@ -913,3 +913,93 @@ body:has(.arena-home) .page-hills {
 .eval-gpu-card[data-stock='ok'] small {
   color: var(--accent);
 }
+
+/* ---------- Your evaluations: collapsible runs ---------- */
+.evaluation-jobs article.eval-job {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+}
+.va-main .eval-job-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.va-main .eval-job-toggle:hover {
+  background: var(--accent-dim);
+}
+.eval-job-toggle .eval-state {
+  margin-right: 0;
+  min-width: 112px;
+}
+.eval-job-title {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.eval-job-title strong {
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eval-job-title small {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A chevron drawn with two borders; it turns when the run opens */
+.eval-job-chevron {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 4px 0;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.eval-job.is-open .eval-job-chevron {
+  transform: translateY(3px) rotate(225deg);
+}
+/* Height animates from 0 to its content with the grid-rows trick */
+.eval-job-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.eval-job.is-open .eval-job-body {
+  grid-template-rows: 1fr;
+}
+.eval-job-inner {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  opacity: 0;
+  transition: opacity 0.25s ease, padding 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.eval-job.is-open .eval-job-inner {
+  padding: 4px 20px 20px;
+  opacity: 1;
+  border-top: 1px solid var(--card-line);
+}
+@media (prefers-reduced-motion: reduce) {
+  .eval-job-body,
+  .eval-job-inner,
+  .eval-job-chevron {
+    transition: none;
+  }
+}
