@@ -41,6 +41,8 @@ export function EvaluationRunner() {
   const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number } | null>(null);
   const [stockBusy, setStockBusy] = useState(false); const [stockError, setStockError] = useState('');
   const [visibility, setVisibility] = useState('private');
+  const [accessError, setAccessError] = useState('');
+  const [accessRetry, setAccessRetry] = useState(0);
   const [access,setAccess] = useState('loading'); const [isAdmin,setIsAdmin] = useState(false); const [submissionsEnabled,setSubmissionsEnabled] = useState(true);
   const [limits,setLimits] = useState<{max_models:number|null;max_scenarios:number|null;max_runtime_seconds:number|null;max_disk_gb:number|null;require_credits:boolean;allow_own_keys:boolean;allow_public_results:boolean}>({max_models:null,max_scenarios:null,max_runtime_seconds:null,max_disk_gb:null,require_credits:false,allow_own_keys:true,allow_public_results:true});
 
@@ -64,20 +66,81 @@ export function EvaluationRunner() {
   }, [auth]);
 
   useEffect(() => {
+    setAccess('loading'); setAccessError(''); setIsAdmin(false); setEnabled(false);
     if (!session || !evaluationAPI) return;
     let alive = true, pending = false;
-    async function refresh() {
-      if (pending) return; pending = true;
+    const controller = new AbortController();
+    async function refreshAccount() {
+      if (pending) return;
+      pending = true;
+      const deadline = new AbortController();
+      const abort = () => deadline.abort();
+      controller.signal.addEventListener('abort', abort);
+      const timeout = setTimeout(abort, 20000);
       try {
-        const [account, catalog, runs] = await Promise.all([request('/account').then(r => r.json()), request('/models').then(r => r.json()), request('/evaluations').then(r => r.json())]);
-        if (alive) { setAccess(account.status || 'approved'); setIsAdmin(account.role==='admin'); if(account.limits)setLimits(account.limits);setSubmissionsEnabled(account.submissions_enabled!==false); setCredits(account.credits); setEnabled(account.enabled); setModels(catalog.models); setJobs(runs); }
-      } catch (e) { if (alive) setError((e as Error).message); } finally { pending = false; }
+        const account = await request('/account', { signal: deadline.signal }).then(r => r.json());
+        if (alive) {
+          setAccess(account.status || 'approved'); setAccessError('');
+          setIsAdmin(account.role === 'admin');
+          if (account.limits) setLimits(account.limits);
+          setSubmissionsEnabled(account.submissions_enabled !== false);
+          setCredits(account.credits); setEnabled(account.enabled);
+        }
+      } catch (e) {
+        if (alive) {
+          setAccess('error'); setEnabled(false);
+          setAccessError(deadline.signal.aborted ? 'The account check timed out. Please retry.' : (e as Error).message);
+        }
+      } finally {
+        clearTimeout(timeout); controller.signal.removeEventListener('abort', abort); pending = false;
+      }
     }
-    void refresh();
-    void request('/models/openrouter').then(r => r.json()).then(data => { if (alive) setDirectory(data.models); }).catch(() => {});
-    const timer = setInterval(refresh, 5000);
-    return () => { alive = false; clearInterval(timer); };
+    void refreshAccount();
+    const timer = setInterval(refreshAccount, 15000);
+    return () => { alive = false; clearInterval(timer); controller.abort(); };
+  }, [session?.user.id, accessRetry]);
+
+  useEffect(() => {
+    setModels([]); setJobs([]); setDirectory([]);
+    if (!session || !evaluationAPI) return;
+    let alive = true, pending = false;
+    const controller = new AbortController();
+    const options = { signal: controller.signal };
+    void request('/models', options).then(r => r.json()).then(data => {
+      if (alive) setModels(data.models);
+    }).catch(e => { if (alive) setError(`Could not load models: ${e.message}`); });
+    void request('/models/openrouter', options).then(r => r.json()).then(data => {
+      if (alive) setDirectory(data.models);
+    }).catch(() => {});
+    async function refreshRuns() {
+      if (pending) return;
+      pending = true;
+      try {
+        const runs = await request('/evaluations', options).then(r => r.json());
+        if (alive) setJobs(runs);
+      } catch (e) { if (alive) setError(`Could not load evaluations: ${(e as Error).message}`); }
+      finally { pending = false; }
+    }
+    void refreshRuns();
+    const timer = setInterval(refreshRuns, 5000);
+    return () => { alive = false; clearInterval(timer); controller.abort(); };
   }, [session?.user.id]);
+
+  async function prepareRetry(job: Job) {
+    try {
+      const config = await request(`/evaluations/${job.id}/settings`).then(r => r.json());
+      setName(config.name); setEngine(config.engine); setSelected(config.models);
+      setCustom(config.custom_models || []); setAdvanced(JSON.stringify(config.advanced_spec || {}, null, 2));
+      setConstitution(presetNames.find(n => label(n) === config.constitution_name) || 'custom');
+      setCriteria(config.criteria.join('\n')); setSource(config.scenario_source);
+      setCount(config.scenario_count); setScenarioText(config.scenarios.map((text: string) => JSON.stringify({scenario: text})).join('\n'));
+      setFileName('Restored scenarios'); setVisibility(config.visibility);
+      setOwnKeys(config.funding === 'own_keys'); setGPU(config.gpu_type); setDisk(config.disk_gb);
+      setOrKey(''); setRpKey(''); setHfToken(''); submission.current = null;
+      setTab('new'); setError('');
+      setNotice('Settings restored. Review the GPU and re-enter any personal keys, then submit a new evaluation.');
+    } catch (e) { setError((e as Error).message); }
+  }
 
   async function checkStock() {
     setStockBusy(true); setStockError(''); setStock(null);
@@ -199,7 +262,7 @@ export function EvaluationRunner() {
     <nav className="eval-tabs" aria-label="Evaluation workspace">{(['new', 'runs', 'account'] as const).map(t => <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => setTab(t)}>{t === 'new' ? 'New evaluation' : t === 'runs' ? `Your evaluations (${jobs.length})` : 'Account'}</button>)}</nav>
     {error && <p role="alert" className="evaluation-notice">{error}</p>}{notice && <p role="status" className="evaluation-notice">{notice}</p>}
     {tab === 'account' && <form className="evaluation-form eval-account-form" onSubmit={saveAccount}><h2>Your account</h2><p>{session.user.email}</p><label>Username<input required pattern="[a-zA-Z0-9_.-]+" minLength={2} maxLength={40} value={username} onChange={e => setUsername(e.target.value)} autoComplete="nickname" /></label><label>Set a password<input type="password" minLength={12} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" /><small>Leave blank to keep your existing password.</small></label><button className="button-primary" disabled={busy}>Save account</button></form>}
-    {tab === 'new' && access!=='approved' && <div className="evaluation-notice eval-status" role="status"><Penguin size={40} state={access==='loading'?'loading':'idle'} /><span>{access==='loading'?'Checking account access…':access==='pending'?'Your access request is waiting for administrator approval.':`Your account is ${access}. Contact an administrator.`}</span></div>}
+    {tab === 'new' && access!=='approved' && <div className="evaluation-notice eval-status" role="status"><Penguin size={40} state={access==='loading'?'loading':'idle'} /><span>{access==='error'?accessError:access==='loading'?'Checking account access…':access==='pending'?'Your access request is waiting for administrator approval.':`Your account is ${access}. Contact an administrator.`}</span>{access==='error' && <button type="button" onClick={() => setAccessRetry(n => n + 1)}>Retry account check</button>}</div>}
     {tab === 'new' && access==='approved' && <form className="evaluation-form eval-workspace eval-deploy" noValidate onSubmit={submit}>
       <div className="eval-main">
         <section className="eval-section"><header><span>01</span><h2>Models</h2><em className="eval-count">{selected.length} selected</em></header>
@@ -255,6 +318,6 @@ export function EvaluationRunner() {
         <div className="eval-submit"><button className="button-primary" disabled={busy} aria-describedby={blockers.length ? "evaluation-blockers" : undefined}>{busy ? 'Preparing…' : 'Run evaluation →'}</button>{blockers.length>0 && <div id="evaluation-blockers" tabIndex={-1} aria-live="polite"><strong>Before you can run</strong><ul>{blockers.map((message,i)=><li key={i}>{message}</li>)}</ul></div>}{error && <p role="alert">{error}</p>}<small>Runs continue in the background until complete or cancelled.{limits.max_runtime_seconds!==null && ` Admin runtime limit: ${Math.round(limits.max_runtime_seconds/60)} minutes.`}{!ownKeys && limits.require_credits && " Runs also stop when their reserved execution credits are used; unused time is returned."}</small></div>
       </aside>
     </form>}
-    {tab === 'runs' && <section className="evaluation-jobs"><h2>Your evaluations</h2>{!jobs.length && <p>Your runs will appear here, with rankings and individual judgments.</p>}{jobs.map(job => <article className="eval-job" key={job.id}><div><span className="eval-state" data-state={job.state}>{job.state}</span><span className="eval-kicker">{job.visibility} · {job.engine === 'inspect' ? 'Inspect' : 'Native'}</span><h3>{job.state === 'succeeded' ? <a href={`/evaluation/?id=${job.id}`}>{job.name}</a> : job.name}</h3><p>{job.constitution} · {job.models_count} models · {job.scenario_count} scenarios</p><RunMonitor job={job} onUpdate={updated=>setJobs(current=>current.map(j=>j.id===updated.id?updated:j))}/></div>{job.publication && <p role="status">{job.publication.state === 'published' ? <a href={`/run/?slug=${encodeURIComponent(job.publication.slug || '')}`}>Published in Experiments ↗</a> : job.publication.state === 'failed' ? job.publication.error : job.publication.state === 'unpublished' ? 'Unlisted from Experiments. Earlier public copies may still exist.' : job.publication.state === 'unpublishing' ? 'Removing public listing…' : 'Publishing to Hugging Face…'}</p>}<div className="eval-actions">{job.state === 'succeeded' && <><a className="button-secondary" href={`/evaluation/?id=${job.id}`}>View results</a><button onClick={() => void action(job, 'visibility', { visibility: job.visibility === 'public' ? 'private' : 'public' })}>{job.visibility === 'public' ? 'Unlist public results' : 'Publish to Experiments'}</button></>}{job.has_artifacts && <button onClick={() => void download(job)}>Download</button>}</div></article>)}</section>}
+    {tab === 'runs' && <section className="evaluation-jobs"><h2>Your evaluations</h2>{!jobs.length && <p>Your runs will appear here, with rankings and individual judgments.</p>}{jobs.map(job => <article className="eval-job" key={job.id}><div><span className="eval-state" data-state={job.state}>{job.state}</span><span className="eval-kicker">{job.visibility} · {job.engine === 'inspect' ? 'Inspect' : 'Native'}</span><h3>{job.state === 'succeeded' ? <a href={`/evaluation/?id=${job.id}`}>{job.name}</a> : job.name}</h3><p>{job.constitution} · {job.models_count} models · {job.scenario_count} scenarios</p>{job.state === 'failed' && ['gpu_unavailable', 'allocation_rejected', 'worker_start_timeout'].includes(job.error_code || '') && <button type="button" onClick={() => void prepareRetry(job)}>Retry / choose another GPU</button>}<RunMonitor job={job} onUpdate={updated=>setJobs(current=>current.map(j=>j.id===updated.id?updated:j))}/></div>{job.publication && <p role="status">{job.publication.state === 'published' ? <a href={`/run/?slug=${encodeURIComponent(job.publication.slug || '')}`}>Published in Experiments ↗</a> : job.publication.state === 'failed' ? job.publication.error : job.publication.state === 'unpublished' ? 'Unlisted from Experiments. Earlier public copies may still exist.' : job.publication.state === 'unpublishing' ? 'Removing public listing…' : 'Publishing to Hugging Face…'}</p>}<div className="eval-actions">{job.state === 'succeeded' && <><a className="button-secondary" href={`/evaluation/?id=${job.id}`}>View results</a><button onClick={() => void action(job, 'visibility', { visibility: job.visibility === 'public' ? 'private' : 'public' })}>{job.visibility === 'public' ? 'Unlist public results' : 'Publish to Experiments'}</button></>}{job.has_artifacts && <button onClick={() => void download(job)}>Download</button>}</div></article>)}</section>}
   </>;
 }

@@ -5,10 +5,37 @@ from contextlib import ExitStack
 
 from .config import settings
 from .db import ACTIVE, TERMINAL, Store
-from .runpod import RunPod
+from .runpod import RunPod, GPUUnavailable, AllocationRejected
 from .secrets import decrypt
 
 log = logging.getLogger(__name__)
+
+
+ALLOCATION_TIMEOUT = 300
+
+
+def allocate(db, client, job, now):
+    allocation = db.get_presentation(job['id'], 'allocation') or {'first_attempt_at': now, 'attempts': 0}
+    allocation.update(attempts=allocation['attempts'] + 1, next_retry_at=None, outcome='uncertain')
+    # Persist uncertainty BEFORE sending: a scheduler crash must never duplicate a pod.
+    db.put_presentation(job['id'], 'allocation', allocation)
+    try:
+        pod_id = client.create(job)
+        allocation.update(outcome='allocated', allocated_at=now)
+        db.patch(job['id'], ('provisioning', 'running', *TERMINAL), pod_id=pod_id, error_code=None)
+    except GPUUnavailable:
+        delay = (15, 30, 60)[min(allocation['attempts'] - 1, 2)]
+        allocation.update(outcome='unavailable', next_retry_at=now + delay)
+        db.patch(job['id'], ('provisioning',), error_code='gpu_unavailable')
+    except Exception as exc:
+        code = f'provider_create_http_{exc.response.status_code}' if isinstance(exc, httpx.HTTPStatusError) else 'provider_create_uncertain'
+        if isinstance(exc, AllocationRejected): code = 'allocation_rejected'
+        if isinstance(exc, AllocationRejected) or (isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code in (400,401,403,404,422)):
+            db.finish(job['id'], 'failed', code)
+        else:
+            db.patch(job['id'], ('provisioning',), error_code=code)
+        log.warning('Pod allocation failed for job %s (%s)', job['id'], code)
+    db.put_presentation(job['id'], 'allocation', allocation)
 
 
 def tick(db, pods, cfg, now=None):
@@ -53,17 +80,32 @@ def tick(db, pods, cfg, now=None):
                     db.forget_credentials(job['id'])
                 continue
             if job['state'] in ACTIVE:
+                allocation = db.get_presentation(job['id'], 'allocation') or {}
                 if matches and not job['pod_id']:
                     db.patch(job['id'], ACTIVE, pod_id=matches[0]['id'], error_code=None)
+                    job = {**job, 'pod_id': matches[0]['id']}
+                    allocation.update(outcome='allocated', allocated_at=now, next_retry_at=None)
+                    db.put_presentation(job['id'], 'allocation', allocation)
                 if len(matches) > 1:
                     db.finish(job['id'], 'failed', 'duplicate_pods')
                 elif job['config'].get('max_runtime_seconds') is not None and now - job['started_at'] >= job['config']['max_runtime_seconds']:
                     db.finish(job['id'], 'failed', 'runtime_limit')
                 elif job['heartbeat_at'] and now-job['heartbeat_at'] > cfg.heartbeat_timeout:
                     db.finish(job['id'], 'failed', 'worker_unresponsive')
-                elif not job['heartbeat_at'] and now-job['started_at'] > cfg.startup_timeout:
+                elif not job['pod_id'] and allocation and now - allocation['first_attempt_at'] >= ALLOCATION_TIMEOUT:
+                    db.finish(job['id'], 'failed', 'gpu_unavailable' if allocation.get('outcome') == 'unavailable' else 'allocation_unconfirmed')
+                elif job['pod_id'] and not job['heartbeat_at'] and now - allocation.get('allocated_at', job['started_at']) >= cfg.startup_timeout:
+                    db.finish(job['id'], 'failed', 'worker_start_timeout')
+                elif not allocation and not job['heartbeat_at'] and now - job['started_at'] > cfg.startup_timeout:
                     db.finish(job['id'], 'failed', job.get('error_code') or 'worker_start_timeout')
-                # Never reissue a create request for provisioning jobs after a crash/timeout.
+                elif (job['state'] == 'provisioning' and not job['pod_id'] and not job['heartbeat_at']
+                      and allocation.get('outcome') == 'unavailable' and now >= allocation['next_retry_at']):
+                    member = db.member(job['user_id'])
+                    if not member or member['status'] != 'approved':
+                        db.finish(job['id'], 'cancelled', 'account_disabled')
+                    elif db.policy()['policy']['dispatch_enabled']:
+                        allocate(db, client, job, now)
+                # Uncertain creates are reconciled by name, never resubmitted.
         p=db.policy()['policy']
         current = db.list()
         occupied = sum(j['state'] in ACTIVE or (j['state'] in TERMINAL and not j['cleanup_done']) for j in current)
@@ -76,18 +118,8 @@ def tick(db, pods, cfg, now=None):
                 db.settle(job['id']); db.forget_credentials(job['id']); continue
             if not db.claim_job(job['id'],now): continue
             occupied += 1
-            try:
-                pod_id = provider(job).create(job)
-                db.patch(job['id'], ('provisioning', 'running', *TERMINAL), pod_id=pod_id)
-            except Exception as exc:
-                code = f'provider_create_http_{exc.response.status_code}' if isinstance(exc,httpx.HTTPStatusError) else 'provider_create_uncertain'
-                if isinstance(exc,httpx.HTTPStatusError) and exc.response.status_code in (400,401,403,404,422):
-                    db.finish(job['id'],'failed',code)
-                else:
-                    db.patch(job['id'],('provisioning',),error_code=code)
-                # The provider may have accepted the request before the connection failed.
-                # Leave provisioning in place and reconcile its deterministic name next tick.
-                log.warning('Pod create outcome unknown for job %s; awaiting reconciliation', job['id'])
+            allocate(db, provider(job), job, now)
+
 
 
 

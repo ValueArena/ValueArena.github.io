@@ -6,6 +6,14 @@ from .auth import worker_token
 MIN_CUDA_VERSION = '13.0'
 
 
+class GPUUnavailable(RuntimeError):
+    pass
+
+
+class AllocationRejected(RuntimeError):
+    pass
+
+
 def gpu_availability(disk_gb=100):
     # Public stock lookup: no user/provider credentials are sent or stored.
     query = """query($input: GpuLowestPriceInput!) {
@@ -64,7 +72,22 @@ class RunPod:
         response.raise_for_status()
         body = response.json()
         result = (body.get('data') or {}).get('podFindAndDeployOnDemand')
+        if not result and body.get('errors'):
+            # Only known, definitive rejections are safe to retry. Never persist
+            # provider messages, which can contain submitted environment values.
+            messages = [str(e.get('message', '')).lower() for e in body['errors']]
+            if messages and all(any(marker in m for marker in (
+                'no available gpu', 'no gpu available', 'not enough free gpus',
+                'does not have the resources to deploy', 'no instances available',
+                'no longer any instances available with the requested specifications'
+            )) for m in messages):
+                raise GPUUnavailable('Selected GPU is unavailable')
+            if messages and all(any(marker in m for marker in (
+                'unauthorized', 'invalid api key', 'insufficient balance', 'invalid gpu type'
+            )) for m in messages):
+                raise AllocationRejected('RunPod rejected the credentials, balance, or configuration')
         if body.get('errors') or not result or not result.get('id'):
+
             # Do not expose provider messages: they may echo env secrets. Reconcile
             # by deterministic pod name, as with an uncertain REST response.
             raise RuntimeError('RunPod did not confirm GPU allocation')
