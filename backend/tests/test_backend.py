@@ -332,3 +332,17 @@ def test_unavailable_progress_shows_attempt_and_next_retry(service):
     assert view['progress']['title'] == 'Waiting for GPU availability'
     assert 'Attempt 1' in view['progress']['detail']
     assert 'Next retry' in view['progress']['detail']
+
+
+def test_compute_limits_and_cpu_local_models(service, monkeypatch):
+    from app.governance import enforce
+    from app.db import Forbidden
+    cfg,db,client=service
+    config=EvaluationRequest(**payload(gpu_count=4,volume_gb=200)).model_dump()
+    limits=db.effective_limits(USER)
+    with pytest.raises(Forbidden,match='max_gpu_count'):enforce(config,{**limits,'max_gpu_count':2})
+    with pytest.raises(Forbidden,match='max_disk_gb'):enforce(config,{**limits,'max_disk_gb':250})
+    with pytest.raises(ValidationError):EvaluationRequest(**payload(engine='inspect',gpu_count=2))
+    monkeypatch.setattr('app.api.resolve_models', lambda *args: {'a':{'provider':'hf_local'},'b':'org/b'})
+    result=client.post('/spec-preview',json=payload(compute_type='cpu'),headers={'Authorization':'Bearer '+USER})
+    assert result.status_code==422 and 'API models only' in result.json()['detail']

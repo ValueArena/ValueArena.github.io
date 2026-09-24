@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     runpod_api_key: str = ''
     worker_image: str = ''
     runpod_gpu_type: str = 'NVIDIA A40'
-    runpod_gpu_count: int = Field(default=1, ge=1, le=1)
+    runpod_gpu_count: int = Field(default=1, ge=1, le=8)
     runpod_disk_gb: int = Field(default=100, ge=30, le=1000)
     max_running_jobs: int = Field(default=1, ge=1, le=10)
     scheduler_interval: int = Field(default=10, ge=1, le=60)

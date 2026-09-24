@@ -433,3 +433,21 @@ service HF_TOKEN when no personal token is supplied. Configure that service toke
 on both API and scheduler; own-provider runs never inherit the service token.
 Native OpenRouter attempts emit `[API]` lines in worker logs with timing, token
 usage and retry status, without prompts or response bodies.
+
+### Compute selection
+
+Evaluations can request `compute_type: "cpu"` for API-only panels, with
+`cpu_count` (2, 4, 8, 16, or 32) and `cpu_flavor` (`cpu3c` for 2 GB RAM per
+vCPU or `cpu3g` for 4 GB). Hugging Face panels require GPU compute.
+Native GPU runs accept `gpu_count` of 1, 2, 4, or 8; all GPUs share one
+instance and each local model uses tensor parallelism across that count.
+Inspect currently accepts one GPU. Models must support the chosen parallel size.
+
+`disk_gb` controls container storage. Optional `volume_gb` mounts workspace
+storage at `/workspace`; it survives restarts but is deleted with the pod.
+Saved results remain in the configured results storage. The admin disk limit
+applies to the sum of both disks; CPU and GPU counts have separate admin limits.
+Custom compute is available to admins and users supplying their own provider keys.
+
+The worker image must include the pinned EigenBench revision for multi-GPU
+execution; `EIGENBENCH_TENSOR_PARALLEL_SIZE` is set by the scheduler.

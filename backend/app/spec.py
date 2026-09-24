@@ -8,6 +8,8 @@ from .models import EvaluationRequest
 
 def build_spec(config, directory):
     request = EvaluationRequest.model_validate({k: v for k, v in config.items() if k != 'model_refs'})
+    if request.compute_type == 'cpu' and any(isinstance(ref, dict) for ref in config['model_refs'].values()):
+        raise ValueError('CPU evaluations support API models only; Hugging Face models require GPU')
     root = Path(directory)
     spec = {
         'name': request.name,

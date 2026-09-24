@@ -58,3 +58,31 @@ def test_only_definitive_capacity_errors_are_retryable():
             with pytest.raises(expected) as exc:
                 pods.create({'id':str(uuid4()),'config':{}})
             assert type(exc.value) is expected
+
+
+def test_cpu_allocation_and_storage_payload():
+    pods=RunPod(Settings(environment='test',worker_secret='x'*40))
+    def handle(request):
+        assert request.url.path == '/v1/pods'
+        body=json.loads(request.content)
+        assert body['computeType']=='CPU' and body['vcpuCount']==8
+        assert body['cpuFlavorIds']==['cpu3g']
+        assert body['volumeInGb']==120 and body['containerDiskInGb']==60
+        assert 'gpuCount' not in body and 'allowedCudaVersions' not in body
+        return httpx.Response(200,json={'id':'cpu-pod'})
+    with httpx.Client(transport=httpx.MockTransport(handle),base_url='https://rest.runpod.io/v1') as client:
+        pods.client.close(); pods.client=client
+        assert pods.create({'id':str(uuid4()),'config':{'compute_type':'cpu','cpu_count':8,'volume_gb':120,'disk_gb':60}})=='cpu-pod'
+
+
+def test_multiple_gpus_reach_provider_and_engine_env():
+    pods=RunPod(Settings(environment='test',worker_secret='x'*40))
+    def handle(request):
+        body=json.loads(request.content)['variables']['input']
+        assert body['gpuCount']==4 and body['volumeInGb']==200
+        env={v['key']:v['value'] for v in body['env']}
+        assert env['EIGENBENCH_TENSOR_PARALLEL_SIZE']=='4'
+        return httpx.Response(200,json={'data':{'podFindAndDeployOnDemand':{'id':'multi-pod'}}})
+    with httpx.Client(transport=httpx.MockTransport(handle)) as client:
+        pods.client.close(); pods.client=client
+        assert pods.create({'id':str(uuid4()),'config':{'gpu_count':4,'volume_gb':200}})=='multi-pod'

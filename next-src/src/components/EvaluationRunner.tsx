@@ -11,7 +11,7 @@ import { RunMonitor, isActive } from './RunMonitor';
 import { Penguin } from './Penguin';
 import { ModelLogo } from './ModelLogo';
 
-type Model = { id: string; label: string };
+type Model = { id: string; label: string; provider?: string };
 type CustomModel = { id: string; provider: string; repo_id: string; kind: string; subfolder: string; base_model_id: string };
 const presetNames = Object.keys(CONSTITUTIONS_DATA).sort();
 const label = (s: string) => s.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
@@ -37,8 +37,10 @@ export function EvaluationRunner() {
   const [source, setSource] = useState('airiskdilemmas'); const [count, setCount] = useState(200);
   const [scenarioText, setScenarioText] = useState(''); const [fileName, setFileName] = useState('');
   const [ownKeys, setOwnKeys] = useState(false); const [orKey, setOrKey] = useState(''); const [rpKey, setRpKey] = useState(''); const [hfToken, setHfToken] = useState('');
+  const [computeType, setComputeType] = useState('gpu'); const [gpuCount, setGPUCount] = useState(1);
+  const [cpuCount, setCPUCount] = useState(4); const [cpuFlavor, setCPUFlavor] = useState('cpu3g'); const [volume, setVolume] = useState(0);
   const [gpu, setGPU] = useState(gpuTypes[0]); const [disk, setDisk] = useState(100);
-  const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number } | null>(null);
+  const [stock, setStock] = useState<{ gpus: { id: string; stock: string; price_per_hour: number | null }[]; checked_at: number; disk_gb: number; gpu_count: number } | null>(null);
   const [stockBusy, setStockBusy] = useState(false); const [stockError, setStockError] = useState('');
   const [visibility, setVisibility] = useState('private');
   const [accessError, setAccessError] = useState('');
@@ -135,7 +137,7 @@ export function EvaluationRunner() {
       setCriteria(config.criteria.join('\n')); setSource(config.scenario_source);
       setCount(config.scenario_count); setScenarioText(config.scenarios.map((text: string) => JSON.stringify({scenario: text})).join('\n'));
       setFileName('Restored scenarios'); setVisibility(config.visibility);
-      setOwnKeys(config.funding === 'own_keys'); setGPU(config.gpu_type); setDisk(config.disk_gb);
+      setOwnKeys(config.funding === 'own_keys'); setGPU(config.gpu_type); setDisk(config.disk_gb); setComputeType(config.compute_type || 'gpu'); setGPUCount(config.gpu_count || 1); setCPUCount(config.cpu_count || 4); setCPUFlavor(config.cpu_flavor || 'cpu3g'); setVolume(config.volume_gb || 0);
       setOrKey(''); setRpKey(''); setHfToken(''); submission.current = null;
       setTab('new'); setError('');
       setNotice('Settings restored. Review the GPU and re-enter any personal keys, then submit a new evaluation.');
@@ -145,7 +147,7 @@ export function EvaluationRunner() {
   async function checkStock() {
     setStockBusy(true); setStockError(''); setStock(null);
     try {
-      const response = await request(`/compute/availability?disk_gb=${ownKeys || isAdmin ? disk : 100}`);
+      const response = await request(`/compute/availability?disk_gb=${ownKeys || isAdmin ? disk + volume : 100}&gpu_count=${ownKeys || isAdmin ? gpuCount : 1}`);
       setStock(await response.json());
     } catch (e) { setStockError((e as Error).message); }
     finally { setStockBusy(false); }
@@ -187,9 +189,13 @@ export function EvaluationRunner() {
         scenario_source: source, scenario_count: count, scenarios: source === 'custom' ? parseScenarios(scenarioText,limits.max_scenarios ?? Infinity) : [], visibility,
         hf_token: hfToken,
         funding: ownKeys ? 'own_keys' : 'service', ...(ownKeys && includeKeys ? { openrouter_key: orKey, runpod_key: rpKey } : {}),
+        compute_type: ownKeys || isAdmin ? computeType : 'gpu', gpu_count: ownKeys || isAdmin ? (computeType === 'cpu' ? 1 : gpuCount) : 1, cpu_count: ownKeys || isAdmin ? cpuCount : 4, cpu_flavor: ownKeys || isAdmin ? cpuFlavor : 'cpu3g', volume_gb: ownKeys || isAdmin ? volume : 0,
         gpu_type: ownKeys || isAdmin ? gpu : gpuTypes[0], disk_gb: ownKeys || isAdmin ? disk : 100 };
   }
   const blockers: string[] = [];
+  if ((ownKeys || isAdmin) && computeType === 'cpu' && selected.some(id => models.some(m => m.id === id && m.provider === 'huggingface') || custom.some(m => m.id === id && m.provider === 'huggingface'))) blockers.push('CPU runs support API models only. Remove Hugging Face models or select GPU.');
+  if ((ownKeys || isAdmin) && computeType === 'gpu' && gpuCount > 1 && engine === 'inspect') blockers.push('Select Native to use multiple GPUs.');
+  if ((ownKeys || isAdmin) && limits.max_disk_gb !== null && disk + volume > limits.max_disk_gb) blockers.push('Container and workspace storage exceed your total storage limit.');
   if (!name.trim()) blockers.push('Enter an evaluation name.');
   if (selected.length < 2) blockers.push('Select at least two models.');
   if ((limits.max_models !== null && selected.length > limits.max_models)) blockers.push(`Remove models to stay within your ${limits.max_models}-model limit.`);
@@ -286,7 +292,7 @@ export function EvaluationRunner() {
         <section className="eval-section"><header><span>04</span><h2>Compute &amp; run</h2></header>
           <div className="eval-fields"><label>Evaluation name<input required maxLength={120} value={name} onChange={e => setName(e.target.value)} placeholder="Humor / Qwen comparison" /></label><label>Engine<select value={engine} onChange={e => setEngine(e.target.value)}><option value="native">Native EigenBench</option><option value="inspect">Inspect</option></select></label></div>
           <div className="eval-choice" role="radiogroup" aria-label="Compute and API access">
-            <label className="eval-choice-card"><input type="radio" name="funding" checked={!ownKeys} onChange={() => setOwnKeys(false)} /><strong>Lab-funded compute</strong><small>{enabled ? (limits.require_credits ? `${Math.floor((credits ?? 0) / 60)} compute minutes available.` : 'Lab-funded compute. No execution credit limit.') : 'No service credits available. Contact an administrator.'}</small></label>
+            <label className="eval-choice-card"><input type="radio" name="funding" checked={!ownKeys} onChange={() => {setOwnKeys(false); if (!isAdmin) {setComputeType('gpu'); setGPUCount(1); setVolume(0);}}} /><strong>Lab-funded compute</strong><small>{enabled ? (limits.require_credits ? `${Math.floor((credits ?? 0) / 60)} compute minutes available.` : 'Lab-funded compute. No execution credit limit.') : 'No service credits available. Contact an administrator.'}</small></label>
             <label className="eval-choice-card"><input type="radio" name="funding" checked={ownKeys} onChange={() => setOwnKeys(true)} /><strong>My provider keys</strong><small>Charged to your OpenRouter and RunPod accounts.</small></label>
           </div>
           {ownKeys && <><div className="eval-fields"><label>OpenRouter API key<input type="password" required value={orKey} onChange={e => setOrKey(e.target.value)} autoComplete="off" /></label><label>RunPod API key<input type="password" required value={rpKey} onChange={e => setRpKey(e.target.value)} autoComplete="off" /></label></div><small>Keys are encrypted and removed after confirmed GPU cleanup.</small></>}
@@ -294,10 +300,20 @@ export function EvaluationRunner() {
         <div className="eval-fields">{(['response','reflection','direct_rating'] as const).map(phase=><label key={phase}>{phase==='direct_rating'?'Rating':label(phase)} token budget<input type="number" min="1" step="1" disabled={!advancedValid} value={collectionOptions.generation?.[phase]?.max_tokens ?? ''} placeholder={{response:'Default: 4096',reflection:'Default: 2048',direct_rating:'Default: 512'}[phase]} onChange={e=>setBudget(phase,e.target.value)}/></label>)}</div>
         <small>Increase reflection tokens for reasoning models. Per-model overrides are available in Advanced configuration.</small>
         {engine==='native'&&<label><input type="checkbox" checked={collectionOptions.failure_policy!=='strict'} disabled={!advancedValid} onChange={e=>setAdvanced(JSON.stringify({...advancedOptions,collection:{...collectionOptions,failure_policy:e.target.checked?'omit_invalid_judgments':'strict'}},null,2))}/>Continue after invalid judgments; omit affected samples after retries.</label>}
+          <fieldset className="eval-fields" disabled={!ownKeys && !isAdmin}>
+            <legend>Compute</legend>
+            <label>Processor<select value={computeType} onChange={e => setComputeType(e.target.value)}><option value="gpu">GPU · Hugging Face and API models</option><option value="cpu">CPU · API models only</option></select></label>
+            {computeType === 'gpu' ? <label>GPU count<select value={gpuCount} onChange={e => setGPUCount(Number(e.target.value))}>{[1,2,4,8].map(n => <option key={n} value={n}>{n} GPU{n > 1 ? 's' : ''}</option>)}</select><small>Native runs split each local model across the selected GPUs. The model must support this count.</small></label> : <>
+              <label>CPU cores<select value={cpuCount} onChange={e => setCPUCount(Number(e.target.value))}>{[2,4,8,16,32].map(n => <option key={n} value={n}>{n} vCPUs</option>)}</select></label>
+              <label>Memory<select value={cpuFlavor} onChange={e => setCPUFlavor(e.target.value)}><option value="cpu3c">{cpuCount * 2} GB · compute optimized</option><option value="cpu3g">{cpuCount * 4} GB · general purpose</option></select><small>CPU workers send API requests and compute rankings.</small></label>
+            </>}
+          </fieldset>
+          {computeType === 'gpu' && <>
           <div className="eval-gpu-head"><span className="eval-gpu-label">GPU</span><button type="button" className="eval-link-button" disabled={stockBusy} onClick={checkStock}>{stockBusy ? 'Checking RunPod…' : 'Check availability'}</button></div>
           {stockError && <p className="eval-help" role="status">{stockError}</p>}
-          <fieldset className="eval-gpu" disabled={!ownKeys && !isAdmin}><legend className="sr-only">GPU</legend><div className="eval-gpu-grid" aria-live="polite">{gpuTypes.map(g => { const item = stock && stock.disk_gb === (ownKeys || isAdmin ? disk : 100) ? stock.gpus.find(x => x.id === g) : undefined; return <label className="eval-choice-card eval-gpu-card" key={g} data-stock={item ? (item.stock === 'None' ? 'none' : item.stock === 'Unknown' ? 'unknown' : 'ok') : undefined}><input type="radio" name="gpu" checked={(ownKeys || isAdmin ? gpu : gpuTypes[0]) === g} onChange={() => setGPU(g)} /><strong>{g.replace('NVIDIA ', '').replace('GeForce ', '')}</strong><small>{item ? <>{item.stock === 'None' ? 'Unavailable' : item.stock === 'Unknown' ? 'Not reported' : `${item.stock} stock`}{item.price_per_hour != null && ` · $${item.price_per_hour.toFixed(2)}/hr`}</> : 'NVIDIA'}</small></label>; })}</div><small>One GPU per evaluation.{!ownKeys && !isAdmin && ' Lab-funded runs use the default GPU.'}{stock && stock.disk_gb === (ownKeys || isAdmin ? disk : 100) && ` Secure Cloud · CUDA 13+ · ${stock.disk_gb} GB disk · checked ${new Date(stock.checked_at * 1000).toLocaleTimeString()}. Stock can change before allocation.`}</small></fieldset>
-          <div className="eval-fields"><label>Temporary storage (GB)<input disabled={!ownKeys && !isAdmin} type="number" min={50} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? disk : 100} onChange={e => setDisk(Number(e.target.value))} /><button type="button" disabled={!ownKeys && !isAdmin} onClick={()=>setDisk(Math.min(limits.max_disk_gb ?? 1000,1000))}>Max allowed</button><small>Model cache and working files. Released after results are saved.</small></label><label>Results<select value={visibility} onChange={e => setVisibility(e.target.value)}><option value="private">Private · only in my account</option><option disabled={!limits.allow_public_results} value="public">Public · list in Experiments</option></select></label></div>
+          <fieldset className="eval-gpu" disabled={!ownKeys && !isAdmin}><legend className="sr-only">GPU</legend><div className="eval-gpu-grid" aria-live="polite">{gpuTypes.map(g => { const item = stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) ? stock.gpus.find(x => x.id === g) : undefined; return <label className="eval-choice-card eval-gpu-card" key={g} data-stock={item ? (item.stock === 'None' ? 'none' : item.stock === 'Unknown' ? 'unknown' : 'ok') : undefined}><input type="radio" name="gpu" checked={(ownKeys || isAdmin ? gpu : gpuTypes[0]) === g} onChange={() => setGPU(g)} /><strong>{g.replace('NVIDIA ', '').replace('GeForce ', '')}</strong><small>{item ? <>{item.stock === 'None' ? 'Unavailable' : item.stock === 'Unknown' ? 'Not reported' : `${item.stock} stock`}{item.price_per_hour != null && ` · $${item.price_per_hour.toFixed(2)}/hr`}</> : 'NVIDIA'}</small></label>; })}</div><small>GPUs are allocated together on one instance.{!ownKeys && !isAdmin && ' Lab-funded runs use the default GPU.'}{stock && stock.disk_gb === (ownKeys || isAdmin ? disk + volume : 100) && stock.gpu_count === (ownKeys || isAdmin ? gpuCount : 1) && ` Secure Cloud · CUDA 13+ · ${stock.disk_gb} GB disk · checked ${new Date(stock.checked_at * 1000).toLocaleTimeString()}. Stock can change before allocation.`}</small></fieldset>
+          </>}
+          <div className="eval-fields"><label>Container storage (GB)<input disabled={!ownKeys && !isAdmin} type="number" min={50} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? disk : 100} onChange={e => setDisk(Number(e.target.value))} /><button type="button" disabled={!ownKeys && !isAdmin} onClick={()=>setDisk(Math.min(limits.max_disk_gb ?? 1000,1000))}>Max allowed</button><small>Model cache and working files. Released after results are saved.</small></label><label>Workspace volume (GB)<input type="number" disabled={!ownKeys && !isAdmin} min={0} max={Math.min(limits.max_disk_gb ?? 1000,1000)} step={10} value={ownKeys || isAdmin ? volume : 0} onChange={e => setVolume(Number(e.target.value))}/><small>Optional /workspace disk. Survives pod restarts; deleted when the pod is terminated. Results are saved separately.</small></label><label>Results<select value={visibility} onChange={e => setVisibility(e.target.value)}><option value="private">Private · only in my account</option><option disabled={!limits.allow_public_results} value="public">Public · list in Experiments</option></select></label></div>
           {visibility === 'public' && <small>Completed rankings, scenarios, responses, and judgments will be visible to everyone. Public results are copied to Hugging Face. Unlisting removes them from the current listing, but repository history and downloaded copies remain public.</small>}
           <AdvancedConfiguration value={advanced} onChange={setAdvanced} modelIds={selected} configVersion={JSON.stringify([advanced, name, engine, selected, custom, criteria, source, count, scenarioText])} getRequest={() => buildRequest(false)} />
         </section>
@@ -310,8 +326,8 @@ export function EvaluationRunner() {
           <div><dt>Scenarios</dt><dd>{typeof advancedCount === 'number' ? advancedCount : source === 'airiskdilemmas' ? count : 'Custom'}</dd></div>
           <div><dt>Engine</dt><dd>{engine === 'inspect' ? 'Inspect' : 'Native EigenBench'}</dd></div>
           <div><dt>Compute</dt><dd>{ownKeys ? 'Your keys' : 'Lab-funded'}</dd></div>
-          <div><dt>GPU</dt><dd>{(ownKeys || isAdmin ? gpu : gpuTypes[0]).replace('NVIDIA ', '')}</dd></div>
-          <div><dt>Storage</dt><dd>{ownKeys || isAdmin ? disk : 100} GB</dd></div>
+          <div><dt>Compute</dt><dd>{(ownKeys || isAdmin) && computeType === 'cpu' ? `${cpuCount} vCPUs · ${cpuCount * (cpuFlavor === 'cpu3g' ? 4 : 2)} GB RAM` : `${ownKeys || isAdmin ? gpuCount : 1} × ${(ownKeys || isAdmin ? gpu : gpuTypes[0]).replace('NVIDIA ', '')}`}</dd></div>
+          <div><dt>Storage</dt><dd>{ownKeys || isAdmin ? disk + volume : 100} GB total</dd></div>
           <div><dt>Results</dt><dd>{visibility === 'public' ? 'Public' : 'Private'}</dd></div>
           {!ownKeys && limits.require_credits && <div><dt>Credits</dt><dd>{Math.floor((credits ?? 0) / 60)} min</dd></div>}
         </dl>

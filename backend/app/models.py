@@ -35,6 +35,11 @@ class EvaluationRequest(BaseModel):
     openrouter_key: SecretStr = Field(default=SecretStr(''), max_length=512)
     hf_token: SecretStr = Field(default=SecretStr(''), max_length=512, exclude=True)
     runpod_key: SecretStr = Field(default=SecretStr(''), max_length=512)
+    compute_type: Literal['gpu', 'cpu'] = 'gpu'
+    gpu_count: Literal[1, 2, 4, 8] = 1
+    cpu_count: Literal[2, 4, 8, 16, 32] = 4
+    cpu_flavor: Literal['cpu3c', 'cpu3g'] = 'cpu3g'
+    volume_gb: int = Field(default=0, ge=0, le=1000)
     gpu_type: Literal['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA H100 80GB HBM3'] = 'NVIDIA A40'
     disk_gb: int = Field(default=100, ge=50, le=1000)
     engine: Literal['native', 'inspect'] = 'native'
@@ -57,6 +62,10 @@ class EvaluationRequest(BaseModel):
             self.scenario_source = 'custom'
         if self.scenario_source == 'custom' and not self.scenarios:
             raise ValueError('Supply at least one custom scenario')
+        if self.compute_type == 'cpu' and self.gpu_count != 1:
+            raise ValueError('CPU evaluations cannot request multiple GPUs')
+        if self.engine == 'inspect' and self.gpu_count > 1:
+            raise ValueError('Multiple GPUs currently require the Native engine')
         ids = [m.id for m in self.custom_models]
         if len(set(ids)) != len(ids) or not set(ids).issubset(self.models):
             raise ValueError('Custom model IDs must be unique and selected')

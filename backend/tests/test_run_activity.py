@@ -72,7 +72,7 @@ def test_uncertain_create_does_not_retry_and_rejected_create_fails(service,statu
 def test_stock_endpoint_requires_login_and_hides_provider_errors(service,monkeypatch):
     cfg,db,api=service
     assert api.get('/compute/availability').status_code==401
-    def stock(disk):return {'disk_gb':disk,'gpus':[]}
+    def stock(disk, gpu_count=1):return {'disk_gb':disk,'gpus':[]}
     monkeypatch.setattr('app.runpod.gpu_availability',stock)
     result=api.get('/compute/availability?disk_gb=200',headers={'Authorization':'Bearer '+USER})
     assert result.status_code==200 and result.json()['disk_gb']==200

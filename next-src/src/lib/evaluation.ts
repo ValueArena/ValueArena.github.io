@@ -21,6 +21,7 @@ export async function evaluationRequest(path: string, options: RequestInit = {},
   return response;
 }
 export type EvaluationJob = {
+  compute_type?: 'gpu' | 'cpu';
   omitted_count?: number;
   publication?: {state: string; slug?: string; url?: string; error?: string} | null;
   progress?: {title:string;detail:string;step:number;checked_at:number;elapsed_seconds:number;worker_last_seen_at:number|null;gpu_allocated:boolean;cleanup_pending:boolean};
