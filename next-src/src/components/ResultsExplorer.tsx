@@ -14,6 +14,19 @@ const fmt = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 1 
 const label = (run?: IndexRun) => run ? constLabel(normConst(run.constitution)) : '';
 const ticks = (domain: [number, number]) => Array.from({ length: 5 }, (_, i) => domain[0] + (domain[1] - domain[0]) * i / 4);
 const position = (v: number, domain: [number, number], start: number, size: number) => start + (v - domain[0]) / (domain[1] - domain[0]) * size;
+// Phones get a narrower, taller plot drawn near 1:1 so labels and hit areas keep their real size.
+const WIDE = { w: 800, h: 470, left: 70, width: 610, right: 750, top: 30, bottom: 400, tickY: 425, titleY: 461, titleX: 17, hit: 12 };
+const COMPACT = { w: 340, h: 322, left: 46, width: 272, right: 332, top: 12, bottom: 270, tickY: 290, titleY: 314, titleX: 12, hit: 15 };
+function useCompact() {
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    const query = matchMedia('(max-width: 600px)');
+    const update = () => setCompact(query.matches);
+    update(); query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  return compact;
+}
 const runURL = (slug: string) => `/run/?slug=${encodeURIComponent(slug)}`;
 const transcriptURL = (slug: string, model: string) => `/transcript/?run=${encodeURIComponent(slug)}&model=${encodeURIComponent(model)}`;
 
@@ -44,6 +57,7 @@ export function ResultsExplorer({ embedded = false }: { embedded?: boolean }) {
   const [query, setQuery] = useState('');
   const [showCI, setShowCI] = useState(true);
   const [shareStatus, setShareStatus] = useState('');
+  const g = useCompact() ? COMPACT : WIDE, plotH = g.bottom - g.top, mid = g.left + g.width / 2;
   useEffect(() => {
     let cancelled = false;
     fetchIndex().then(index => {
@@ -127,22 +141,22 @@ export function ResultsExplorer({ embedded = false }: { embedded?: boolean }) {
     {(x.error || (view === 'tradeoff' && y.error)) ? <p className="chart-message" role="alert">{x.error || y.error}</p> : view === 'tradeoff' && !ySlug ? <p className="chart-message">This experiment only covers one constitution. Pick a run from an experiment that covers two or more.</p> : !x.value || (view === 'tradeoff' && !y.value) ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading scores and run settings…</span></p> : issues.length ? <div className="chart-message" role="status"><strong>These two runs can’t be compared directly.</strong><ul>{issues.map(issue => <li key={issue}>{issue}</li>)}</ul><a href={runURL(xSlug)}>Open the first run →</a></div> : !rows.length ? <p className="chart-message">No matching models. Try clearing the search or family filter.</p> : <>
       {!embedded && <header className="chart-heading"><h2>{view === 'ranking' ? `${label(xRun)}: model rankings` : `${label(xRun)} and ${label(yRun)}`}</h2><p>{view === 'ranking' ? 'A higher score means the answers fit the constitution better.' : 'Each axis is Elo within its own run. Higher means more of that trait, which isn’t always a good thing.'}</p></header>}
       {view === 'ranking' ? <div className="ranking-figure" role="group" aria-label={`${label(xRun)} rankings with confidence intervals`}>
-        <div className="ranking-axis"><span>Model</span><svg viewBox="0 0 600 30" aria-hidden="true">{ticks(domain).map(t => <text key={t} x={position(t, domain, 20, 560)} y={20} textAnchor="middle">{Math.round(t)}</text>)}</svg><span>Elo</span></div>
+        <div className="ranking-axis"><span>Model</span><div className="ranking-ticks" aria-hidden="true">{ticks(domain).map(t => <span key={t} style={{ left: `${position(t, domain, 20, 560) / 6}%` }}>{Math.round(t)}</span>)}</div><span>Elo</span></div>
         {rows.map(row => { const ci = interval(row), active = focused === row.model_name; return <button key={row.model_name} className={`ranking-row${active ? ' is-selected' : ''}`} aria-pressed={selected === row.model_name} aria-label={`${row.model_name}, Elo ${fmt(row.elo_mean)}${ci ? `, 95% interval ${fmt(ci[0])} to ${fmt(ci[1])}` : ', interval unavailable'}`} onClick={() => choose(row.model_name)} onMouseEnter={() => setHovered(row.model_name)} onMouseLeave={() => setHovered('')}>
           <span className="ranking-name"><ModelLogo name={row.model_name} size={20} /><i style={{ background: colorOf(row.model_name) }} />{row.model_name}</span>
           <svg viewBox="0 0 600 36" preserveAspectRatio="none" aria-hidden="true">{ticks(domain).map(t => <line className="chart-grid" key={t} x1={position(t, domain, 20, 560)} x2={position(t, domain, 20, 560)} y1="0" y2="36" />)}{showCI && ci && <line x1={position(ci[0], domain, 20, 560)} x2={position(ci[1], domain, 20, 560)} y1="18" y2="18" stroke={colorOf(row.model_name)} strokeWidth="2" />}<circle cx={position(row.elo_mean, domain, 20, 560)} cy="18" r="1" stroke={colorOf(row.model_name)} strokeWidth={active ? 6 : 4} vectorEffect="non-scaling-stroke" fill={colorOf(row.model_name)} /></svg>
           <span className="ranking-score">{fmt(row.elo_mean)}</span>
         </button>; })}
-      </div> : <div className="scatter-wrap"><svg viewBox="0 0 800 470" className="tradeoff-figure" role="group" aria-label={`${label(xRun)} versus ${label(yRun)}. Select a point or use the model selector below.`}>
-        {ticks(domain).map(t => <g key={t}><line className="chart-grid" x1={position(t, domain, 70, 680)} x2={position(t, domain, 70, 680)} y1="30" y2="400" /><text x={position(t, domain, 70, 680)} y="425" textAnchor="middle">{Math.round(t)}</text></g>)}
-        {ticks(yDomain).map(t => <g key={t}><line className="chart-grid" x1="70" x2="750" y1={400-position(t,yDomain,0,370)} y2={400-position(t,yDomain,0,370)} /><text x="57" y={404-position(t,yDomain,0,370)} textAnchor="end">{Math.round(t)}</text></g>)}
-        <text x="410" y="461" textAnchor="middle">{label(xRun)} · Elo →</text><text transform="translate(17,215) rotate(-90)" textAnchor="middle">{label(yRun)} · Elo →</text>
-        {points.map(p => { const cx=position(p.x.elo_mean,domain,70,680), cy=400-position(p.y.elo_mean,yDomain,0,370), ix=interval(p.x), iy=interval(p.y), active=focused===p.name, color=colorOf(p.name); return <g key={p.name} opacity={focused && !active ? .55 : 1}>
-          {showCI && ix && <line x1={position(ix[0],domain,70,680)} x2={position(ix[1],domain,70,680)} y1={cy} y2={cy} stroke={color} opacity=".5" />}
-          {showCI && iy && <line y1={400-position(iy[0],yDomain,0,370)} y2={400-position(iy[1],yDomain,0,370)} x1={cx} x2={cx} stroke={color} opacity=".5" />}
-          <circle cx={cx} cy={cy} r="12" fill="transparent" tabIndex={0} role="button" aria-label={`${p.name}: ${label(xRun)} ${fmt(p.x.elo_mean)}, ${label(yRun)} ${fmt(p.y.elo_mean)}`} aria-pressed={selected===p.name} onClick={() => choose(p.name)} onMouseEnter={() => setHovered(p.name)} onMouseLeave={() => setHovered('')} onFocus={() => setHovered(p.name)} onBlur={() => setHovered('')} onKeyDown={e => { if(e.key==='Enter'||e.key===' ') {e.preventDefault();choose(p.name);} }}><title>{p.name}</title></circle>
+      </div> : <div className="scatter-wrap"><svg viewBox={`0 0 ${g.w} ${g.h}`} className={`tradeoff-figure${g === COMPACT ? ' is-compact' : ''}`} role="group" aria-label={`${label(xRun)} versus ${label(yRun)}. Select a point or use the model selector below.`}>
+        {ticks(domain).map(t => <g key={t}><line className="chart-grid" x1={position(t, domain, g.left, g.width)} x2={position(t, domain, g.left, g.width)} y1={g.top} y2={g.bottom} /><text x={position(t, domain, g.left, g.width)} y={g.tickY} textAnchor="middle">{Math.round(t)}</text></g>)}
+        {ticks(yDomain).map(t => <g key={t}><line className="chart-grid" x1={g.left} x2={g.right} y1={g.bottom-position(t,yDomain,0,plotH)} y2={g.bottom-position(t,yDomain,0,plotH)} /><text x={g.left - 8} y={g.bottom + 4 - position(t,yDomain,0,plotH)} textAnchor="end">{Math.round(t)}</text></g>)}
+        <text x={mid} y={g.titleY} textAnchor="middle">{label(xRun)} · Elo →</text><text transform={`translate(${g.titleX},${g.top + plotH / 2}) rotate(-90)`} textAnchor="middle">{label(yRun)} · Elo →</text>
+        {points.map(p => { const cx=position(p.x.elo_mean,domain,g.left,g.width), cy=g.bottom-position(p.y.elo_mean,yDomain,0,plotH), ix=interval(p.x), iy=interval(p.y), active=focused===p.name, color=colorOf(p.name); return <g key={p.name} opacity={focused && !active ? .55 : 1}>
+          {showCI && ix && <line x1={position(ix[0],domain,g.left,g.width)} x2={position(ix[1],domain,g.left,g.width)} y1={cy} y2={cy} stroke={color} opacity=".5" />}
+          {showCI && iy && <line y1={g.bottom-position(iy[0],yDomain,0,plotH)} y2={g.bottom-position(iy[1],yDomain,0,plotH)} x1={cx} x2={cx} stroke={color} opacity=".5" />}
+          <circle cx={cx} cy={cy} r={g.hit} fill="transparent" tabIndex={0} role="button" aria-label={`${p.name}: ${label(xRun)} ${fmt(p.x.elo_mean)}, ${label(yRun)} ${fmt(p.y.elo_mean)}`} aria-pressed={selected===p.name} onClick={() => choose(p.name)} onMouseEnter={() => setHovered(p.name)} onMouseLeave={() => setHovered('')} onFocus={() => setHovered(p.name)} onBlur={() => setHovered('')} onKeyDown={e => { if(e.key==='Enter'||e.key===' ') {e.preventDefault();choose(p.name);} }}><title>{p.name}</title></circle>
           <circle cx={cx} cy={cy} r={active?7:5} className={`scatter-dot${active ? ' is-active' : ''}`} fill={color} stroke="var(--bg)" strokeWidth="1.5" pointerEvents="none" />
-          {active && <text x={cx + (cx > 410 ? -12 : 12)} y={cy - 14} textAnchor={cx > 410 ? 'end' : 'start'} className="scatter-point-label" pointerEvents="none">{p.name}</text>}
+          {active && <text x={cx + (cx > mid ? -12 : 12)} y={cy - 14} textAnchor={cx > mid ? 'end' : 'start'} className="scatter-point-label" pointerEvents="none">{p.name}</text>}
         </g>; })}
       </svg></div>}
       <div className="chart-legend">{families.map(f => <button key={f} aria-pressed={family===f} onClick={() => setFamily(family===f?'':f)}><ModelLogo name={f === 'xAI' ? 'grok' : f === 'Ai2' ? 'olmo' : f} size={20} /><i style={{background:colorOf(allRows.find(r=>familyOf(r.model_name)===f)?.model_name || '')}} />{f}</button>)}</div>

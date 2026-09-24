@@ -35,8 +35,14 @@ export function FeaturedCarousel() {
     { title: 'Training or prompting?', kind: 'prompt' },
   ];
   const stopped = paused || reduced;
+  // Step by one card (its width plus the track gap) so the buttons land on card edges at any screen width.
+  const stepBy = (direction: number) => {
+    const first = group.current, card = first?.firstElementChild as HTMLElement | null;
+    const width = card && first ? card.offsetWidth + (parseFloat(getComputedStyle(first).columnGap) || 0) : 360;
+    setPaused(true); viewport.current?.scrollBy({ left: direction * width, behavior: reduced ? 'instant' : 'smooth' });
+  };
   return <section className="featured-carousel" aria-label="Featured results and research" aria-roledescription="carousel">
-    <div className="featured-carousel-controls"><div><button type="button" aria-label="Previous cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: -360, behavior: reduced ? 'instant' : 'smooth' }); }}><PixelIcon name="prev" /></button><button type="button" className="carousel-toggle" aria-pressed={stopped} disabled={reduced} aria-label={reduced ? 'Motion is off' : paused ? 'Play carousel' : 'Pause carousel'} title={reduced ? 'Motion is off' : paused ? 'Play' : 'Pause'} onClick={() => setPaused(p => !p)}><PixelIcon name={stopped ? 'play' : 'pause'} /></button><button type="button" aria-label="Next cards" onClick={() => { setPaused(true); viewport.current?.scrollBy({ left: 360, behavior: reduced ? 'instant' : 'smooth' }); }}><PixelIcon name="next" /></button></div></div>
+    <div className="featured-carousel-controls"><div><button type="button" aria-label="Previous cards" onClick={() => stepBy(-1)}><PixelIcon name="prev" /></button><button type="button" className="carousel-toggle" aria-pressed={stopped} disabled={reduced} aria-label={reduced ? 'Motion is off' : paused ? 'Play carousel' : 'Pause carousel'} title={reduced ? 'Motion is off' : paused ? 'Play' : 'Pause'} onClick={() => setPaused(p => !p)}><PixelIcon name={stopped ? 'play' : 'pause'} /></button><button type="button" aria-label="Next cards" onClick={() => stepBy(1)}><PixelIcon name="next" /></button></div></div>
     <div className="featured-carousel-viewport" ref={viewport} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={e => { if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false); }} onTouchStart={() => setPaused(true)}>
       <div className="featured-carousel-track"><div className="featured-carousel-group" ref={group}>
         {cards.map(card => <article className="featured-carousel-card featured-interactive" key={card.title}>

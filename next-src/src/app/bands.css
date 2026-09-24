@@ -416,6 +416,22 @@ body {
     font-size: 20px;
     margin-bottom: 16px;
   }
+  .site-footer-card ul {
+    gap: 2px;
+  }
+  .site-footer-card li a {
+    display: inline-block;
+    padding: 6px 0;
+  }
+  /* The third card would sit alone in the two-column grid; let it span and run its links in a row. */
+  .site-footer-card[aria-label="Open source"] {
+    grid-column: 1 / -1;
+  }
+  .site-footer-card[aria-label="Open source"] ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 20px;
+  }
   .site-footer-scene {
     margin: 0 -14px;
   }

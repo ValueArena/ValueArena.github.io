@@ -145,7 +145,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .ranking-axis, .ranking-row { display: grid; grid-template-columns: minmax(170px, 30%) minmax(0, 1fr) 68px; gap: 16px; align-items: center; }
 .ranking-axis { color: var(--text-muted); font-size: 11px; }
 .ranking-axis > span:last-child { text-align: right; }
-.ranking-axis svg { width: 100%; }
 .ranking-figure { max-height: 740px; overflow-y: auto; padding: 0 6px; }
 .ranking-row { width: 100%; min-height: 46px; text-align: left; color: var(--text); border: 0; border-bottom: 1px solid var(--border-light); background: none; cursor: pointer; padding: 6px 0; }
 .ranking-row:hover, .ranking-row.is-selected { background: var(--accent-dim); }
@@ -154,10 +153,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .ranking-row svg { width: 100%; height: 36px; }
 .ranking-score { font: 12px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
 .chart-grid { stroke: var(--border-light); stroke-width: 1; }
-.ranking-axis text, .tradeoff-figure text { fill: var(--text-muted); font: 12px var(--font-body); }
+.ranking-ticks { position: relative; height: 30px; }
+.ranking-ticks span { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tradeoff-figure text { fill: var(--text-muted); font: 12px var(--font-body); }
 .scatter-wrap { overflow-x: auto; }
 .tradeoff-figure { width: 100%; min-width: 510px; max-height: 590px; }
 .tradeoff-figure circle[role='button'] { cursor: pointer; }
+.tradeoff-figure.is-compact, .home-tradeoff .tradeoff-figure.is-compact { min-width: 0; max-height: none; }
+.tradeoff-figure.is-compact text { font-size: 12px; }
+.tradeoff-figure.is-compact .scatter-point-label { font-size: 12px; }
 .tradeoff-figure circle[role='button']:focus { outline: none; stroke: var(--text); stroke-width: 2; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
 .chart-legend button { display: flex; gap: 8px; align-items: center; font-size: 11px; padding: 6px 10px; }
@@ -177,11 +181,14 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
   .explorer-controls label, .explorer-controls .explorer-run-select { min-width: 0; flex: 1 1 100%; }
   .chart-tools > label { max-width: 100%; }
   .chart-inspector { grid-template-columns: 1fr; padding: 16px; gap: 18px; }
-  .ranking-axis, .ranking-row { grid-template-columns: minmax(105px, 36%) minmax(0, 1fr) 48px; gap: 7px; }
+  .ranking-axis, .ranking-row { grid-template-columns: minmax(0, 44%) minmax(0, 1fr) 46px; gap: 8px; }
   .ranking-name { font-size: 11px; gap: 5px; }
-  .ranking-axis text { font-size: 28px; }
-  .ranking-score { font-size: 10px; }
-  .ranking-axis svg { height: 30px; }
+  .ranking-ticks span { font-size: 10px; }
+  .results-explorer .ranking-ticks span:nth-child(even) { display: none; }
+  .ranking-score { font-size: 11px; }
+}
+@media (max-width: 400px) {
+  .ranking-ticks span:not(:first-child):not(:last-child) { display: none; }
 }
 
 .tradeoff-figure .scatter-point-label { fill: var(--text); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; font-weight: 600; }
@@ -374,6 +381,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
   .home-pixel-art { width: 138px; margin: 16px 0 8px 18px; }
   .has-pixel-art .home-actions { display: flex; clear: both; }
 }
+@media (max-width: 600px) {
+  .home-pixel-art { width: 112px; margin: 6px 0 4px 14px; }
+  .home-contents a { padding: 7px 0; }
+  .arena-home .story-closing { padding-bottom: 8px; }
+}
+/* Keep the compact lab chips easy to hit on touchscreens without enlarging their text. */
+@media (pointer: coarse) {
+  .home-tradeoff .chart-legend button { min-height: 32px; }
+}
 
 /* A more compact figure and a readable experiment index on the homepage. */
 .home-tradeoff { max-width: 760px; margin: 0 auto; }
@@ -393,8 +409,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .experiment-art { float: right; width: 138px; height: auto; image-rendering: pixelated; margin: 0 0 12px 24px; }
 @media (max-width: 600px) {
   .home-tradeoff .chart-inspector { grid-template-columns: 1fr; }
-  .home-tradeoff .tradeoff-figure text { font-size: 15px; }
-  .home-tradeoff .scatter-point-label { font-size: 12px; }
   .experiment-art { width: 100px; margin-left: 16px; }
   .arena-home .experiment-index .home-run { grid-template-columns: 26px minmax(0, 1fr); column-gap: 10px; }
   .laisr-pixel-mark { width: 30px; height: 30px; }
@@ -627,12 +641,21 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .carousel-chart svg.carousel-radar { height: 228px; margin: 4px 0 0; }
 .carousel-radar .radar-trait { font: 12px var(--font-body); fill: var(--text-secondary); }
 .carousel-radar .radar-scale { font: 10px var(--font-body); fill: var(--text-muted); paint-order: stroke; stroke: var(--bg-elevated); stroke-width: 3px; }
-.carousel-radar circle[role="button"] { cursor: pointer; transition: r .12s; }
-.carousel-radar circle[role="button"]:hover, .carousel-radar circle[role="button"]:focus { r: 7; outline: none; stroke: var(--text); }
+.carousel-radar .radar-point { cursor: pointer; }
+.carousel-radar .radar-point:focus { outline: none; }
+.carousel-radar .radar-point circle:last-child { transition: r .12s; }
+.carousel-radar .radar-point:hover circle:last-child, .carousel-radar .radar-point:focus circle:last-child { r: 7; stroke: var(--text); }
 .radar-model-key { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 12px; }
 .radar-model-key > span { width: 6px; height: 6px; border-radius: 50%; }
 .radar-detail { text-align: center; font-size: 11px; margin: 8px 0 0; min-height: 28px; }
-@media(max-width:600px) { .carousel-chart svg.carousel-radar { height: 228px; } .carousel-radar .radar-trait { font-size: 13px; } }
+/* The carousel SVGs render at roughly 0.65-0.8 scale on phones, so their type is set larger to land near 11px. */
+@media(max-width:600px) {
+  .carousel-chart svg.carousel-radar { height: 228px; }
+  .carousel-radar .radar-trait { font-size: 17px; }
+  .carousel-radar .radar-scale { font-size: 14px; }
+  .carousel-chart svg text { font-size: 14px; }
+  .carousel-model small, .carousel-ranking strong small { font-size: 11px; }
+}
 .eval-advanced { border-top: 1px solid var(--border); padding: 16px 0; font-size: 12px; line-height: 1.7; }
 .eval-advanced > summary { color: var(--accent); cursor: pointer; font-size: 13px; }
 .eval-advanced p { margin: 12px 0; color: var(--text-secondary); overflow-wrap: anywhere; }
