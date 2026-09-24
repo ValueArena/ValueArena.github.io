@@ -6,8 +6,10 @@ RUN cd /opt/eigenbench \
     && git fetch origin "$EIGENBENCH_REVISION" \
     && git checkout --detach "$EIGENBENCH_REVISION"
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-worker.txt .
+RUN pip install --no-cache-dir -r requirements-worker.txt \
+    && pip check
+RUN python -c "import torch, transformers, vllm; print('GPU stack:', torch.__version__, torch.version.cuda, transformers.__version__, vllm.__version__)"
 COPY app app
 ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
 RUN python -m app.upstream

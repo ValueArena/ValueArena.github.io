@@ -7,8 +7,10 @@ RUN git clone https://github.com/jchang153/EigenBench.git /opt/eigenbench \
 # Pin the runner source; resolve GPU dependencies when building, then deploy an immutable image.
 RUN pip install --no-cache-dir -r /opt/eigenbench/requirements.txt
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-worker.txt .
+RUN pip install --no-cache-dir -r requirements-worker.txt \
+    && pip check
+RUN python -c "import torch, transformers, vllm; print('GPU stack:', torch.__version__, torch.version.cuda, transformers.__version__, vllm.__version__)"
 COPY app app
 ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
 RUN python -m app.upstream

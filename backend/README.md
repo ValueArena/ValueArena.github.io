@@ -376,3 +376,7 @@ to preserve other researchers' concurrent uploads.
 GPU allocation requires a CUDA 13.0 host (`allowedCudaVersions: ["13.0"]`),
 the highest version currently accepted by the RunPod v1 API. There is no
 fallback to CUDA 12.x hosts, which cannot initialize this worker’s PyTorch build.
+
+The GPU image installs `requirements-worker.txt`, separately from API/scheduler
+dependencies. Image builds run `pip check` and import the GPU libraries so web
+backend dependency changes cannot silently downgrade the inference stack.
