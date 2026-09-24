@@ -1,4 +1,5 @@
 """Resolve public provider IDs to immutable, server-owned model references."""
+from .upstream import MAX_LORA_RANK
 import re
 import time
 from urllib.parse import quote
@@ -47,7 +48,7 @@ def hf_snapshot(repo, revision, subfolder='', adapter=False):
 
 
 def validate_native_adapters(refs):
-    """Pinned upstream native vLLM engine supports LoRA ranks up to 64."""
+    """Pinned upstream native vLLM engine supports LoRA ranks up to 512."""
     for nick, ref in refs.items():
         if not isinstance(ref, dict) or ref.get('provider') != 'hf_local' or ref.get('kind') != 'lora':
             continue
@@ -64,8 +65,8 @@ def validate_native_adapters(refs):
             rank = max(ranks)
         except (httpx.HTTPError, KeyError, ValueError, TypeError):
             raise HTTPException(422, f'Cannot verify LoRA rank for {nick}. Check the adapter configuration.') from None
-        if rank > 64:
-            raise HTTPException(422, f'{nick} has LoRA rank {rank}; the pinned upstream native runner supports at most 64. Use a compatible lower-rank adapter or a merged full model. No GPU has been started.')
+        if rank > MAX_LORA_RANK:
+            raise HTTPException(422, f'{nick} has LoRA rank {rank}; the pinned upstream native runner supports at most {MAX_LORA_RANK}. Use a compatible lower-rank adapter or a merged full model. No GPU has been started.')
 
 
 def resolve_models(request, catalog):

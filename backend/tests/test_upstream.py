@@ -37,7 +37,7 @@ def test_spec_runs_through_actual_pinned_upstream(tmp_path):
     assert resolved['response']['max_tokens']==4096
 
 
-@pytest.mark.parametrize('rank,pattern,accepted',[(64,{},True),(128,{},False),(32,{'q_proj':128},False)])
+@pytest.mark.parametrize('rank,pattern,accepted',[(64,{},True),(128,{},True),(512,{},True),(32,{'q_proj':512},True),(1024,{},False),(32,{'q_proj':1024},False)])
 def test_native_adapter_rank_checked_before_provisioning(monkeypatch,rank,pattern,accepted):
     class Response:
         def raise_for_status(self): pass
@@ -47,4 +47,4 @@ def test_native_adapter_rank_checked_before_provisioning(monkeypatch,rank,patter
     if accepted: validate_native_adapters(refs)
     else:
         with pytest.raises(HTTPException) as exc: validate_native_adapters(refs)
-        assert exc.value.status_code==422 and 'rank 128' in exc.value.detail
+        assert exc.value.status_code==422 and 'rank 1024' in exc.value.detail

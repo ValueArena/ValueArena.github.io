@@ -1,7 +1,7 @@
 # Reuse the published dependency image; rebuild Dockerfile.worker-base to refresh it.
 FROM ghcr.io/valuearena/evaluation-worker@sha256:9ef0b90df76fa1fcb54253bbc8e9a2ec296c6ed0e5844e22ab39a76aea389272
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
-ARG EIGENBENCH_REVISION=c510619902013ec91c317c2c33a90fe27f8ee941
+ARG EIGENBENCH_REVISION=07a6772207658d06d5c04decc4367b259b8f12b6
 RUN cd /opt/eigenbench \
     && git remote set-url origin https://github.com/jchang153/EigenBench.git \
     && git fetch origin "$EIGENBENCH_REVISION" \

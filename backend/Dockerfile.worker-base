@@ -1,6 +1,6 @@
 # Build from this backend directory. CI/release should publish by immutable digest.
 FROM python:3.11-slim
-ARG EIGENBENCH_REVISION=c510619902013ec91c317c2c33a90fe27f8ee941
+ARG EIGENBENCH_REVISION=07a6772207658d06d5c04decc4367b259b8f12b6
 RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 build-essential && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/jchang153/EigenBench.git /opt/eigenbench \
     && cd /opt/eigenbench && git checkout "$EIGENBENCH_REVISION"
