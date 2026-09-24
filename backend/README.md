@@ -451,3 +451,12 @@ Custom compute is available to admins and users supplying their own provider key
 
 The worker image must include the pinned EigenBench revision for multi-GPU
 execution; `EIGENBENCH_TENSOR_PARALLEL_SIZE` is set by the scheduler.
+
+### Private experiment viewer
+
+The private results bucket must allow `application/gzip`, `application/json`,
+`application/jsonl`, `application/x-ndjson`, `text/csv`, `image/png`, and
+`application/octet-stream`. Keep the bucket private. Successful runs are
+converted lazily to the same whitelisted file format used by public experiments;
+owner-authorized requests receive five-minute signed links. Preparing viewer
+files does not publish the run or execute another evaluation.
