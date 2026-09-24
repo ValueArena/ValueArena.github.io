@@ -72,16 +72,16 @@ class Store(GovernanceStore):
                     c.exec_driver_sql(f'REVOKE ALL ON {table.name} FROM PUBLIC, anon, authenticated')
 
     @contextmanager
-    def scheduler_lock(self):
+    def scheduler_lock(self, lock_id=82819401):
         # Requires a direct/session-mode Postgres connection, not transaction pooling.
         with self.engine.connect() as c:
             postgres = self.engine.dialect.name == 'postgresql'
-            locked = not postgres or c.exec_driver_sql('SELECT pg_try_advisory_lock(82819401)').scalar()
+            locked = not postgres or c.exec_driver_sql(f'SELECT pg_try_advisory_lock({int(lock_id)})').scalar()
             try:
                 yield locked
             finally:
                 if postgres and locked:
-                    c.exec_driver_sql('SELECT pg_advisory_unlock(82819401)')
+                    c.exec_driver_sql(f'SELECT pg_advisory_unlock({int(lock_id)})')
 
     def grant(self, user_id, amount):
         if amount <= 0: raise ValueError('Credits must be positive')

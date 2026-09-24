@@ -273,9 +273,9 @@ downloads remain owner-only, including for published runs.
 Successful jobs upload a validated summary and batches of 25 transcript records.
 `/evaluation/?id=<uuid>` shows rankings, intervals, criteria, responses, reflections,
 and ratings for either private or public runs. Owners can select public visibility
-before a run or publish afterwards, and can make results private again. Public
+before a run or publish afterwards, and can unlist public results later. Public
 results appear in the existing Experiments list under **Community evaluations**.
-Publishing is through the evaluation API, not by modifying the Hugging Face dataset.
+The scheduler copies public results to Hugging Face; private archives remain in Supabase.
 Failed runs cannot be published as successful results or bypass coverage checks.
 
 ### Deploying workspace changes
@@ -353,3 +353,22 @@ submissions or dispatch are paused.
 
 Rollout order: deploy the API with `init-db` as its pre-deploy command, then deploy
 the scheduler against the initialized schema. Keep their code revisions aligned.
+
+## Public result publication
+
+Private archives remain in the Supabase results bucket. Successful runs explicitly
+marked public also publish rankings, transcripts, constitution, and analysis
+charts/data to `invi-bhagyesh/ValueArena` on Hugging Face. Each run gets
+`community/<job UUID>` and an entry in the existing experiment index.
+
+Set `HF_PUBLISH_TOKEN` on the **scheduler service only**, with dataset write access;
+optionally override `HF_RESULTS_REPO`. This credential is never sent to GPU workers.
+`HF_TOKEN` remains a separate optional model-download token. Publishing retries
+automatically, independently of GPU cleanup. The account page shows publication
+status; results remain accessible there if publishing fails.
+
+Unlisting removes current public files and the index entry, but cannot erase
+Hugging Face commit history or downloaded copies. Private runs are never published
+until their owner chooses public visibility. Failed runs are not published.
+Exports use a file allowlist and atomic commits against the latest dataset revision
+to preserve other researchers' concurrent uploads.

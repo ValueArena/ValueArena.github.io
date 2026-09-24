@@ -216,7 +216,7 @@ def test_worker_lifecycle(service, tmp_path, engine, fail):
         phase = command[4]; phases.append(phase)
         if fail: raise RuntimeError('invalid ratings')
         if phase == 'analyzing':
-            (directory/'analysis').mkdir(); (directory/'analysis/summary.json').write_text('[]')
+            (directory/'analysis/direct_rating').mkdir(parents=True); (directory/'analysis/direct_rating/summary.json').write_text(json.dumps([{'model_index': 0, 'model_name': 'a', 'eigenbench_elo': 1500}]))
     code = run(Client(), tmp_path/'work', execute)
     assert code == (1 if fail else 0)
     assert db.get(job_id)['state'] == ('failed' if fail else 'succeeded')

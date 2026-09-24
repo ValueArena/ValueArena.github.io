@@ -19,6 +19,17 @@ class SupabaseStorage:
                                   content=source, timeout=180)
         response.raise_for_status()
 
+    def fetch(self,key,target,max_bytes):
+        url=self.download_url(key)
+        total=0
+        with httpx.stream('GET',url,timeout=180) as response:
+            response.raise_for_status()
+            for chunk in response.iter_bytes():
+                total+=len(chunk)
+                if total>max_bytes:raise ValueError('Artifact exceeds size limit')
+                target.write(chunk)
+
+
     def download_url(self, key):
         response = httpx.post(f'{self.root}/object/sign/{self.settings.storage_bucket}/{quote(key, safe="/")}',
             headers=self.headers, json={'expiresIn': 300}, timeout=30)
@@ -36,3 +47,10 @@ class LocalStorage:
         dest = self.root / key
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, dest)
+
+    def fetch(self,key,target,max_bytes):
+        path=self.root/key
+        if path.stat().st_size>max_bytes:raise ValueError('Artifact exceeds size limit')
+        with path.open('rb') as source:
+            import shutil
+            shutil.copyfileobj(source,target)

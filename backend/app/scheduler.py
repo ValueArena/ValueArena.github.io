@@ -90,6 +90,9 @@ def main():
         raise SystemExit('Set WORKER_IMAGE and API_PUBLIC_URL')
     db = Store(cfg.database_url); pods = RunPod(cfg)
     logging.basicConfig(level=logging.INFO)
+    import threading
+    from .publication import publication_loop
+    threading.Thread(target=publication_loop,args=(db,cfg),daemon=True).start()
     while True:
         try: tick(db, pods, cfg)
         except Exception:

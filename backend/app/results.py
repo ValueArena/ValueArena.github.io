@@ -23,9 +23,9 @@ class TranscriptRow(BaseModel):
 
 class ResultSummary(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    summary: list[RatingRow] = Field(max_length=8)
-    record_count: int = Field(ge=0, le=12800)
-    batch_count: int = Field(ge=0, le=12800)
+    summary: list[RatingRow] = Field(min_length=1)
+    record_count: int = Field(ge=0)
+    batch_count: int = Field(ge=0)
 
 class ResultBatch(BaseModel):
     records: list[TranscriptRow] = Field(min_length=1, max_length=25)

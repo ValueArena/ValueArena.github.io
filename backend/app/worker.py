@@ -58,6 +58,16 @@ def log_tail(directory):
     return redact(value)[-64000:]
 
 
+def read_summary(directory):
+    from .results import RatingRow
+    root=directory/'analysis'/'direct_rating'
+    if not root.is_dir():root=directory/'analysis'  # Older hosted artifacts.
+    path=root/'bootstrap'/'summary.json'
+    if not path.exists():path=root/'summary.json'
+    rows=json.loads(path.read_text())
+    return [RatingRow.model_validate({**row,'elo_mean':row.get('elo_mean',row.get('eigenbench_elo'))}).model_dump(exclude_none=True) for row in rows]
+
+
 def publish_results(client, directory):
     count = 0; batch_count = 0; batch = []
     path = directory/'evaluations.jsonl'
@@ -76,7 +86,7 @@ def publish_results(client, directory):
                     batch = []; batch_count += 1
     if batch:
         client.put_result(f'records-{batch_count}', {'records': batch}); batch_count += 1
-    summary = json.loads((directory/'analysis'/'summary.json').read_text())
+    summary = read_summary(directory)
     client.put_result('summary', {'summary': summary, 'record_count': count, 'batch_count': batch_count})
 
 
@@ -136,7 +146,7 @@ def run(client, workdir, execute=execute_stage):
             state['stage'] = phase
             client.post('heartbeat', {'stage': phase})
             execute([sys.executable, '-m', 'app.stage', config['engine'], phase, str(spec)], directory, abort, deadline)
-        if not (directory/'analysis'/'summary.json').is_file():
+        if not read_summary(directory):
             raise RuntimeError('missing_analysis')
     except Exception:
         error = 'evaluation_failed'
@@ -144,9 +154,11 @@ def run(client, workdir, execute=execute_stage):
         if not abort.is_set():
             state['stage'] = 'uploading'
             # Redact known provider secrets from plain logs before sharing artifacts.
-            log = directory/'execution.log'
-            if log.exists():
-                log.write_text(redact(log.read_text(errors='replace')))
+            for path in directory.rglob('*'):
+                if path.is_file() and not path.is_symlink() and path.suffix in {'.json','.jsonl','.txt','.csv','.log'}:
+                    content=path.read_text(errors='replace')
+                    cleaned=redact(content)
+                    if cleaned!=content:path.write_text(cleaned)
             client.post('heartbeat', {'stage': 'uploading', 'log': log_tail(directory)})
             if error is None: publish_results(client, directory)
             (directory/'worker-result.json').write_text(json.dumps({'engine': config['engine'], 'error_code': error}))

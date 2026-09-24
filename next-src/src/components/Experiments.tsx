@@ -68,7 +68,7 @@ export function Experiments() {
     (async () => {
       try {
         const [index, hosted] = await Promise.all([fetchIndex(), evaluationAPI ? fetch(evaluationAPI + '/experiments', { cache: 'no-store' }).then(r => r.ok ? r.json() as Promise<EvaluationJob[]> : []).catch(() => []) : Promise.resolve([])]);
-        const hostedRuns: RunRow[] = hosted.map((r: EvaluationJob) => ({ slug: 'hosted/' + r.id, hosted_id: r.id, name: r.name, group: 'Community evaluations', constitution: r.constitution, scenario: `${r.scenario_count} scenarios`, models_count: r.models_count, timestamp: new Date(r.created_at * 1000).toISOString(), evaluation_mode: 'direct_rating' }));
+        const hostedRuns: RunRow[] = hosted.filter((r: EvaluationJob) => !index.runs.some(existing => existing.slug === 'community/' + r.id)).map((r: EvaluationJob) => ({ slug: 'hosted/' + r.id, hosted_id: r.id, name: r.name, group: 'Community evaluations', constitution: r.constitution, scenario: `${r.scenario_count} scenarios`, models_count: r.models_count, timestamp: new Date(r.created_at * 1000).toISOString(), evaluation_mode: 'direct_rating' }));
         if (cancelled) return;
         const normalized: RunRow[] = (index.runs || []).map((r) => ({
           ...r,

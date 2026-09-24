@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     local_storage_path: Path = Path('.local-results')
     openrouter_api_key: str = ''
     hf_token: str = ''
+    hf_publish_token: str = ''
+    hf_results_repo: str = 'invi-bhagyesh/ValueArena'
 
     @model_validator(mode='after')
     def production_config(self):

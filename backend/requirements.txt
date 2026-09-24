@@ -5,3 +5,4 @@ pydantic-settings==2.9.1
 SQLAlchemy==2.0.40
 psycopg[binary]==3.2.9
 cryptography==46.0.5
+huggingface_hub==0.35.3

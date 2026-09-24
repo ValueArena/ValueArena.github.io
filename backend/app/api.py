@@ -106,7 +106,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/admin/evaluations')
     def admin_jobs(actor=Depends(administrator)):
-        return [public_job(j) | {'user_id':j['user_id']} for j in db.list()[:200]]
+        return [present(j) | {'user_id':j['user_id']} for j in db.list()[:200]]
 
     @app.post('/admin/evaluations/{job_id}/cancel')
     def admin_cancel(job_id:UUID,actor=Depends(administrator)):
@@ -116,7 +116,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if job['state']=='queued':
             db.settle(str(job_id)); db.forget_credentials(str(job_id))
         db.record_admin(actor,'cancel',str(job_id),{})
-        return public_job(db.get(str(job_id)))
+        return present(db.get(str(job_id)))
 
     def owned(job_id, user_id):
         job = db.get(str(job_id))
@@ -131,6 +131,15 @@ def create_app(config=None, store=None, auth=None, storage=None):
         job = db.get(str(job_id))
         if not job: raise HTTPException(404, 'Evaluation not found')
         return job
+
+    def present(job):
+        publication=db.get_presentation(job['id'],'publication')
+        if job['state']=='succeeded':
+            desired=job['config'].get('visibility')=='public'
+            if desired and not publication:publication={'state':'pending'}
+            elif publication and publication.get('desired_public')!=desired:
+                publication={**publication,'state':'pending' if desired else 'unpublishing'}
+        return public_job(job) | {'publication':publication}
 
     @app.get('/health')
     def health(): return {'status': 'ok'}
@@ -198,18 +207,18 @@ def create_app(config=None, store=None, auth=None, storage=None):
         # Snapshot the catalog: queued jobs do not silently change if administrators update it.
         config['model_refs'] = refs
         encrypted = encrypt(cfg.worker_secret, keys) if incoming.funding == 'own_keys' else None
-        return public_job(db.submit(user_id, idempotency_key, digest, config, encrypted))
+        return present(db.submit(user_id, idempotency_key, digest, config, encrypted))
 
     @app.get('/evaluation-schema')
     def schema(): return EvaluationRequest.model_json_schema()
 
     @app.get('/evaluations')
     def evaluations(user_id=Depends(user)):
-        return [public_job(job) for job in db.list(user_id)]
+        return [present(job) for job in db.list(user_id)]
 
     @app.get('/experiments')
     def published():
-        return [public_job(j) for j in db.public_jobs() if db.get_presentation(j['id'], 'summary')]
+        return [present(j) for j in db.public_jobs() if db.get_presentation(j['id'], 'summary')]
 
     def readable(job_id, authorization):
         job = db.get(str(job_id))
@@ -222,7 +231,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         job = readable(job_id, authorization)
         result = db.get_presentation(job['id'], 'summary')
         if not result: raise HTTPException(404, 'Results are not available yet')
-        return {'job': public_job(job), 'criteria': job['config']['criteria'][:job['config'].get('advanced_spec', {}).get('constitution', {}).get('num_criteria')], **result}
+        return {'job': present(job), 'criteria': job['config']['criteria'][:job['config'].get('advanced_spec', {}).get('constitution', {}).get('num_criteria')], **result}
 
     @app.get('/results/{job_id}/records/{batch}')
     def records(job_id: UUID, batch: int, authorization: str | None = Header(default=None)):
@@ -239,7 +248,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         if update.visibility == 'public' and (job['state'] != 'succeeded' or not db.get_presentation(job['id'], 'summary')):
             raise HTTPException(409, 'Only completed results can be published')
         db.visibility(job['id'], update.visibility)
-        return public_job(db.get(job['id']))
+        return present(db.get(job['id']))
 
     @app.get('/evaluations/{job_id}/logs')
     def logs(job_id: UUID, user_id=Depends(user)):
@@ -264,7 +273,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
 
     @app.get('/evaluations/{job_id}')
     def evaluation(job_id: UUID, user_id=Depends(user)):
-        return public_job(owned(job_id, user_id))
+        return present(owned(job_id, user_id))
 
     @app.post('/evaluations/{job_id}/cancel')
     def cancel(job_id: UUID, user_id=Depends(user)):
@@ -276,7 +285,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
             if fresh['started_at'] is None:
                 db.settle(job['id'])
                 db.forget_credentials(job['id'])
-        return public_job(db.get(job['id']))
+        return present(db.get(job['id']))
 
     @app.get('/evaluations/{job_id}/artifacts')
     def artifacts(job_id: UUID, user_id=Depends(user)):

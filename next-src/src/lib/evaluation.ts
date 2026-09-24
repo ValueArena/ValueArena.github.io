@@ -21,6 +21,7 @@ export async function evaluationRequest(path: string, options: RequestInit = {},
   return response;
 }
 export type EvaluationJob = {
+  publication?: {state: string; slug?: string; url?: string; error?: string} | null;
   progress?: {title:string;detail:string;step:number;checked_at:number;elapsed_seconds:number;worker_last_seen_at:number|null;gpu_allocated:boolean;cleanup_pending:boolean};
   id: string; name: string; state: string; stage: string; engine: string; has_artifacts: boolean;
   error_code: string | null; visibility: 'private' | 'public'; constitution: string;
