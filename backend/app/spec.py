@@ -16,7 +16,7 @@ def build_spec(config, directory):
             'include_self': True, 'normalization': 'zscore_softmax'}},
         'dataset': {'path': str(root/'scenarios.json'), 'count': (len(request.scenarios) or request.scenario_count)},
         'constitution': {'path': str(root/'constitution.json'), 'num_criteria': len(request.criteria)},
-        'collection': {'enabled': True, 'sampler_mode': 'all_to_all', 'sampler_seed': request.seed,
+        'collection': {'failure_policy': 'omit_invalid_judgments', 'enabled': True, 'sampler_mode': 'all_to_all', 'sampler_seed': request.seed,
             'evaluations_path': str(root/'evaluations.jsonl'),
             'inspect': {'cache': False, 'retry_on_error': 0, 'display': 'plain', 'max_connections': 4,
                         'log_dir': str(root/'inspect_logs')}},

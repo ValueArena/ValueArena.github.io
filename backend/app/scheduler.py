@@ -19,13 +19,14 @@ def tick(db, pods, cfg, now=None):
         clients = {}
         observations = {}
         def provider(job):
-            if job['config'].get('funding') != 'own_keys': return pods
+            if job['config'].get('funding') != 'own_keys' and not db.job_credentials(job['id']): return pods
             if job['id'] in clients: return clients[job['id']]
             encrypted = db.job_credentials(job['id'])
             if not encrypted: return None
             keys = decrypt(cfg.worker_secret, encrypted)
-            client = RunPod(cfg.model_copy(update={'runpod_api_key': keys['runpod_key'],
-                'openrouter_api_key': keys['openrouter_key'], 'hf_token': ''}))
+            client = RunPod(cfg.model_copy(update={'runpod_api_key': keys.get('runpod_key', cfg.runpod_api_key),
+                'openrouter_api_key': keys.get('openrouter_key', cfg.openrouter_api_key),
+                'hf_token': keys.get('hf_token', '' if job['config'].get('funding') == 'own_keys' else cfg.hf_token)}))
             cleanup.callback(client.client.close)
             clients[job['id']] = client
             return client

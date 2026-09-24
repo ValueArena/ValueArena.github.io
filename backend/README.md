@@ -416,3 +416,20 @@ libraries) for FlashInfer JIT compilation. Both worker Dockerfiles compile and
 load a CUDA extension at image build time, in addition to the Triton C-extension
 check. This catches missing toolchains without a GPU; it does not replace a
 GPU inference smoke test.
+
+Hosted native runs default to `collection.failure_policy="omit_invalid_judgments"`.
+Exhausted invalid reflections/ratings omit the affected judge–evaluee sample;
+response generation and infrastructure/authentication failures remain fatal.
+`omitted_samples.json` records the planned/completed counts and omitted identities,
+and successful run cards show the omission count. Select strict behavior to stop
+on invalid judgments. Token budgets are editable beside compute settings and
+per-model overrides remain in Advanced configuration.
+
+An optional per-run Hugging Face token grants access to approved gated models.
+Validation checks the pinned weights with HEAD before GPU allocation. Tokens are
+encrypted separately from specs and removed after confirmed cleanup; the worker
+receives the chosen token through HF_TOKEN. Service-funded runs may use the
+service HF_TOKEN when no personal token is supplied. Configure that service token
+on both API and scheduler; own-provider runs never inherit the service token.
+Native OpenRouter attempts emit `[API]` lines in worker logs with timing, token
+usage and retry status, without prompts or response bodies.

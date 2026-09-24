@@ -47,8 +47,8 @@ def test_own_keys_require_both_and_are_verified(service, monkeypatch):
 
 def test_custom_models_are_pinned_and_safe(service, monkeypatch):
     _, db, client = service
-    monkeypatch.setattr(model_resolution, 'hf_snapshot', lambda *args: 'a'*40)
-    monkeypatch.setattr(model_resolution, 'validate_native_adapters', lambda refs: None)
+    monkeypatch.setattr(model_resolution, 'hf_snapshot', lambda *args, **kwargs: 'a'*40)
+    monkeypatch.setattr(model_resolution, 'validate_native_adapters', lambda refs, token='': None)
     model = {'id': 'my-qwen', 'provider': 'huggingface', 'repo_id': 'me/adapter', 'kind': 'lora',
              'subfolder': 'introspection-final', 'base_model_id': 'Qwen/Qwen2.5-7B-Instruct'}
     result = submit(client, payload(models=['a', 'my-qwen'], custom_models=[model]))
@@ -178,3 +178,53 @@ def test_hf_resolver_rejects_gated_or_missing_weights(monkeypatch):
         model_resolution.hf_snapshot('owner/model', 'main')
     response.data['siblings'] = [{'rfilename': 'config.json'}, {'rfilename': 'model.safetensors'}]
     assert model_resolution.hf_snapshot('owner/model', 'main') == 'a'*40
+
+
+def test_user_hf_token_encrypted_and_forwarded_on_service_run(service,monkeypatch):
+    cfg,db,api=service
+    observed=[]
+    monkeypatch.setattr('app.api.resolve_models',lambda req,catalog,token: observed.append(token) or {'a':'org/a','b':'org/b'})
+    response=submit(api,payload(hf_token='hf_personal_secret'))
+    assert response.status_code==202
+    job_id=response.json()['id']
+    assert observed==['hf_personal_secret']
+    assert 'hf_personal_secret' not in json.dumps(db.get(job_id))
+    assert decrypt(cfg.worker_secret,db.job_credentials(job_id))=={'hf_token':'hf_personal_secret'}
+    class TokenPods(Pods):
+        def __init__(self,settings):
+            assert settings.hf_token=='hf_personal_secret'
+            super().__init__()
+            self.client=self
+        def close(self):pass
+    monkeypatch.setattr('app.scheduler.RunPod',TokenPods)
+    tick(db,Pods(),cfg)
+    assert db.get(job_id)['pod_id']
+
+
+def test_gated_weight_access_is_checked_without_downloading(monkeypatch):
+    data={'sha':'a'*40,'gated':'auto','siblings':[{'rfilename':'config.json'},{'rfilename':'model.safetensors'}]}
+    import httpx
+    def get(url,**kwargs):
+        assert kwargs['headers']['Authorization']=='Bearer hf_test'
+        return httpx.Response(200,json=data,request=httpx.Request('GET',url))
+    def head(url,**kwargs):
+        assert '/resolve/'+('a'*40)+'/model.safetensors' in url
+        assert kwargs['headers']['Authorization']=='Bearer hf_test'
+        return httpx.Response(200,request=httpx.Request('HEAD',url))
+    monkeypatch.setattr(model_resolution.httpx,'get',get)
+    monkeypatch.setattr(model_resolution.httpx,'head',head)
+    assert model_resolution.hf_snapshot('owner/model','main',token='hf_test')=='a'*40
+    monkeypatch.setattr(model_resolution.httpx,'head',lambda url,**kw:httpx.Response(403,request=httpx.Request('HEAD',url)))
+    with pytest.raises(HTTPException,match='denied weight access'):
+        model_resolution.hf_snapshot('owner/model','main',token='hf_test')
+
+
+def test_reflection_budget_and_omission_policy_reach_spec():
+    from app.spec import build_spec
+    config=payload(advanced_spec={'collection':{'generation':{'reflection':{'max_tokens':8192}}}})
+    config['model_refs']={'a':'org/a','b':'org/b'}
+    spec=build_spec(config,'.')
+    assert spec['collection']['generation']['reflection']['max_tokens']==8192
+    assert spec['collection']['failure_policy']=='omit_invalid_judgments'
+    config['advanced_spec']['collection']['failure_policy']='strict'
+    assert build_spec(config,'.')['collection']['failure_policy']=='strict'

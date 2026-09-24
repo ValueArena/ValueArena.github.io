@@ -4,7 +4,7 @@ FROM nvidia/cuda:13.0.2-devel-ubuntu22.04@sha256:6b6617592b94e7dcc6ffbe6d00720ee
 FROM python:3.11-slim
 COPY --from=cuda-toolkit /usr/local/cuda-13.0 /usr/local/cuda
 ENV CUDA_HOME=/usr/local/cuda PATH=/usr/local/cuda/bin:$PATH LD_LIBRARY_PATH=/usr/local/cuda/lib64
-ARG EIGENBENCH_REVISION=07a6772207658d06d5c04decc4367b259b8f12b6
+ARG EIGENBENCH_REVISION=5e7520f71fd74fb3c884ae1a02534c8489348dbd
 RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 build-essential && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/jchang153/EigenBench.git /opt/eigenbench \
     && cd /opt/eigenbench && git checkout "$EIGENBENCH_REVISION"

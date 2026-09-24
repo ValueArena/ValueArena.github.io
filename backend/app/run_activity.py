@@ -50,10 +50,10 @@ async def collect_activity(db,cfg):
         async with semaphore:
             key=cfg.runpod_api_key
             secrets=[cfg.runpod_api_key,cfg.openrouter_api_key,cfg.hf_token,worker_token(cfg.worker_secret,job['id'])]
-            if job['config'].get('funding')=='own_keys':
+            if db.job_credentials(job['id']):
                 encrypted=db.job_credentials(job['id'])
                 if not encrypted:return
-                keys=decrypt(cfg.worker_secret,encrypted);key=keys['runpod_key'];secrets+=list(keys.values())
+                keys=decrypt(cfg.worker_secret,encrypted);key=keys.get('runpod_key',key);secrets+=list(keys.values())
             previous=db.get_presentation(job['id'],'provider_activity') or {}
             now=int(time.time())
             try:
