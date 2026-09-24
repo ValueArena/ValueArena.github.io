@@ -139,6 +139,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
         return job
 
     def present(job):
+        job = {**job, 'allocation': db.get_presentation(job['id'], 'allocation')}
         publication=db.get_presentation(job['id'],'publication')
         if job['state']=='succeeded':
             desired=job['config'].get('visibility')=='public'
@@ -274,7 +275,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
                 'provider':db.get_presentation(job['id'],'provider_activity'),
                 'pod_name':'valuearena-'+job['id'] if job.get('pod_id') else None,
                 'gpu':job['config'].get('gpu_type',cfg.runpod_gpu_type),
-                'state':job['state'],'stage':job['stage'],'progress':progress(job)}
+                'state':job['state'],'stage':job['stage'],'progress':progress({**job, 'allocation':db.get_presentation(job['id'],'allocation')})}
 
     @app.get('/evaluations/{job_id}/logs')
     def logs(job_id: UUID, user_id=Depends(user)):
@@ -300,6 +301,13 @@ def create_app(config=None, store=None, auth=None, storage=None):
     @app.get('/evaluations/{job_id}')
     def evaluation(job_id: UUID, user_id=Depends(user)):
         return present(owned(job_id, user_id))
+
+    @app.get('/evaluations/{job_id}/settings')
+    def evaluation_settings(job_id: UUID, user_id=Depends(user)):
+        job = owned(job_id, user_id)
+        # Credentials are never returned, even if future config formats add them.
+        fields = set(EvaluationRequest.model_fields) - {'hf_token', 'openrouter_key', 'runpod_key'}
+        return {key: value for key, value in job['config'].items() if key in fields}
 
     @app.post('/evaluations/{job_id}/cancel')
     def cancel(job_id: UUID, user_id=Depends(user)):

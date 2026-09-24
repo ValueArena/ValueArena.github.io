@@ -2,6 +2,9 @@
 import time
 
 ERRORS = {
+    'gpu_unavailable': 'The selected GPU remained unavailable for 5 minutes. Retry or choose another GPU.',
+    'allocation_unconfirmed': 'RunPod did not confirm allocation within 5 minutes. Check cleanup before retrying.',
+    'allocation_rejected': 'RunPod rejected the request. Check your API key, account balance, and GPU settings.',
     'worker_start_timeout': 'The worker did not connect before the startup timeout.',
     'worker_unresponsive': 'The worker stopped sending heartbeats.',
     'runtime_limit': 'The execution-time limit was reached.',
@@ -23,7 +26,11 @@ def progress(job, now=None):
     if state == 'queued':
         title, detail, step = 'Queued', 'Waiting for the scheduler to allocate a GPU. Admin concurrency settings or a dispatch pause can keep a job queued.', 0
     elif state == 'provisioning':
-        if provider_error and not job.get('pod_id'):
+        allocation = job.get('allocation') or {}
+        if allocation.get('outcome') == 'unavailable' and not job.get('pod_id'):
+            delay = max(0, (allocation.get('next_retry_at') or now) - now)
+            title, detail, step = 'Waiting for GPU availability', f"Attempt {allocation['attempts']}: selected GPU unavailable. Next retry in {delay} seconds; retrying for up to 5 minutes.", 1
+        elif provider_error and not job.get('pod_id'):
             title, detail, step = 'GPU allocation not confirmed', provider_detail, 1
         elif job.get('pod_id'):
             title, detail, step = 'GPU allocated · waiting for worker', 'A RunPod instance has been allocated. The container has not reported ready yet; image download and container startup happen before worker output is available.', 1

@@ -242,3 +242,93 @@ def test_storage_uses_new_secret_key_as_apikey_only(service):
     assert storage.headers == {'apikey': 'sb_secret_test'}
     cfg.supabase_secret_key = 'legacy.jwt.value'
     assert SupabaseStorage(cfg).headers['Authorization'] == 'Bearer legacy.jwt.value'
+
+
+def test_capacity_retry_backoff_and_separate_startup_window(service):
+    from app.runpod import GPUUnavailable
+    cfg, db, client = service
+    job_id = submit(client).json()['id']; now = int(time.time())
+    class CapacityPods(Pods):
+        attempts = 0
+        def create(self, job):
+            self.attempts += 1
+            if self.attempts < 4: raise GPUUnavailable()
+            return super().create(job)
+    pods = CapacityPods()
+    for offset, expected in [(0,1),(10,1),(15,2),(44,2),(45,3),(104,3),(105,4)]:
+        tick(db,pods,cfg,now+offset)
+        assert pods.attempts == expected
+        assert db.get(job_id)['state'] == 'provisioning'
+    tick(db,pods,cfg,now+164)
+    assert db.get(job_id)['state'] == 'provisioning'
+    tick(db,pods,cfg,now+165)
+    assert db.get(job_id)['error_code'] == 'worker_start_timeout'
+
+
+def test_capacity_deadline_and_cancel_stop_retries(service):
+    from app.runpod import GPUUnavailable
+    cfg, db, client = service
+    job_id = submit(client).json()['id']; now = int(time.time())
+    class CapacityPods(Pods):
+        attempts = 0
+        def create(self, job):
+            self.attempts += 1
+            raise GPUUnavailable()
+    pods = CapacityPods()
+    tick(db,pods,cfg,now); tick(db,pods,cfg,now+299)
+    assert pods.attempts == 2
+    tick(db,pods,cfg,now+300)
+    assert db.get(job_id)['error_code'] == 'gpu_unavailable'
+    assert db.get(job_id)['state'] == 'failed'
+    tick(db,pods,cfg,now+310)
+    assert pods.attempts == 2
+    second = submit(client,key='retry').json()['id']
+    tick(db,pods,cfg,now+320)
+    db.finish(second,'cancelled','user_cancelled')
+    tick(db,pods,cfg,now+400)
+    assert pods.attempts == 3
+
+
+def test_settings_are_owned_and_secret_free(service):
+    _,db,client=service
+    job=submit(client).json()['id']
+    result=client.get(f'/evaluations/{job}/settings',headers={'Authorization':'Bearer '+USER})
+    assert result.status_code == 200
+    assert result.json()['models'] == ['a','b']
+    assert not {'hf_token','runpod_key','openrouter_key','model_refs'} & result.json().keys()
+    assert client.get(f'/evaluations/{job}/settings',headers={'Authorization':'Bearer '+OTHER}).status_code == 404
+
+
+def test_uncertain_allocation_never_retries_and_late_pod_gets_full_startup(service):
+    cfg, db, client = service
+    job_id = submit(client).json()['id']; now = int(time.time())
+    class LostResponse(Pods):
+        attempts = 0
+        def create(self, job):
+            self.attempts += 1
+            raise TimeoutError()
+    pods = LostResponse()
+    tick(db,pods,cfg,now); tick(db,pods,cfg,now+120)
+    assert pods.attempts == 1
+    pods.items.append({'id':'late-pod','name':pods.name(job_id)})
+    tick(db,pods,cfg,now+290)
+    assert db.get(job_id)['pod_id'] == 'late-pod'
+    tick(db,pods,cfg,now+320)
+    assert db.get(job_id)['state'] == 'provisioning'
+    assert pods.attempts == 1
+    tick(db,pods,cfg,now+350)
+    assert db.get(job_id)['error_code'] == 'worker_start_timeout'
+
+
+def test_unavailable_progress_shows_attempt_and_next_retry(service):
+    from app.runpod import GPUUnavailable
+    cfg,db,client=service
+    job_id=submit(client).json()['id']
+    pods=Pods()
+    def unavailable(job): raise GPUUnavailable()
+    pods.create=unavailable
+    tick(db,pods,cfg)
+    view=client.get(f'/evaluations/{job_id}',headers={'Authorization':'Bearer '+USER}).json()
+    assert view['progress']['title'] == 'Waiting for GPU availability'
+    assert 'Attempt 1' in view['progress']['detail']
+    assert 'Next retry' in view['progress']['detail']

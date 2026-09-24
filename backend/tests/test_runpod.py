@@ -45,3 +45,16 @@ def test_graphql_errors_never_echo_credentials_or_confirm_allocation():
         with pytest.raises(RuntimeError,match='did not confirm') as exc:
             pods.create({'id':str(uuid4()),'config':{}})
         assert 'secret' not in str(exc.value)
+
+
+def test_only_definitive_capacity_errors_are_retryable():
+    import pytest
+    from app.runpod import GPUUnavailable
+    pods=RunPod(Settings(environment='test',worker_secret='x'*40))
+    for message, expected in [('There are no available GPUs', GPUUnavailable), ('Unknown internal error', RuntimeError)]:
+        with httpx.Client(transport=httpx.MockTransport(lambda r:httpx.Response(200,json={
+            'errors':[{'message':message}], 'data':None}))) as client:
+            pods.client.close(); pods.client=client
+            with pytest.raises(expected) as exc:
+                pods.create({'id':str(uuid4()),'config':{}})
+            assert type(exc.value) is expected
