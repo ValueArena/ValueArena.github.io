@@ -1,5 +1,9 @@
+# CUDA development files are required for FlashInfer's runtime compilation.
+FROM nvidia/cuda:13.0.2-devel-ubuntu22.04@sha256:6b6617592b94e7dcc6ffbe6d00720eed27bc6e3b4f06b26b93b4070c31f57391 AS cuda-toolkit
 # Reuse the published dependency image; rebuild Dockerfile.worker-base to refresh it.
 FROM ghcr.io/valuearena/evaluation-worker@sha256:9ef0b90df76fa1fcb54253bbc8e9a2ec296c6ed0e5844e22ab39a76aea389272
+COPY --from=cuda-toolkit /usr/local/cuda-13.0 /usr/local/cuda
+ENV CUDA_HOME=/usr/local/cuda PATH=/usr/local/cuda/bin:$PATH LD_LIBRARY_PATH=/usr/local/cuda/lib64
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 ARG EIGENBENCH_REVISION=07a6772207658d06d5c04decc4367b259b8f12b6
 RUN cd /opt/eigenbench \
@@ -13,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements-worker.txt \
 RUN python -c "import torch, transformers, vllm; print('GPU stack:', torch.__version__, torch.version.cuda, transformers.__version__, vllm.__version__)"
 COPY app app
 ENV EIGENBENCH_ROOT=/opt/eigenbench PYTHONUNBUFFERED=1 HF_HOME=/workspace/hf MPLBACKEND=Agg
-RUN python -m app.upstream && python -m app.check_compiler
+RUN python -m app.upstream && python -m app.check_compiler && python -m app.check_cuda_compiler
 CMD ["python", "-m", "app.worker"]
