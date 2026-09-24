@@ -108,6 +108,12 @@ def create_app(config=None, store=None, auth=None, storage=None):
     def admin_jobs(actor=Depends(administrator)):
         return [present(j) | {'user_id':j['user_id']} for j in db.list()[:200]]
 
+    @app.get('/admin/evaluations/{job_id}/logs')
+    def admin_logs(job_id:UUID,actor=Depends(administrator)):
+        job=db.get(str(job_id))
+        if not job:raise HTTPException(404,'Evaluation not found')
+        return activity(job)
+
     @app.post('/admin/evaluations/{job_id}/cancel')
     def admin_cancel(job_id:UUID,actor=Depends(administrator)):
         job=db.get(str(job_id))
@@ -250,10 +256,17 @@ def create_app(config=None, store=None, auth=None, storage=None):
         db.visibility(job['id'], update.visibility)
         return present(db.get(job['id']))
 
+    def activity(job):
+        return {'text':db.get_presentation(job['id'],'log') or '',
+                'provider':db.get_presentation(job['id'],'provider_activity'),
+                'pod_name':'valuearena-'+job['id'] if job.get('pod_id') else None,
+                'gpu':job['config'].get('gpu_type',cfg.runpod_gpu_type),
+                'state':job['state'],'stage':job['stage'],'progress':progress(job)}
+
     @app.get('/evaluations/{job_id}/logs')
     def logs(job_id: UUID, user_id=Depends(user)):
         job = owned(job_id, user_id)
-        return {'text': db.get_presentation(job['id'], 'log') or '', 'state': job['state'], 'stage': job['stage']}
+        return activity(job)
 
     @app.put('/internal/jobs/{job_id}/results/{part}')
     async def upload_result(part: str, request: Request, job=Depends(worker)):

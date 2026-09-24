@@ -22,3 +22,10 @@ def test_terminal_elapsed_stops_and_cleanup_is_explicit():
     p=progress(j,999)
     assert p['elapsed_seconds']==100 and p['cleanup_pending']
     assert 'did not connect' in p['detail']
+
+
+def test_provider_create_failure_is_not_presented_as_normal_startup():
+    j=job(error_code='provider_create_http_500')
+    p=progress(j,160)
+    assert p['title']=='GPU allocation not confirmed'
+    assert 'HTTP 500' in p['detail'] and 'No GPU allocation' in p['detail']

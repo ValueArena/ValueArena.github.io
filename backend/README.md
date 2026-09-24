@@ -380,3 +380,22 @@ fallback to CUDA 12.x hosts, which cannot initialize this worker’s PyTorch bui
 The GPU image installs `requirements-worker.txt`, separately from API/scheduler
 dependencies. Image builds run `pip check` and import the GPU libraries so web
 backend dependency changes cannot silently downgrade the inference stack.
+
+## Live run activity
+
+The scheduler collects recent RunPod **system** events (image pulling, extraction,
+container startup) through the v2 logs API in a separate bounded background loop.
+A provider outage does not block GPU cancellation or cleanup. Known worker/provider
+credentials are redacted before snapshots are stored. These logs are owner/admin
+only, including for public evaluations. Historical runs may have no startup events
+if they completed before this collector was deployed.
+
+`GET /evaluations/{id}/logs` serves the owner; administrators can use
+`GET /admin/evaluations/{id}/logs`. Both return worker output and startup events.
+The UI refreshes every five seconds, offers separate log tabs and follow-scroll,
+and confirms cancellation before sending the request. Admin job polling does not
+reset unsaved policy edits. No completion percentage is inferred from elapsed time.
+
+Definite RunPod create rejections (400/401/403/404/422) fail the job promptly.
+Uncertain outcomes, such as HTTP 500 or a timeout, record a visible allocation
+error and continue reconciliation without issuing another create request.
