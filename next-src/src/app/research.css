@@ -736,3 +736,46 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .eval-submission-screen { min-height: 55vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 1rem; padding: 2rem; }
 .eval-submission-screen h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0; }
 .eval-submission-screen p { max-width: 34rem; margin: 0; color: var(--text-muted); }
+
+/* LAISR Lab emblem: the bubbles take turns hopping one pixel and the gold square blinks between them. */
+.lab-mark { display: block; overflow: visible; }
+.lab-mark.is-animated g { animation-duration: 6s; animation-timing-function: steps(1, end); animation-iteration-count: infinite; }
+.lab-mark.is-animated .lab-mark-green { animation-name: lab-mark-green; }
+.lab-mark.is-animated .lab-mark-terracotta { animation-name: lab-mark-terracotta; }
+.lab-mark.is-animated .lab-mark-gold { animation-name: lab-mark-gold; }
+.va-lab-link:hover .lab-mark.is-animated g { animation-duration: 2.4s; }
+@keyframes lab-mark-green { 0%, 16%, 100% { transform: none; } 8% { transform: translateY(-1px); } }
+@keyframes lab-mark-terracotta { 0%, 36%, 100% { transform: none; } 28% { transform: translateY(-1px); } }
+@keyframes lab-mark-gold { 0%, 24%, 48%, 100% { opacity: 1; } 20%, 44% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .lab-mark.is-animated g { animation: none; } }
+
+/* The brand pill holds two links: the lab (emblem and name) and ValueArena. */
+.va-lab-link { display: inline-flex; align-items: center; gap: inherit; color: inherit; text-decoration: none; }
+.va-lab-link:hover .va-lab-name, .va-lab-link[aria-current='page'] .va-lab-name { color: var(--accent); }
+.va-header a.va-wordmark { color: inherit; text-decoration: none; }
+
+/* Lab page: one quiet column. */
+.lab-page { max-width: 640px; margin: 0 auto; padding: 64px 0 24px; }
+.lab-hero { padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+.lab-hero-mark { width: 72px; height: 78px; margin-bottom: 28px; }
+:root[data-theme='dark'] .lab-hero-mark { filter: brightness(1.5) saturate(.85); }
+.lab-hero h1 { font: 600 40px/1.1 var(--font-body); letter-spacing: -.03em; }
+.lab-tagline { color: var(--accent); font-size: 14px; margin-top: 10px; }
+.lab-lede { font-size: 17px; line-height: 1.7; color: var(--text-secondary); margin-top: 22px; }
+.lab-section { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 24px; padding: 32px 0; border-bottom: 1px solid var(--border-light); }
+.lab-section h2 { font-size: 13px; font-weight: 500; color: var(--text-muted); padding-top: 2px; }
+.lab-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+.lab-list li { display: grid; gap: 4px; }
+.lab-list strong { font-size: 15px; font-weight: 600; }
+.lab-list span { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+.lab-list a:hover strong { color: var(--accent); }
+.lab-links { display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: 14px; }
+.lab-links a { color: var(--accent); }
+.lab-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 600px) {
+  .lab-page { padding: 36px 0 8px; }
+  .lab-hero-mark { width: 56px; height: 61px; margin-bottom: 22px; }
+  .lab-hero h1 { font-size: 32px; }
+  .lab-lede { font-size: 16px; }
+  .lab-section { grid-template-columns: 1fr; gap: 14px; padding: 26px 0; }
+}

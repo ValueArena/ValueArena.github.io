@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { evaluationAuth, evaluationRequest } from '@/lib/evaluation';
 import { usePathname } from 'next/navigation';
+import { LabMark } from './LabMark';
 
 export function Header() {
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
@@ -78,15 +79,16 @@ export function Header() {
 
   return (
     <header className="va-header" ref={header}>
-      <a href="/" className="va-brand va-glass-pill" aria-label="ValueArena home">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="laisr-pixel-mark" src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" />
-        <span className="va-lab-name">LAISR Lab</span>
+      <div className="va-brand va-glass-pill">
+        <a href="/lab/" className="va-lab-link" aria-label="LAISR Lab" aria-current={pathname.startsWith('/lab') ? 'page' : undefined}>
+          <LabMark className="laisr-pixel-mark" />
+          <span className="va-lab-name">LAISR Lab</span>
+        </a>
         <span className="va-brand-divider" aria-hidden="true" />
-        <span className="va-wordmark">
+        <a href="/" className="va-wordmark" aria-label="ValueArena home">
           <span>Value</span>Arena
-        </span>
-      </a>
+        </a>
+      </div>
       <nav id="main-navigation" ref={nav} className={`va-nav va-glass-pill${menuOpen ? ' is-open' : ''}`} aria-label="Main navigation"
         onMouseOver={e => { const a = (e.target as Element).closest<HTMLElement>('a'); if (a) snapTo(a); }}
         onMouseLeave={() => toCurrent()}
