@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { evaluationAuth, evaluationRequest } from '@/lib/evaluation';
 import { usePathname } from 'next/navigation';
-import { LabMark } from './LabMark';
 
 export function Header() {
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
@@ -81,7 +80,8 @@ export function Header() {
     <header className="va-header" ref={header}>
       <div className="va-brand va-glass-pill">
         <a href="/lab/" className="va-lab-link" aria-label="LAISR Lab" aria-current={pathname.startsWith('/lab') ? 'page' : undefined}>
-          <LabMark className="laisr-pixel-mark" playOnMount={pathname.startsWith('/lab')} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="laisr-pixel-mark" src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" />
           <span className="va-lab-name">LAISR Lab</span>
         </a>
         <span className="va-brand-divider" aria-hidden="true" />

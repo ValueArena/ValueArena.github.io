@@ -1,6 +1,5 @@
 import { pageMetadata } from '@/lib/metadata';
 import { papers } from '@/lib/papers';
-import { LabMark } from '@/components/LabMark';
 
 export const metadata = pageMetadata('LAISR Lab — Long-term AI Safety Research', 'LAISR Lab is a long-term AI safety research lab studying the values language models hold and how to measure them.', '/lab/');
 
@@ -13,7 +12,8 @@ const FOCUS = [
 export default function LabPage() {
   return <div className="lab-page">
     <header className="lab-hero">
-      <LabMark className="lab-hero-mark" playOnMount />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="lab-hero-mark" src="/assets/art/laisr-pixel-mark.webp" width="119" height="128" alt="" />
       <h1>LAISR Lab</h1>
       <p className="lab-tagline">Long-term AI Safety Research</p>
       <p className="lab-lede">We study the values language models come to hold, and build ways to measure them, so that increasingly capable systems stay aligned with the people they serve.</p>
