@@ -81,7 +81,7 @@ export function Header() {
     <header className="va-header" ref={header}>
       <div className="va-brand va-glass-pill">
         <a href="/lab/" className="va-lab-link" aria-label="LAISR Lab" aria-current={pathname.startsWith('/lab') ? 'page' : undefined}>
-          <LabMark className="laisr-pixel-mark" />
+          <LabMark className="laisr-pixel-mark" playOnMount={pathname.startsWith('/lab')} />
           <span className="va-lab-name">LAISR Lab</span>
         </a>
         <span className="va-brand-divider" aria-hidden="true" />

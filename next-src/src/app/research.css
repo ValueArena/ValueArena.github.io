@@ -737,17 +737,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .eval-submission-screen h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 0; }
 .eval-submission-screen p { max-width: 34rem; margin: 0; color: var(--text-muted); }
 
-/* LAISR Lab emblem: the bubbles take turns hopping one pixel and the gold square blinks between them. */
+/* LAISR Lab emblem; LabMark animates its parts when the bubbles click together. */
 .lab-mark { display: block; overflow: visible; }
-.lab-mark.is-animated g { animation-duration: 6s; animation-timing-function: steps(1, end); animation-iteration-count: infinite; }
-.lab-mark.is-animated .lab-mark-green { animation-name: lab-mark-green; }
-.lab-mark.is-animated .lab-mark-terracotta { animation-name: lab-mark-terracotta; }
-.lab-mark.is-animated .lab-mark-gold { animation-name: lab-mark-gold; }
-.va-lab-link:hover .lab-mark.is-animated g { animation-duration: 2.4s; }
-@keyframes lab-mark-green { 0%, 16%, 100% { transform: none; } 8% { transform: translateY(-1px); } }
-@keyframes lab-mark-terracotta { 0%, 36%, 100% { transform: none; } 28% { transform: translateY(-1px); } }
-@keyframes lab-mark-gold { 0%, 24%, 48%, 100% { opacity: 1; } 20%, 44% { opacity: .2; } }
-@media (prefers-reduced-motion: reduce) { .lab-mark.is-animated g { animation: none; } }
 
 /* The brand pill holds two links: the lab (emblem and name) and ValueArena. */
 .va-lab-link { display: inline-flex; align-items: center; gap: inherit; color: inherit; text-decoration: none; }

@@ -13,7 +13,7 @@ const FOCUS = [
 export default function LabPage() {
   return <div className="lab-page">
     <header className="lab-hero">
-      <LabMark className="lab-hero-mark" />
+      <LabMark className="lab-hero-mark" playOnMount />
       <h1>LAISR Lab</h1>
       <p className="lab-tagline">Long-term AI Safety Research</p>
       <p className="lab-lede">We study the values language models come to hold, and build ways to measure them, so that increasingly capable systems stay aligned with the people they serve.</p>

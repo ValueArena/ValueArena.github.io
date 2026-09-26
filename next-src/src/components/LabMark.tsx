@@ -1,6 +1,10 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
 // The LAISR Lab emblem, redrawn from laisr-pixel-mark.webp on its 12×13 pixel
-// grid so each part can move: the two speech bubbles take turns hopping and the
-// gold square where they meet blinks between them.
+// grid so its parts can move: on hover (or on arrival, with playOnMount) the two
+// speech bubbles click together once and the gold square appears where they meet.
 const GRID = [
   '..GGGGGG....',
   '.GGGGGGGG...',
@@ -27,8 +31,35 @@ const PARTS = [
   { name: 'gold', fill: '#d5a33f', cells: runs('Y') },
 ];
 
-export function LabMark({ className = '', animated = true }: { className?: string; animated?: boolean }) {
-  return <svg className={`lab-mark${animated ? ' is-animated' : ''} ${className}`} viewBox="0 0 12 13" shapeRendering="crispEdges" aria-hidden="true" focusable="false">
+// The bubbles close a two-pixel gap in whole-pixel steps, then the gold square lands.
+const CLICK: Record<string, Keyframe[]> = {
+  green: [{ transform: 'translate(-2px, -2px)' }, { transform: 'translate(-1px, -1px)', offset: .35 }, { transform: 'none', offset: .7 }, { transform: 'none' }],
+  terracotta: [{ transform: 'translate(2px, 2px)' }, { transform: 'translate(1px, 1px)', offset: .35 }, { transform: 'none', offset: .7 }, { transform: 'none' }],
+  gold: [{ opacity: 0 }, { opacity: 1, offset: .7 }, { opacity: 1 }],
+};
+
+function click(svg: SVGSVGElement) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (const [name, frames] of Object.entries(CLICK)) {
+    svg.querySelector(`.lab-mark-${name}`)?.animate(frames.map(f => ({ ...f, easing: 'steps(1, end)' })), { duration: 420 });
+  }
+}
+
+export function LabMark({ className = '', playOnMount = false }: { className?: string; playOnMount?: boolean }) {
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    if (playOnMount) click(svg);
+    // Hovering the surrounding link (or the emblem itself) replays the click.
+    const target = svg.closest('a') ?? svg;
+    const onEnter = () => click(svg);
+    target.addEventListener('mouseenter', onEnter);
+    return () => target.removeEventListener('mouseenter', onEnter);
+    // playOnMount only matters on arrival
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <svg ref={ref} className={`lab-mark ${className}`} viewBox="0 0 12 13" shapeRendering="crispEdges" aria-hidden="true" focusable="false">
     {PARTS.map(part => <g key={part.name} className={`lab-mark-${part.name}`} fill={part.fill}>
       {part.cells.map(c => <rect key={`${c.x}-${c.y}`} x={c.x} y={c.y} width={c.w} height="1" />)}
     </g>)}
