@@ -51,7 +51,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="site-footer-meta">
-          <span>© {year} LAISR Lab</span>
+          <a href="/lab/">© {year} LAISR Lab, Cornell University</a>
           <a href="https://arxiv.org/abs/2509.01938">EigenBench paper ↗</a>
         </div>
         <div className="site-footer-scene" aria-hidden="true">
