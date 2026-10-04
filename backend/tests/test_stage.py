@@ -132,4 +132,28 @@ def test_retries_are_bounded_and_the_failure_policy_reaches_the_inspect_export(u
     failed = NS(samples=[sample('InternalServerError 500'), sample(), sample('InternalServerError 500')])
     assert collect.records_from_logs([failed]) == ('records', False)
     assert collect.export_log(failed, evaluations_path='e.jsonl') == ('export', False)
-    assert 'Omitting 2 failed judgment(s)' in capsys.readouterr().out
+    failed.eval = NS(task_args={'judge_nick': 'nycc-agent'})
+    collect.records_from_logs([failed])
+    out = capsys.readouterr().out
+    assert 'Omitting 2 failed judgment(s)' in out
+    assert 'nycc-agent: 2 of 3 failed. First error: InternalServerError 500' in out
+
+
+def test_bootstrap_chart_cannot_fail_the_analysis(monkeypatch, capsys):
+    drawn = []
+    def plot(rows, path):
+        if any(r['elo_mean'] - r['elo_ci_lower'] < 0 or r['elo_ci_upper'] - r['elo_mean'] < 0 for r in rows):
+            raise ValueError("'yerr' must not contain negative values")
+        drawn.append(rows)
+        if path == 'broken.png': raise RuntimeError('no display')
+    module = NS(_save_bootstrap_plot=plot)
+    monkeypatch.setitem(sys.modules, 'pipeline', types.ModuleType('pipeline'))
+    monkeypatch.setitem(sys.modules, 'pipeline.train', NS(direct_analysis=module))
+    monkeypatch.setitem(sys.modules, 'pipeline.train.direct_analysis', module)
+    stage.patch_analysis()
+    # Two ratings: every bootstrap sample equal, the mean a rounding error outside its interval.
+    rows = [{'model_name': 'a', 'elo_mean': 1500.0000000000002, 'elo_ci_lower': 1500.0000000000005, 'elo_ci_upper': 1500.0000000000005}]
+    module._save_bootstrap_plot(rows, 'chart.png')
+    assert drawn and drawn[0][0]['elo_ci_lower'] <= drawn[0][0]['elo_mean'] <= drawn[0][0]['elo_ci_upper']
+    module._save_bootstrap_plot(rows, 'broken.png')
+    assert 'Skipping the bootstrap chart: no display' in capsys.readouterr().out

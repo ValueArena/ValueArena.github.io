@@ -88,7 +88,14 @@ def patch_runtime(failure_policy='omit_invalid_judgments'):
         records_from_logs, export_log = collect.records_from_logs, collect.export_log
         def report(logs):
             failed = sum(1 for log in logs for sample in (log.samples or []) if sample.error)
-            if failed: print(f'Omitting {failed} failed judgment(s) (failure_policy=omit_invalid_judgments).', flush=True)
+            if not failed: return
+            print(f'Omitting {failed} failed judgment(s) (failure_policy=omit_invalid_judgments):', flush=True)
+            for log in logs:
+                errors = [sample.error.message for sample in (log.samples or []) if sample.error]
+                if errors:
+                    judge = (getattr(log, 'eval', None) and log.eval.task_args.get('judge_nick')) or 'judge'
+                    first = ' '.join(errors[0].strip().splitlines())[:400]
+                    print(f'  {judge}: {len(errors)} of {len(log.samples)} failed. First error: {first}', flush=True)
         def lenient_records(logs, strict=True):
             report(logs); return records_from_logs(logs, strict=False)
         def lenient_export(log, **kwargs):
@@ -104,6 +111,23 @@ def patch_runtime(failure_policy='omit_invalid_judgments'):
         except Exception: return
         if isinstance(api, VLLMAPI): await close(nick, resolve_model)
     collect._close_model = close_local_models
+
+
+def patch_analysis():
+    """Keep EigenBench's bootstrap chart from failing the analysis.
+
+    With few ratings every bootstrap sample is identical, the mean can round to just outside its
+    own percentile interval, and matplotlib rejects the negative error bar ("'yerr' must not
+    contain negative values") after the rankings were already written.
+    """
+    from pipeline.train import direct_analysis
+    plot = direct_analysis._save_bootstrap_plot
+    def safe_plot(rows, path):
+        rows = [{**row, 'elo_ci_lower': min(row['elo_ci_lower'], row['elo_mean']),
+                 'elo_ci_upper': max(row['elo_ci_upper'], row['elo_mean'])} for row in rows]
+        try: plot(rows, path)
+        except Exception as error: print(f'Skipping the bootstrap chart: {error}', flush=True)
+    direct_analysis._save_bootstrap_plot = safe_plot
 
 
 def collection_failures(log_dir: Path) -> list[str]:
@@ -165,6 +189,7 @@ def main():
         collect(spec)
     elif phase == 'analyzing' and engine in {'native', 'inspect'}:
         from scripts.run_train import main as analyze
+        patch_analysis()
         analyze(spec)
     else:
         raise ValueError('Unsupported stage')
