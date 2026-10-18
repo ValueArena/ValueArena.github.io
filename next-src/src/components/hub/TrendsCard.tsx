@@ -4,19 +4,28 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Penguin } from '@/components/Penguin';
 import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
-import { LENSES, groupOf, runningBest, topLabs, type Lens, type ModelInfo, type TrendPoint } from '@/lib/hub';
+import { LENSES, groupOf, runningTop, topLabs, type Lens, type ModelInfo, type TrendPoint } from '@/lib/hub';
 import { TREND_RUN, modelInfo } from '@/lib/registry';
 import type { SummaryRow } from '@/lib/types';
 import { LogoTile, Tip, niceTicks } from './ui';
 import { Sparks } from './sparks';
 import { useWidth } from './useWidth';
 
-// Series slots in validated order; the dash pattern is each series' second identity channel.
+// Group slots in validated order; the dash pattern is each group's second identity channel.
 const SERIES = [
   { color: 'var(--s1)', dash: '' },
   { color: 'var(--s2)', dash: '7 5' },
   { color: 'var(--s3)', dash: '2 4' },
 ];
+
+// Lower ranks in a group fade, so each group's leader reads first.
+const RANK_OPACITY = [1, 0.62, 0.38];
+
+const LENS_NOTE: Record<Lens, string> = {
+  license: 'Top three models of each license · solid proprietary, dashed open weights',
+  country: 'Top three models from each country · solid US, dashed China',
+  labs: 'The best model from each of the three largest labs',
+};
 
 interface Point extends TrendPoint { info: ModelInfo; lo?: number; hi?: number }
 
@@ -79,9 +88,13 @@ export function TrendsCard() {
   const labs = useMemo(() => topLabs(points.map(p => p.info)), [points]);
   const groups = useMemo(() => {
     const names = lens === 'license' ? ['Proprietary', 'Open weights'] : lens === 'country' ? ['US', 'China'] : labs;
-    return names.map((name, i) => {
-      const members = points.filter(p => groupOf(p.info, lens, labs) === name);
-      return { name, ...SERIES[i], members, steps: runningBest(members) };
+    // One line per model rank in each group: the top three per license or country, the best per lab.
+    const depth = lens === 'labs' ? 1 : 3;
+    return names.flatMap((group, i) => {
+      const members = points.filter(p => groupOf(p.info, lens, labs) === group);
+      return Array.from({ length: depth }, (_, rank) => ({
+        name: `${group} #${rank + 1}`, group, rank, ...SERIES[i], opacity: RANK_OPACITY[rank], members, steps: runningTop(members, rank),
+      }));
     });
   }, [points, lens, labs]);
   const span = useMemo(() => {
@@ -197,7 +210,7 @@ export function TrendsCard() {
           if (pillW) s.shred(px(t) + 26, px(t) + 26 + pillW * 0.75, py(reached[reached.length - 2].score), g.color);
         }
       }
-      if (!top || best.score > top.score) top = { index, score: best.score };
+      if (!g.rank && (!top || best.score > top.score)) top = { index, score: best.score };
       if (Math.random() < 0.35) s.trail(px(t), py(best.score), g.color);
     });
     const lead = kicks.current.get('#lead');
@@ -251,7 +264,7 @@ export function TrendsCard() {
         <div>
           <p className="hub-eyebrow">Trends</p>
           <h2 id="hub-trends-title" className="hub-title">Kindness over time <span className="hub-chip">{points.length} models</span></h2>
-          <p className="hub-sub">{month(span.first)} – {month(span.last)} · the kindest model available on each release date</p>
+          <p className="hub-sub">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>
         </div>
         <div className="hub-tabs hub-tabs-timed" role="tablist" aria-label="Group models by">
           {LENSES.map(l => (
@@ -281,7 +294,7 @@ export function TrendsCard() {
           onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); setPointer({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
           onPointerLeave={() => setPointer(null)}>
           <defs>
-            {lines.map(({ g }, i) => (
+            {lines.map(({ g }, i) => !g.rank && (
               <linearGradient key={g.name} id={`hub-wash-${i}`} x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0" stopColor={g.color} stopOpacity="0.18" />
                 <stop offset="1" stopColor={g.color} stopOpacity="0" />
@@ -298,7 +311,7 @@ export function TrendsCard() {
           <line x1={m.left} x2={endX} y1={baseY} y2={baseY} className="hub-baseline" />
           {xTicks.map(t => <text key={t} x={px(t)} y={height - 10} className="hub-axis" textAnchor="middle" opacity={t <= tNow + 30 * DAY ? 1 : 0.35}>{month(t)}</text>)}
 
-          {lines.map(({ g, area }, i) => <path key={`a-${g.name}`} d={area} fill={`url(#hub-wash-${i})`} />)}
+          {lines.map(({ g, area }, i) => !g.rank && <path key={`a-${g.name}`} d={area} fill={`url(#hub-wash-${i})`} />)}
           {shown.map(p => {
             const g = groups.find(group => group.members.includes(p));
             return <circle key={`${lens}-${p.name}`} cx={px(Date.parse(p.date))} cy={py(p.score)} r={4} className="hub-trend-dot"
@@ -306,8 +319,8 @@ export function TrendsCard() {
           })}
           {lines.map(({ g, line }) => (
             <g key={`l-${g.name}`}>
-              {live && <path d={line} className="hub-line hub-line-glow" style={{ stroke: g.color }} filter="url(#hub-glow)" />}
-              <path d={line} className="hub-line" style={{ stroke: g.color }} strokeDasharray={g.dash || undefined} />
+              {live && !g.rank && <path d={line} className="hub-line hub-line-glow" style={{ stroke: g.color }} filter="url(#hub-glow)" />}
+              <path d={line} className={g.rank ? 'hub-line hub-line-minor' : 'hub-line'} style={{ stroke: g.color, strokeOpacity: g.opacity }} strokeDasharray={g.dash || undefined} />
             </g>
           ))}
           {live && <line x1={headX} x2={headX} y1={m.top} y2={baseY} className="hub-playhead" />}
@@ -321,7 +334,7 @@ export function TrendsCard() {
             </g>
           )}
 
-          {lines.map(({ g, pts }) => pts.map(({ x, y, step }) => {
+          {lines.filter(({ g }) => !g.rank).map(({ g, pts }) => pts.map(({ x, y, step }) => {
             const logo = getModelLogo(modelInfo(step.name)?.id ?? step.name);
             const r = narrow ? 9 : 11;
             return (
@@ -338,8 +351,8 @@ export function TrendsCard() {
 
           {live && lines.map(({ g, headY }) => (
             <g key={`h-${g.name}`}>
-              <circle cx={headX} cy={headY} r={9} className="hub-head-halo" style={{ fill: g.color }} />
-              <circle cx={headX} cy={headY} r={4.5} className="hub-head" style={{ fill: g.color }} />
+              {!g.rank && <circle cx={headX} cy={headY} r={9} className="hub-head-halo" style={{ fill: g.color }} />}
+              <circle cx={headX} cy={headY} r={g.rank ? 3.5 : 4.5} className="hub-head" style={{ fill: g.color, fillOpacity: g.opacity }} />
             </g>
           ))}
 
@@ -349,7 +362,7 @@ export function TrendsCard() {
               <g key={`e-${l.g.name}`}>
                 {Math.abs(y - lineY) > 2 && <path d={`M${x + 2},${lineY}C${x + 10},${lineY} ${x + 6},${y} ${x + 14},${y}`} className="hub-leader" />}
                 <foreignObject x={x + 14} y={y - 13} width={pillW} height={26}>
-                  <div className="hub-pill" style={{ borderColor: l.g.color }}>
+                  <div className="hub-pill" data-rank={l.g.rank} style={{ borderColor: l.g.color }}>
                     <span key={l.leader.name} className="hub-pill-swap">
                       <LogoTile name={l.leader.name} size={16} />
                       <span className="hub-pill-name">{l.leader.name}</span>
@@ -383,10 +396,10 @@ export function TrendsCard() {
             <span className="hub-tip-date">Best available, {month(hoverT)}</span>
             {atDate.map(({ g, best }) => best && (
               <span key={g.name} className="hub-tip-row">
-                <svg width="16" height="8" aria-hidden="true"><line x1="0" x2="16" y1="4" y2="4" style={{ stroke: g.color }} strokeWidth="2" strokeDasharray={g.dash || undefined} /></svg>
+                <svg width="16" height="8" aria-hidden="true"><line x1="0" x2="16" y1="4" y2="4" style={{ stroke: g.color, strokeOpacity: g.opacity }} strokeWidth="2" strokeDasharray={g.dash || undefined} /></svg>
                 <strong>{best.score.toFixed(0)}</strong>
                 <span>{best.name}</span>
-                <span className="hub-tip-group">{g.name}</span>
+                <span className="hub-tip-group">{g.group}{lens === 'labs' ? '' : ` · #${g.rank + 1}`}</span>
               </span>
             ))}
           </Tip>
@@ -396,9 +409,8 @@ export function TrendsCard() {
       <ul className="hub-legend">
         {groups.map(g => (
           <li key={g.name}>
-            <svg width="28" height="10" aria-hidden="true"><line x1="1" x2="27" y1="5" y2="5" style={{ stroke: g.color }} strokeWidth="2" strokeLinecap="round" strokeDasharray={g.dash || undefined} /></svg>
-            <span>{g.name}</span>
-            {g.steps.length > 0 && <span className="hub-legend-best">best {g.steps[g.steps.length - 1].name}</span>}
+            <svg width="22" height="10" aria-hidden="true"><line x1="1" x2="21" y1="5" y2="5" style={{ stroke: g.color, strokeOpacity: g.opacity }} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={g.dash || undefined} /></svg>
+            {g.steps.length > 0 && <><LogoTile name={g.steps[g.steps.length - 1].name} size={18} /><span>{g.steps[g.steps.length - 1].name}</span></>}
           </li>
         ))}
         <li><span className="hub-legend-dot" /><span>Every other model</span></li>

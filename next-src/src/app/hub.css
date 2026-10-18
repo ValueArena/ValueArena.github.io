@@ -343,6 +343,8 @@
 .hub-axis { fill: var(--text-muted); font-family: var(--font-mono); font-size: 11px; }
 .hub-axis-title { fill: var(--text-muted); font-size: 11.5px; font-weight: 500; }
 .hub-line { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hub-line-minor { stroke-width: 2; }
+.hub-pill:not([data-rank='0']) { border-width: 1px; }
 .hub-trend-dot { stroke: var(--bg-surface); stroke-width: 1.5; transition: opacity 0.15s; }
 .hub-milestone-ring { fill: var(--hub-tile); stroke-width: 2; }
 .hub-annotation line { stroke: var(--text-muted); stroke-width: 1; }

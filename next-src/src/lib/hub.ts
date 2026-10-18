@@ -100,6 +100,25 @@ export function runningBest<T extends TrendPoint>(points: T[]): T[] {
   return steps;
 }
 
+/**
+ * The model holding a given rank (0 = best) on each release date: one step whenever that rank
+ * changes hands. A step is dated when the model took the rank, which can be after its release.
+ */
+export function runningTop<T extends TrendPoint>(points: T[], rank: number): T[] {
+  const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+  const available: T[] = [];
+  const steps: T[] = [];
+  for (let i = 0; i < sorted.length;) {
+    const date = sorted[i].date;
+    while (i < sorted.length && sorted[i].date === date) available.push(sorted[i++]);
+    available.sort((a, b) => b.score - a.score);
+    const holder = available[rank];
+    const last = steps[steps.length - 1];
+    if (holder && (!last || last.name !== holder.name)) steps.push({ ...holder, date });
+  }
+  return steps;
+}
+
 function ranks(values: number[]): number[] {
   const order = values.map((value, index) => ({ value, index })).sort((a, b) => a.value - b.value);
   const result = new Array<number>(values.length);
