@@ -22,8 +22,8 @@ const SERIES = [
 const RANK_OPACITY = [1, 0.62, 0.38];
 
 const LENS_NOTE: Record<Lens, string> = {
-  license: 'Top three models of each license · solid proprietary, dashed open weights',
-  country: 'Top three models from each country · solid US, dashed China',
+  license: 'Top three of each license · solid proprietary, dashed open weights',
+  country: 'Top three from each country · solid US, dashed China',
   labs: 'The best model from each of the three largest labs',
 };
 
@@ -31,13 +31,13 @@ interface Point extends TrendPoint { info: ModelInfo; lo?: number; hi?: number }
 
 const DAY = 864e5;
 // One replay runs through the whole release history in this many milliseconds.
-const PLAY_MS = 9000;
+const PLAY_MS = 16000;
 // While playing, the x-axis shows a moving window of this many months and scrolls with the head;
 // at the end it zooms out to the whole history over ZOOM_MS.
 const WINDOW_MONTHS = 9;
-const ZOOM_MS = 1200;
+const ZOOM_MS = 1800;
 // A short beat on the finished chart before the next grouping replays.
-const CYCLE_PAUSE_MS = 1600;
+const CYCLE_PAUSE_MS = 2600;
 const month = (t: number | string) => new Date(typeof t === 'string' ? `${t}T00:00:00Z` : t)
   .toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
@@ -63,7 +63,11 @@ function wave(fromX: number, y: number, headX: number, amp: number, phase: numbe
   return { d: `${d}L${headX},${y + offset(headX)}`, headY: y + offset(headX) };
 }
 
-export function TrendsCard() {
+/**
+ * `compact` is for the top of the home page: a one-row header, no legend or table on wide screens
+ * (end labels name the lines), and a chart sized so the whole card fits on the first screen.
+ */
+export function TrendsCard({ compact = false }: { compact?: boolean }) {
   const [rows, setRows] = useState<SummaryRow[] | null>(null);
   const [lens, setLens] = useState<Lens>('license');
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
@@ -110,8 +114,10 @@ export function TrendsCard() {
 
   // Start playing the first time the chart is mostly on screen, and hold the clock while it is off screen.
   const visible = useRef(false);
+  const [cardTop, setCardTop] = useState(0);
   const sectionRef = useCallback((node: HTMLElement | null) => {
     if (!node) return;
+    setCardTop(node.getBoundingClientRect().top + window.scrollY);
     const io = new IntersectionObserver(entries => {
       visible.current = entries[entries.length - 1].isIntersecting;
       if (visible.current) setInView(true);
@@ -173,7 +179,10 @@ export function TrendsCard() {
     return () => window.removeEventListener('resize', update);
   }, []);
   const narrow = width < 640;
-  const height = narrow ? 280 : Math.round(Math.min(360, Math.max(250, viewH * 0.4)));
+  // Compact: whatever is left of the first screen below the card's header, within limits.
+  const height = narrow ? (compact ? 220 : 260) : compact && cardTop
+    ? Math.round(Math.min(360, Math.max(220, viewH - cardTop - 150)))
+    : Math.round(Math.min(360, Math.max(250, viewH * 0.4)));
   useEffect(() => {
     if (!canvasRef.current) return;
     sparks.current ??= new Sparks(canvasRef.current);
@@ -298,13 +307,15 @@ export function TrendsCard() {
   const replay = () => { setInView(true); setPlayKey(k => k + 1); };
 
   return (
-    <section ref={sectionRef} className="hub-card hub-card-feature" aria-labelledby="hub-trends-title">
-      <header className="hub-card-head">
+    <section ref={sectionRef} className={compact ? 'hub-card hub-card-feature hub-card-compact' : 'hub-card hub-card-feature'} aria-labelledby="hub-trends-title">
+      {/* A fixed grid: title and tabs share the first row, the note always gets its own single line,
+          so switching groupings never moves the chart. */}
+      <header className="hub-card-head hub-trends-head">
         <div>
           <p className="hub-eyebrow">Trends</p>
           <h2 id="hub-trends-title" className="hub-title">Kindness over time <span className="hub-chip">{points.length} models</span></h2>
-          <p className="hub-sub">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>
         </div>
+        <p className="hub-sub hub-trends-note">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>
         <div className="hub-tabs hub-tabs-timed" role="tablist" aria-label="Group models by">
           {LENSES.map(l => (
             <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => choose(l.id)}>
@@ -454,7 +465,7 @@ export function TrendsCard() {
         )}
       </div>
 
-      <ul className="hub-legend">
+      {(!compact || narrow) && <ul className="hub-legend">
         {groups.map(g => (
           <li key={g.name}>
             <svg width="22" height="10" aria-hidden="true"><line x1="1" x2="21" y1="5" y2="5" style={{ stroke: g.color, strokeOpacity: g.opacity }} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={g.dash || undefined} /></svg>
@@ -463,11 +474,11 @@ export function TrendsCard() {
         ))}
         <li><span className="hub-legend-dot" /><span>Every other model</span></li>
         <li><span className="hub-legend-badge" /><span>New leader</span></li>
-      </ul>
+      </ul>}
       <p className="hub-foot">
         Replays {month(span.first)} to {month(span.last)} by release date. All {points.length} models were judged together in one run, so their scores are comparable; release dates are when each model reached OpenRouter.
       </p>
-      <details className="hub-details">
+      {!compact && <details className="hub-details">
         <summary>Show as a table</summary>
         <table className="hub-table hub-table-compact">
           <thead><tr><th scope="col">Model</th><th scope="col">Lab</th><th scope="col">Weights</th><th scope="col">Released</th><th scope="col" className="num">Kindness</th></tr></thead>
@@ -477,7 +488,7 @@ export function TrendsCard() {
             ))}
           </tbody>
         </table>
-      </details>
+      </details>}
     </section>
   );
 }

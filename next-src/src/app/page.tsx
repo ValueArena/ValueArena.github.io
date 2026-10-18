@@ -68,7 +68,7 @@ export default function HomePage() {
     <section className="story-section band-section home-live" id="trends" style={band(1)}>
       <h2 className="sr-only">Live trends</h2>
       <div className="hub hub-embed">
-        <TrendsCard />
+        <TrendsCard compact />
         <Highlights />
         <p className="hub-embed-more"><a href="/leaderboard/">Full leaderboard: every board, reasoning on vs. off, and Arena baselines →</a></p>
       </div>
