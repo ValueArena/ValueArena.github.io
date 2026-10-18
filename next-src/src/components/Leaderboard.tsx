@@ -1,5 +1,6 @@
 'use client';
 
+import { interval } from '@/lib/chart-data';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CONSTITUTIONS } from '@/lib/config';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
@@ -494,8 +495,9 @@ function LabGroupedTable({ ranked }: { ranked: SummaryRow[] }) {
 }
 
 function PlotView({ ranked, groupBy }: { ranked: SummaryRow[]; groupBy: GroupBy }) {
-  const maxElo = Math.max(...ranked.map((m) => m.elo_mean || 0));
-  const minElo = Math.min(...ranked.map((m) => m.elo_mean || 0));
+  // The scale spans the 95% intervals too, so every whisker fits.
+  const maxElo = Math.max(...ranked.map((m) => interval(m)?.[1] ?? m.elo_mean ?? 0));
+  const minElo = Math.min(...ranked.map((m) => interval(m)?.[0] ?? m.elo_mean ?? 0));
   const range = maxElo - minElo || 1;
 
   const bars: React.ReactNode[] = [];
@@ -529,6 +531,7 @@ function PlotRow({ m, idx, minElo, range }: { m: SummaryRow; idx: number; minElo
   const elo = m.elo_mean || 0;
   const pct = ((elo - minElo) / range) * 100;
   const color = labColor(m.model_name);
+  const ci = interval(m);
   return (
     <div className="lb-plot-row" style={{ animationDelay: `${idx * 30}ms` }}>
       <div className="lb-plot-label" title={m.model_name}>
@@ -542,6 +545,13 @@ function PlotRow({ m, idx, minElo, range }: { m: SummaryRow; idx: number; minElo
           className="lb-plot-bar"
           style={{ width: `${Math.max(2, pct)}%`, background: color }}
         />
+        {ci && (
+          <span
+            className="lb-plot-ci"
+            title={`95% interval ${ci[0].toFixed(0)}–${ci[1].toFixed(0)}`}
+            style={{ left: `${((ci[0] - minElo) / range) * 100}%`, width: `${((ci[1] - ci[0]) / range) * 100}%` }}
+          />
+        )}
       </div>
       <div className="lb-plot-value">{elo.toFixed(0)}</div>
     </div>

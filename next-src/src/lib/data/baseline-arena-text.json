@@ -1,0 +1,412 @@
+{
+ "id": "arena-text",
+ "name": "Arena Text",
+ "metric": "Arena score (style control), overall",
+ "direction": "higher",
+ "source": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
+ "license": "CC-BY-4.0",
+ "attribution": "Arena (formerly LMArena)",
+ "published": "2026-10-15",
+ "rows": {
+  "Claude 4.5 Sonnet": {
+   "arena_model": "claude-sonnet-4-5-20250929",
+   "exact": true,
+   "score": 1454.9,
+   "lower": 1452.1,
+   "upper": 1457.8,
+   "votes": 82688
+  },
+  "Claude 4.0 Sonnet": {
+   "arena_model": "claude-sonnet-4-20250514",
+   "exact": true,
+   "score": 1390.9,
+   "lower": 1386.5,
+   "upper": 1395.3,
+   "votes": 39163
+  },
+  "Claude 3.7 Sonnet": {
+   "arena_model": "claude-3-7-sonnet-20250219",
+   "exact": true,
+   "score": 1372.6,
+   "lower": 1368.6,
+   "upper": 1376.5,
+   "votes": 42572
+  },
+  "Claude 3.5 Sonnet": {
+   "arena_model": "claude-3-5-sonnet-20241022",
+   "exact": true,
+   "score": 1374.3,
+   "lower": 1371.1,
+   "upper": 1377.5,
+   "votes": 87769
+  },
+  "GPT 5.1": {
+   "arena_model": "gpt-5.1",
+   "exact": true,
+   "score": 1438.6,
+   "lower": 1435.0,
+   "upper": 1442.2,
+   "votes": 44434
+  },
+  "GPT 5": {
+   "arena_model": "gpt-5-high",
+   "exact": false,
+   "score": 1434.8,
+   "lower": 1430.3,
+   "upper": 1439.3,
+   "votes": 31722
+  },
+  "GPT 4.1": {
+   "arena_model": "gpt-4.1-2025-04-14",
+   "exact": true,
+   "score": 1414.6,
+   "lower": 1410.9,
+   "upper": 1418.3,
+   "votes": 50312
+  },
+  "GPT 4o": {
+   "arena_model": "gpt-4o-2024-08-06",
+   "exact": true,
+   "score": 1335.6,
+   "lower": 1331.4,
+   "upper": 1339.8,
+   "votes": 45499
+  },
+  "GPT oss 120b": {
+   "arena_model": "gpt-oss-120b",
+   "exact": true,
+   "score": 1351.8,
+   "lower": 1347.4,
+   "upper": 1356.1,
+   "votes": 30206
+  },
+  "GPT oss 20b": {
+   "arena_model": "gpt-oss-20b",
+   "exact": true,
+   "score": 1317.4,
+   "lower": 1311.0,
+   "upper": 1323.8,
+   "votes": 10419
+  },
+  "Gemini 2.5 Pro": {
+   "arena_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 1445.4,
+   "lower": 1443.0,
+   "upper": 1447.9,
+   "votes": 125366
+  },
+  "Gemini 2.0 Flash": {
+   "arena_model": "gemini-2.0-flash-001",
+   "exact": true,
+   "score": 1359.9,
+   "lower": 1356.1,
+   "upper": 1363.7,
+   "votes": 43446
+  },
+  "Grok 4.1 Fast": {
+   "arena_model": "grok-4-1-fast-reasoning",
+   "exact": false,
+   "score": 1430.4,
+   "lower": 1427.2,
+   "upper": 1433.6,
+   "votes": 57541
+  },
+  "Grok 4": {
+   "arena_model": "grok-4-0709",
+   "exact": true,
+   "score": 1410.9,
+   "lower": 1406.9,
+   "upper": 1414.8,
+   "votes": 39693
+  },
+  "Grok 3": {
+   "arena_model": "grok-3-preview-02-24",
+   "exact": true,
+   "score": 1411.2,
+   "lower": 1406.9,
+   "upper": 1415.6,
+   "votes": 32499
+  },
+  "DeepSeek v3": {
+   "arena_model": "deepseek-v3",
+   "exact": true,
+   "score": 1358.4,
+   "lower": 1353.7,
+   "upper": 1363.2,
+   "votes": 21770
+  },
+  "Qwen 3 235B": {
+   "arena_model": "qwen3-235b-a22b-instruct-2507",
+   "exact": true,
+   "score": 1422.1,
+   "lower": 1419.6,
+   "upper": 1424.7,
+   "votes": 98134
+  },
+  "Qwen 3 80b": {
+   "arena_model": "qwen3-next-80b-a3b-instruct",
+   "exact": true,
+   "score": 1398.5,
+   "lower": 1393.8,
+   "upper": 1403.3,
+   "votes": 22760
+  },
+  "Qwen 3 32b": {
+   "arena_model": "qwen3-32b",
+   "exact": true,
+   "score": 1346.8,
+   "lower": 1337.3,
+   "upper": 1356.3,
+   "votes": 3926
+  },
+  "Qwen 2.5 72b": {
+   "arena_model": "qwen2.5-72b-instruct",
+   "exact": true,
+   "score": 1302.9,
+   "lower": 1298.8,
+   "upper": 1306.9,
+   "votes": 39406
+  },
+  "Kimi K2 thinking": {
+   "arena_model": "kimi-k2-thinking-turbo",
+   "exact": false,
+   "score": 1430.1,
+   "lower": 1427.0,
+   "upper": 1433.2,
+   "votes": 63368
+  },
+  "Kimi K2 0711": {
+   "arena_model": "kimi-k2-0711-preview",
+   "exact": true,
+   "score": 1417.8,
+   "lower": 1412.9,
+   "upper": 1422.7,
+   "votes": 27146
+  },
+  "Mistral Small 3.2": {
+   "arena_model": "mistral-small-2506",
+   "exact": true,
+   "score": 1356.1,
+   "lower": 1350.9,
+   "upper": 1361.3,
+   "votes": 17462
+  },
+  "Llama 4 Maverick": {
+   "arena_model": "llama-4-maverick-17b-128e-instruct",
+   "exact": true,
+   "score": 1327.0,
+   "lower": 1322.7,
+   "upper": 1331.3,
+   "votes": 39450
+  },
+  "Llama 4 Scout": {
+   "arena_model": "llama-4-scout-17b-16e-instruct",
+   "exact": true,
+   "score": 1321.5,
+   "lower": 1316.8,
+   "upper": 1326.2,
+   "votes": 29826
+  },
+  "Llama 3.3 70b": {
+   "arena_model": "llama-3.3-70b-instruct",
+   "exact": true,
+   "score": 1318.1,
+   "lower": 1314.6,
+   "upper": 1321.6,
+   "votes": 54497
+  },
+  "Microsoft Phi 4": {
+   "arena_model": "phi-4",
+   "exact": true,
+   "score": 1256.3,
+   "lower": 1251.7,
+   "upper": 1260.9,
+   "votes": 24126
+  },
+  "GLM 4.6": {
+   "arena_model": "glm-4.6",
+   "exact": true,
+   "score": 1424.1,
+   "lower": 1420.2,
+   "upper": 1428.0,
+   "votes": 35824
+  },
+  "GLM 4.5 Air": {
+   "arena_model": "glm-4.5-air",
+   "exact": true,
+   "score": 1373.0,
+   "lower": 1368.7,
+   "upper": 1377.2,
+   "votes": 30660
+  },
+  "gpt-4o": {
+   "arena_model": "gpt-4o-2024-08-06",
+   "exact": true,
+   "score": 1335.6,
+   "lower": 1331.4,
+   "upper": 1339.8,
+   "votes": 45499
+  },
+  "claude-4-sonnet": {
+   "arena_model": "claude-sonnet-4-20250514",
+   "exact": true,
+   "score": 1390.9,
+   "lower": 1386.5,
+   "upper": 1395.3,
+   "votes": 39163
+  },
+  "gemini-2.5-pro": {
+   "arena_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 1445.4,
+   "lower": 1443.0,
+   "upper": 1447.9,
+   "votes": 125366
+  },
+  "GPT-5.6 Sol": {
+   "arena_model": "gpt-5.6-sol-xhigh",
+   "exact": false,
+   "score": 1484.7,
+   "lower": 1480.4,
+   "upper": 1489.1,
+   "votes": 40442
+  },
+  "Claude Sonnet 5": {
+   "arena_model": "claude-sonnet-5-high",
+   "exact": false,
+   "score": 1461.1,
+   "lower": 1456.9,
+   "upper": 1465.2,
+   "votes": 49595
+  },
+  "Gemini 3.7 Flash": {
+   "arena_model": "Gemini 3.7 Flash (High)",
+   "exact": false,
+   "score": 1487.6,
+   "lower": 1482.7,
+   "upper": 1492.5,
+   "votes": 27232
+  },
+  "DeepSeek V4 Pro": {
+   "arena_model": "deepseek-v4-pro-high-20260813",
+   "exact": false,
+   "score": 1464.6,
+   "lower": 1458.0,
+   "upper": 1471.2,
+   "votes": 9800
+  },
+  "Nemotron 3 Ultra": {
+   "arena_model": "nvidia-nemotron-3-ultra-550b-a55b-nvfp4",
+   "exact": true,
+   "score": 1426.0,
+   "lower": 1419.1,
+   "upper": 1432.9,
+   "votes": 11567
+  },
+  "Grok 4.3": {
+   "arena_model": "grok-4.3",
+   "exact": true,
+   "score": 1441.7,
+   "lower": 1438.1,
+   "upper": 1445.3,
+   "votes": 71347
+  },
+  "Kimi K2.6": {
+   "arena_model": "kimi-k2.6",
+   "exact": true,
+   "score": 1460.8,
+   "lower": 1456.4,
+   "upper": 1465.3,
+   "votes": 40013
+  },
+  "GLM 5.3": {
+   "arena_model": "glm-5.3-max",
+   "exact": false,
+   "score": 1478.5,
+   "lower": 1473.3,
+   "upper": 1483.8,
+   "votes": 22543
+  },
+  "GPT-5.6 Luna (instant)": {
+   "arena_model": "gpt-5.6-luna-xhigh",
+   "exact": false,
+   "score": 1452.6,
+   "lower": 1448.3,
+   "upper": 1456.9,
+   "votes": 41109
+  },
+  "GPT-5.6 Luna (reasoning)": {
+   "arena_model": "gpt-5.6-luna-xhigh",
+   "exact": false,
+   "score": 1452.6,
+   "lower": 1448.3,
+   "upper": 1456.9,
+   "votes": 41109
+  },
+  "Claude Haiku 4.5 (instant)": {
+   "arena_model": "claude-haiku-4-5-20251001",
+   "exact": true,
+   "score": 1414.3,
+   "lower": 1411.9,
+   "upper": 1416.7,
+   "votes": 149199
+  },
+  "Claude Haiku 4.5 (reasoning)": {
+   "arena_model": "claude-haiku-4-5-20251001",
+   "exact": true,
+   "score": 1414.3,
+   "lower": 1411.9,
+   "upper": 1416.7,
+   "votes": 149199
+  },
+  "Grok 4.3 (instant)": {
+   "arena_model": "grok-4.3",
+   "exact": true,
+   "score": 1441.7,
+   "lower": 1438.1,
+   "upper": 1445.3,
+   "votes": 71347
+  },
+  "Grok 4.3 (reasoning)": {
+   "arena_model": "grok-4.3",
+   "exact": true,
+   "score": 1441.7,
+   "lower": 1438.1,
+   "upper": 1445.3,
+   "votes": 71347
+  },
+  "DeepSeek V4 Flash 0423 (instant)": {
+   "arena_model": "deepseek-v4-flash",
+   "exact": true,
+   "score": 1435.6,
+   "lower": 1431.6,
+   "upper": 1439.7,
+   "votes": 51987
+  },
+  "DeepSeek V4 Flash 0423 (reasoning)": {
+   "arena_model": "deepseek-v4-flash",
+   "exact": true,
+   "score": 1435.6,
+   "lower": 1431.6,
+   "upper": 1439.7,
+   "votes": 51987
+  },
+  "Gemini 3.1 Flash Lite (instant)": {
+   "arena_model": "gemini-3.1-flash-lite-preview",
+   "exact": true,
+   "score": 1432.9,
+   "lower": 1429.3,
+   "upper": 1436.5,
+   "votes": 64211
+  },
+  "Gemini 3.1 Flash Lite (reasoning)": {
+   "arena_model": "gemini-3.1-flash-lite-preview",
+   "exact": true,
+   "score": 1432.9,
+   "lower": 1429.3,
+   "upper": 1436.5,
+   "votes": 64211
+  }
+ }
+}

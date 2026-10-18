@@ -1,6 +1,7 @@
 // Helpers for working with model "nicks" (short ids like claude-4-sonnet,
 // prompted_loving, Qwen2.5-7B-Instruct_humor).
 
+import { boardName } from './hub';
 import { CONSTITUTIONS } from './config';
 import type { MetaModel } from './types';
 
@@ -10,7 +11,7 @@ export function normConst(c: string | null | undefined): string {
 
 export function constLabel(id: string): string {
   const found = CONSTITUTIONS.find((c) => c.id.toLowerCase() === id.toLowerCase());
-  return found ? found.label : id.charAt(0).toUpperCase() + id.slice(1);
+  return found ? found.label : boardName(id);
 }
 
 // Normalize a model nick / label for fuzzy URL matching.
