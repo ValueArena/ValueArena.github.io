@@ -32,8 +32,8 @@ interface Point extends TrendPoint { info: ModelInfo; lo?: number; hi?: number }
 const DAY = 864e5;
 // One replay runs through the whole release history in this many milliseconds.
 const PLAY_MS = 9000;
-// Pause on the finished chart before moving on to the next grouping.
-const CYCLE_PAUSE_MS = 3500;
+// A short beat on the finished chart before the next grouping replays.
+const CYCLE_PAUSE_MS = 1600;
 const month = (t: number | string) => new Date(typeof t === 'string' ? `${t}T00:00:00Z` : t)
   .toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
@@ -68,8 +68,6 @@ export function TrendsCard() {
   const [clock, setClock] = useState<{ t: number; now: number } | null>(null);
   const [playKey, setPlayKey] = useState(0);
   const [inView, setInView] = useState(false);
-  // Cycle through the groupings on its own until the reader picks one.
-  const auto = useRef(true);
   const [motion, setMotion] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<HTMLDivElement | null>(null);
@@ -103,16 +101,20 @@ export function TrendsCard() {
     return { first: Math.min(...times), last: Math.max(...times) };
   }, [points]);
 
-  // Start playing the first time the chart is mostly on screen.
+  // Start playing the first time the chart is mostly on screen, and hold the clock while it is off screen.
+  const visible = useRef(false);
   const sectionRef = useCallback((node: HTMLElement | null) => {
     if (!node) return;
     const io = new IntersectionObserver(entries => {
-      if (entries.some(e => e.isIntersecting)) { setInView(true); io.disconnect(); }
+      visible.current = entries[entries.length - 1].isIntersecting;
+      if (visible.current) setInView(true);
     }, { threshold: 0.35 });
     io.observe(node);
   }, []);
   const setChart = useCallback((node: HTMLDivElement | null) => { chartRef.current = node; ref(node); }, [ref]);
 
+  // Each grouping replays in turn, and the cycle runs on: a finished replay hands over to the next
+  // tab after a short beat. Picking a tab, skipping or replaying carries on from there.
   useEffect(() => {
     if (!span || !inView) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -120,20 +122,24 @@ export function TrendsCard() {
     kicks.current.clear();
     sparks.current?.stop();
     skip.current = false;
-    let raf = 0, timer = 0;
-    const start = performance.now();
+    let raf = 0, timer = 0, elapsed = 0, last = performance.now();
+    const next = () => setLens(l => LENSES[(LENSES.findIndex(x => x.id === l) + 1) % LENSES.length].id);
     const tick = (now: number) => {
-      const k = skip.current ? 1 : Math.min(1, (now - start) / PLAY_MS);
+      if (visible.current) elapsed += Math.min(now - last, 50);
+      last = now;
+      const k = skip.current ? 1 : Math.min(1, elapsed / PLAY_MS);
       // Run on to the chart's right edge, where the finished lines end.
       const t = span.first + k * (span.last + 25 * DAY - span.first);
-      if (!skip.current) onFrame.current(t, now);
+      if (!skip.current && visible.current) onFrame.current(t, now);
       if (k < 1) {
         setClock({ t, now });
         raf = requestAnimationFrame(tick);
       } else {
         setClock(null);
-        if (auto.current && !reduced && !skip.current) {
-          timer = window.setTimeout(() => setLens(l => LENSES[(LENSES.findIndex(x => x.id === l) + 1) % LENSES.length].id), CYCLE_PAUSE_MS);
+        if (!reduced) {
+          // Wait for the reader to be looking before starting the next replay.
+          const handOff = () => { if (visible.current) next(); else timer = window.setTimeout(handOff, 500); };
+          timer = window.setTimeout(handOff, CYCLE_PAUSE_MS);
         }
       }
     };
@@ -141,8 +147,16 @@ export function TrendsCard() {
     return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
   }, [span, inView, lens, playKey]);
 
+  // The chart takes a share of the window's height, so the whole card fits on short laptop screens.
+  const [viewH, setViewH] = useState(900);
+  useEffect(() => {
+    const update = () => setViewH(window.innerHeight);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const narrow = width < 640;
-  const height = narrow ? 320 : 430;
+  const height = narrow ? 280 : Math.round(Math.min(360, Math.max(250, viewH * 0.4)));
   useEffect(() => {
     if (!canvasRef.current) return;
     sparks.current ??= new Sparks(canvasRef.current);
@@ -255,8 +269,8 @@ export function TrendsCard() {
     return { g, best: reached[reached.length - 1] };
   });
   const progress = live ? (frame.t - span.first) / (span.last + 25 * DAY - span.first) : 1;
-  const choose = (id: Lens) => { auto.current = false; setLens(id); setInView(true); setPlayKey(k => k + 1); };
-  const replay = () => { auto.current = false; setInView(true); setPlayKey(k => k + 1); };
+  const choose = (id: Lens) => { setLens(id); setInView(true); setPlayKey(k => k + 1); };
+  const replay = () => { setInView(true); setPlayKey(k => k + 1); };
 
   return (
     <section ref={sectionRef} className="hub-card hub-card-feature" aria-labelledby="hub-trends-title">
@@ -281,7 +295,7 @@ export function TrendsCard() {
           {live ? <>
             <span className="hub-live-dot" aria-hidden="true" />
             <span className="hub-clock-date">{month(frame.t)}</span>
-            <button type="button" className="hub-replay" onClick={() => { auto.current = false; skip.current = true; }}>Skip</button>
+            <button type="button" className="hub-replay" onClick={() => { skip.current = true; }}>Skip</button>
           </> : (
             <button type="button" className="hub-replay" onClick={replay}>
               <svg viewBox="0 0 16 16" width={13} height={13} aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8" /></svg>

@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { FeaturedCarousel } from '@/components/FeaturedCarousel';
 import { ResultsExplorer } from '@/components/ResultsExplorer';
 import { HomeRanking } from '@/components/HomeRanking';
-import { ExperimentsPreview } from '@/components/ExperimentsPreview';
 import { PixelHills } from '@/components/PixelHills';
+import { Highlights } from '@/components/hub/LeaderboardHub';
+import { TrendsCard } from '@/components/hub/TrendsCard';
+import { FeaturedHowItWorks } from '@/components/hub/HowItWorks';
+import './hub.css';
 
 // Each section sits on a tinted band; neighbouring bands meet on a shared mix
 // of their two colours so one fades into the next. Values are CSS variables so
 // both themes supply their own palette.
-const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
+const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-dusk)', 'var(--band-sand)', 'var(--band-clay)', 'var(--bg)'];
 const band = (i: number) => ({
   '--band-from': `color-mix(in srgb, ${BANDS[i - 1]} 50%, ${BANDS[i]})`,
   '--band-color': BANDS[i],
@@ -25,7 +28,7 @@ const TRADEOFF_NOTES = [
 
 export default function HomePage() {
   const [active, setActive] = useState('tradeoffs');
-  const contents = [['tradeoffs', 'Humor vs. sarcasm'], ['values', 'Model rankings'], ['how-it-works', 'Method'], ['evidence', 'Experiments'], ['related-research', 'Research']];
+  const contents = [['tradeoffs', 'Humor vs. sarcasm'], ['trends', 'Live trends'], ['values', 'Model rankings'], ['how-it-works', 'Method'], ['related-research', 'Research']];
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id);
@@ -74,28 +77,22 @@ export default function HomePage() {
       </div>
     </section>
 
-    <section className="story-section band-section" id="values" style={band(2)}>
+    <section className="story-section band-section" id="trends" style={band(2)}>
+      <div className="story-copy"><h2>Live trends</h2><p>A replay of the last two years: each line is one of the kindest models of its group on every release date, so you can watch open and proprietary models, the US and China, or the biggest labs overtake each other. The cycle runs on its own; pick a grouping or press Replay.</p></div>
+      <div className="hub hub-embed">
+        <Highlights />
+        <TrendsCard />
+        <p className="hub-embed-more"><a href="/leaderboard/">Full leaderboard: every board, reasoning on vs. off, and Arena baselines →</a></p>
+      </div>
+    </section>
+
+    <section className="story-section band-section" id="values" style={band(3)}>
       <div className="story-copy"><h2>Model rankings by constitution</h2><p>Pick a constitution to see how the models ranked on it. Each ranking comes from a single run, so its scores only compare the models, scenarios and judges in that run.</p></div>
       <div className="band-card"><HomeRanking /></div>
     </section>
 
-    <section className="story-section band-section" id="how-it-works" style={band(3)}>
-      <div className="story-copy art-section-intro"><img className="section-pixel-art" src="/assets/art/constitution-notebook.webp" width="256" height="256" alt="" aria-hidden="true" loading="lazy" /><h2>How EigenBench works</h2><p>Every model answers the same scenarios. Then the models take turns as judges, reading each other’s answers with the names removed and deciding which fits the constitution better. EigenBench turns those judgments into scores.</p></div>
-      <div className="band-card">
-      <dl className="arena-protocol">
-        <div><dt>Responses</dt><dd>Every model answers the same scenario. What it chooses to do shows what it cares about.</dd></div>
-        <div><dt>Judgments</dt><dd>Judges either pick the better of two unnamed answers or rate each answer against the constitution.</dd></div>
-        <div><dt>Aggregation</dt><dd>EigenTrust gives more say to judges whose own answers the other judges rate highly, then combines everything into one score per model.</dd></div>
-      </dl>
-      <div className="arena-method-note"><strong>Why the error bars?</strong><p>A different sample of scenarios or judgments could shuffle the order a little. The bootstrap intervals show how much, so you can tell a real gap from noise.</p><a href="/research/eigenbench/">About EigenBench →</a></div>
-      </div>
-    </section>
-
-    <section className="story-section band-section" id="evidence" style={band(4)}>
-      <div className="story-copy">
-        <h2>Published experiments</h2><p>Open a run to see which models took part, how many judgments were collected, and the judgments themselves. The explorer lets you compare rankings across constitutions.</p></div>
-      <div className="band-card"><ExperimentsPreview /></div>
-      <div className="research-links arena-evidence-links"><a className="research-primary" href="/explore/">Explore rankings & tradeoffs ↗</a><a href="/compare/">Compare models yourself →</a></div>
+    <section className="story-section band-section" id="how-it-works" style={band(4)}>
+      <div className="hub hub-embed"><FeaturedHowItWorks /></div>
       <p className="story-small">A higher score means a model’s answers fit the chosen constitution better. It says nothing about whether the model is safer or better aligned overall. The model at the top of the sarcasm ranking is just very sarcastic.</p>
     </section>
 

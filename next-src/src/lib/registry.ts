@@ -19,6 +19,10 @@ export const PLANNED_BASELINES = [
   { id: 'mask', name: 'MASK honesty', what: 'Whether a model states what it believes when pressured to lie (Scale AI).' },
 ];
 
+// One panel of current frontier models judged on several constitutions with the same judges,
+// so its boards are comparable with each other.
+export const FEATURED_GROUP = 'frontier-direct-ratings-200';
+
 // Runs the hub reads beyond its featured boards.
 export const TREND_RUN = '37_model_run';
 export const REASONING_GROUP = 'reasoning-vs-instant';

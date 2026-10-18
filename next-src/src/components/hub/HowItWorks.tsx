@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import example from '@/lib/data/worked-example.json';
+import { fetchIndex, fetchSummary } from '@/lib/hf';
+import { FEATURED_GROUP } from '@/lib/registry';
 import { scoreFromShare, trustShare } from '@/lib/hub';
 import type { SummaryRow } from '@/lib/types';
 import { LogoTile } from './ui';
@@ -97,10 +100,10 @@ export function HowItWorks({ rows, boardName }: { rows: SummaryRow[]; boardName:
             <span><LogoTile name={example.evaluee} size={26} /><span><small>Answer by</small>{example.evaluee}</span></span>
           </div>
           <p className="hub-judgment-scenario">{example.scenario}</p>
-          <blockquote>{example.response}</blockquote>
+          <blockquote><span>{example.response}</span></blockquote>
           <ul className="hub-ratings">
             {example.ratings.map(r => (
-              <li key={r.criterion}>
+              <li key={r.criterion} title={r.criterion}>
                 <span className="hub-rating-label">{r.criterion.charAt(0).toUpperCase() + r.criterion.slice(1)}</span>
                 <span className="hub-rating-bar" aria-hidden="true">{Array.from({ length: 10 }, (_, i) => <span key={i} data-on={i < r.rating || undefined} />)}</span>
                 <span className="hub-rating-value">{r.rating}</span>
@@ -112,4 +115,17 @@ export function HowItWorks({ rows, boardName }: { rows: SummaryRow[]; boardName:
       </div>
     </section>
   );
+}
+
+/** The explainer with its worked example on the featured kindness board, for pages without a board of their own. */
+export function FeaturedHowItWorks() {
+  const [rows, setRows] = useState<SummaryRow[]>([]);
+  useEffect(() => {
+    fetchIndex()
+      .then(index => index.runs.find(run => run.group === FEATURED_GROUP && run.constitution === 'kindness'))
+      .then(run => (run ? fetchSummary(run.slug) : []))
+      .then(setRows)
+      .catch(() => {});
+  }, []);
+  return <HowItWorks rows={rows} boardName="Kindness" />;
 }

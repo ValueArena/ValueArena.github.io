@@ -50,9 +50,9 @@
 .hub-stat-tile {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
-  padding: 18px 18px 16px;
+  padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--bg-surface);
@@ -66,14 +66,14 @@
   margin: 2px 0 0;
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 1.55rem;
+  font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 .hub-stat-tile:nth-child(1) .hub-stat-value,
-.hub-stat-tile:nth-child(3) .hub-stat-value { font-size: 1.15rem; letter-spacing: -0.01em; }
+.hub-stat-tile:nth-child(3) .hub-stat-value { font-size: 1.05rem; letter-spacing: -0.01em; }
 .hub-stat-sub { margin: auto 0 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; }
 
 /* Board chips */
@@ -91,15 +91,15 @@
   align-items: center;
   gap: 8px;
   flex: none;
-  min-height: 42px;
-  padding: 0 16px 0 13px;
+  min-height: 38px;
+  padding: 0 14px 0 12px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: transparent;
   box-shadow: none;
   color: var(--text-secondary);
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -120,7 +120,7 @@
 /* Cards */
 .hub-card {
   min-width: 0;
-  padding: 24px 26px;
+  padding: 20px 22px;
   border: 1px solid var(--border);
   border-radius: var(--hub-radius);
   background: var(--bg-surface);
@@ -130,8 +130,8 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px 24px;
-  margin-bottom: 18px;
+  gap: 10px 24px;
+  margin-bottom: 14px;
 }
 .hub-eyebrow {
   display: inline-flex;
@@ -153,13 +153,13 @@
   margin: 0;
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-.hub-title-lg { font-size: 1.75rem; }
-.hub-card-board .hub-title { font-size: 1.9rem; letter-spacing: -0.025em; }
-.hub-sub { margin: 6px 0 0; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; }
+.hub-title-lg { font-size: 1.45rem; }
+.hub-card-board .hub-title { font-size: 1.5rem; letter-spacing: -0.025em; }
+.hub-sub { margin: 4px 0 0; color: var(--text-muted); font-size: 0.84rem; line-height: 1.5; }
 .hub-chip {
   display: inline-flex;
   align-items: center;
@@ -213,15 +213,16 @@
 .hub .hub-tabs button[aria-selected='true'] { background: var(--bg-hover); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
 
 /* Podium */
-.hub-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; padding: 0; list-style: none; }
+.hub-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
 .hub-podium-item {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas: 'logo rank' 'logo name' 'logo meta' 'score score';
-  column-gap: 14px;
+  grid-template-areas: 'logo rank score' 'logo name score' 'logo meta score';
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
   align-items: center;
-  padding: 16px 18px;
+  padding: 12px 14px;
   border: 1px solid var(--border-light);
   border-radius: 14px;
   background: var(--bg-elevated);
@@ -238,19 +239,19 @@
 .hub-podium-item > .hub-logo { grid-area: logo; align-self: start; }
 .hub-podium-rank { grid-area: rank; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.74rem; }
 .hub-podium-rank::before { content: '#'; }
-.hub-podium-name { grid-area: name; overflow: hidden; color: var(--text); font-size: 1.02rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.hub-podium-name { grid-area: name; overflow: hidden; color: var(--text); font-size: 0.95rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .hub-podium-meta { grid-area: meta; overflow: hidden; color: var(--text-muted); font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }
 .hub-podium-score {
   grid-area: score;
-  margin-top: 14px;
   color: var(--text);
-  font-size: 1.9rem;
+  text-align: right;
+  font-size: 1.45rem;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.hub-podium-score small { margin-left: 4px; color: var(--text-muted); font-size: 0.85rem; font-weight: 400; letter-spacing: 0; }
+.hub-podium-score small { display: block; margin-top: 3px; color: var(--text-muted); font-size: 0.85rem; font-weight: 400; letter-spacing: 0; }
 
 /* Ranking table with a forest plot column */
 .hub-table-wrap { overflow-x: auto; }
@@ -265,7 +266,7 @@
   white-space: nowrap;
   vertical-align: bottom;
 }
-.hub-table td { padding: 10px; border-bottom: 1px solid var(--border-light); color: var(--text); vertical-align: middle; }
+.hub-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-light); color: var(--text); vertical-align: middle; }
 .hub-table tbody tr { transition: background 0.12s; }
 .hub-table tbody tr:hover td { background: var(--bg-hover); }
 .hub-table tbody tr:last-child td { border-bottom: 0; }
@@ -577,8 +578,8 @@
 .hub-planned-item { display: inline-flex; align-items: center; padding: 4px 6px 4px 11px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-secondary); }
 
 /* How EigenBench works */
-.hub-how { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 36px; padding: 28px; }
-.hub-how-steps ol { position: relative; display: grid; gap: 22px; margin: 22px 0 24px; padding: 0; list-style: none; }
+.hub-how { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 28px; padding: 24px; }
+.hub-how-steps ol { position: relative; display: grid; gap: 16px; margin: 18px 0 20px; padding: 0; list-style: none; }
 .hub-how-steps ol::before { content: ''; position: absolute; top: 18px; bottom: 18px; left: 17px; width: 1px; background: var(--border); }
 .hub-how-steps li { position: relative; display: grid; gap: 3px; padding-left: 52px; }
 .hub-step-node {
@@ -596,8 +597,8 @@
 }
 .hub-step-node svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .hub-step-n { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-.hub-how-steps li strong { color: var(--text); font-size: 1rem; font-weight: 600; }
-.hub-how-steps li p { margin: 2px 0 0; color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; }
+.hub-how-steps li strong { color: var(--text); font-size: 0.94rem; font-weight: 600; }
+.hub-how-steps li p { margin: 2px 0 0; color: var(--text-secondary); font-size: 0.84rem; line-height: 1.5; }
 .hub-formula {
   justify-self: start;
   margin-top: 10px;
@@ -626,9 +627,9 @@
 }
 .hub .hub-button:hover { opacity: 0.88; }
 .hub-button svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.hub-how-example { padding: 22px; border: 1px solid var(--border-light); border-radius: 14px; background: var(--bg-elevated); }
+.hub-how-example { padding: 18px; border: 1px solid var(--border-light); border-radius: 14px; background: var(--bg-elevated); }
 .hub-shares { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.hub-shares li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(60px, 1fr) 82px 48px; align-items: center; gap: 12px; min-height: 42px; }
+.hub-shares li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(60px, 1fr) 82px 48px; align-items: center; gap: 12px; min-height: 36px; }
 .hub-share-name { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); font-size: 0.86rem; font-weight: 500; }
 .hub-share-name > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hub-share-bar { position: relative; height: 8px; border-radius: 4px; background: var(--bg-hover); }
@@ -638,35 +639,53 @@
 .hub-share-num small { color: var(--text-muted); font-size: 0.7rem; font-weight: 400; }
 .hub-share-score { color: var(--text); font-size: 0.95rem; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 .hub-shares-key { margin-top: 6px; }
-.hub-how-total { margin-top: 16px; padding: 16px 0 0; border-top: 1px solid var(--border-light); }
+.hub-how-total { margin-top: 12px; padding: 12px 0 0; border-top: 1px solid var(--border-light); }
 .hub-how-total > span { display: flex; align-items: center; gap: 16px; color: var(--text-secondary); font-size: 0.86rem; line-height: 1.5; }
-.hub-how-number { flex: none; color: var(--text); font-family: var(--font-body); font-size: 2.8rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-.hub-judgment { margin: 20px 0 0; padding: 18px 0 0; border-top: 1px solid var(--border-light); }
+.hub-how-number { flex: none; color: var(--text); font-family: var(--font-body); font-size: 2.1rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.hub-judgment { margin: 14px 0 0; padding: 14px 0 0; border-top: 1px solid var(--border-light); }
 .hub-judgment-who { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; color: var(--text); font-size: 0.86rem; font-weight: 600; }
 .hub-judgment-who > span { display: flex; align-items: center; gap: 9px; }
 .hub-judgment-who > span > span { display: grid; }
 .hub-judgment-who small { color: var(--text-muted); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
 .hub-judgment-who > svg { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.hub-judgment-scenario { margin: 0 0 8px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.55; }
+.hub-judgment-scenario { display: -webkit-box; margin: 0 0 8px; overflow: hidden; color: var(--text-muted); font-size: 0.78rem; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .hub-judgment blockquote {
-  margin: 0 0 16px;
-  padding: 12px 14px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: var(--bg-hover);
   color: var(--text-secondary);
   font-family: var(--font-serif);
-  font-size: 0.92rem;
-  line-height: 1.55;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
-.hub-ratings { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
-.hub-ratings li { display: grid; grid-template-columns: minmax(0, 1fr) 110px 18px; align-items: center; gap: 12px; font-size: 0.8rem; }
+.hub-judgment blockquote span { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.hub-ratings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; margin: 0; padding: 0; list-style: none; }
+.hub-ratings li { display: grid; grid-template-columns: minmax(0, 1fr) 60px 14px; align-items: center; gap: 8px; font-size: 0.76rem; }
 .hub-rating-label { overflow: hidden; color: var(--text-secondary); text-overflow: ellipsis; white-space: nowrap; }
 .hub-rating-bar { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; }
-.hub-rating-bar span { height: 8px; border-radius: 2px; background: var(--bg-hover); }
+.hub-rating-bar span { height: 7px; border-radius: 2px; background: var(--bg-hover); }
 .hub-rating-bar span[data-on] { background: var(--s1); }
 .hub-rating-value { color: var(--text); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 .hub-judgment-avg { margin: 12px 0 0; color: var(--text-muted); font-size: 0.8rem; }
 .hub-judgment-avg strong { color: var(--text); font-size: 0.95rem; }
+
+/* Hub pieces embedded on the home page, dressed as the home page's floating cards */
+.hub-embed { margin-bottom: 0; }
+.arena-home .hub-card, .arena-home .hub-stat-tile {
+  border-color: var(--card-line);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+.arena-home .hub-card { padding: 24px 26px; border-radius: 24px; }
+.arena-home .hub-stat-tile { border-radius: 20px; }
+.arena-home .hub-how-example { background: var(--bg-surface); }
+.hub-embed-more { margin: 0; font-size: 0.9rem; }
+.hub .hub-embed-more a { color: var(--text-secondary); text-decoration: none; }
+.hub .hub-embed-more a:hover { color: var(--text); }
+.home-ranking.hub { gap: 18px; }
+.hub-home-board .hub-card-head { margin-bottom: 16px; }
+.hub-home-board .home-plot-source { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 14px; font-size: 0.85rem; }
 
 /* All runs: the full leaderboard below the hub */
 .hub-all-runs { margin-top: 12px; }
@@ -679,9 +698,6 @@
 @media (max-width: 900px) {
   .hub-pair, .hub-how { grid-template-columns: minmax(0, 1fr); }
   .hub-podium { grid-template-columns: minmax(0, 1fr); }
-  .hub-podium-item { grid-template-areas: 'logo rank score' 'logo name score' 'logo meta score'; grid-template-columns: auto minmax(0, 1fr) auto; }
-  .hub-podium-score { margin-top: 0; font-size: 1.5rem; text-align: right; }
-  .hub-podium-score small { display: block; margin: 2px 0 0; font-size: 0.75rem; }
 }
 @media (max-width: 640px) {
   .hub { gap: 16px; }
@@ -691,7 +707,8 @@
   .hub-stat-tile:nth-child(1) .hub-stat-value,
   .hub-stat-tile:nth-child(3) .hub-stat-value { font-size: 1rem; }
   .hub-stat-value .hub-logo { display: none; }
-  .hub-card, .hub-how { padding: 18px 16px; }
+  .hub-card, .hub-how, .arena-home .hub-card { padding: 18px 16px; }
+  .arena-home .hub-card { border-radius: 20px; }
   .hub-title { font-size: 1.2rem; }
   .hub-title-lg, .hub-card-board .hub-title { font-size: 1.5rem; }
   .hub-podium-item { padding: 12px 14px; }
@@ -704,13 +721,14 @@
   .hub-judgment-who > svg { display: none; }
   .hub-table td, .hub-table th { padding: 9px 6px; }
   .hub-rank { width: 48px; }
+  .home-ranking .hub-podium { display: none; }
   .hub-db { --hub-db-label: minmax(0, 42%); }
   .hub-db-axis, .hub-db-row { grid-template-columns: var(--hub-db-label) minmax(0, 1fr) 46px; gap: 8px; }
   .hub-db-name .hub-logo { display: none; }
   .hub-shares li { grid-template-columns: minmax(0, 1fr) 70px 44px; }
   .hub-share-bar { display: none; }
   .hub-how-number { font-size: 2.2rem; }
-  .hub-ratings li { grid-template-columns: minmax(0, 1fr) 70px 18px; }
+  .hub-ratings { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 380px) {
   .hub-highlights { grid-template-columns: minmax(0, 1fr); }

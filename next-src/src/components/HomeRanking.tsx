@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { Penguin } from './Penguin';
-import { ModelLogo } from './ModelLogo';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
 import { normConst, constLabel } from '@/lib/nicks';
-import { extent, interval, validRows } from '@/lib/chart-data';
+import { validRows } from '@/lib/chart-data';
+import { Podium, RankTable } from './hub/LeaderboardHub';
+import { BoardIcon } from './hub/ui';
 import type { IndexRun, SummaryRow } from '@/lib/types';
+
+const TRAITS = ['kindness', 'humor', 'goodness'];
+// The table shows this many models; ranks still count every model in the run.
+const SHOWN = 7;
 
 export function HomeRanking() {
   const [trait, setTrait] = useState('kindness');
@@ -24,24 +29,26 @@ export function HomeRanking() {
     return () => { cancelled = true; };
   }, [trait]);
   const current = data?.trait === trait ? data : null;
-  const rows = current?.rows.slice(0, 7) || [];
-  const domain = extent(rows);
-  const x = (v: number) => 20 + (v - domain[0]) / (domain[1] - domain[0]) * 560;
-  const ticks = Array.from({ length: 4 }, (_, i) => domain[0] + (domain[1] - domain[0]) * i / 3);
-  return <div className="home-ranking">
-    <div className="home-plot-controls" role="group" aria-label="Ranking constitution">{['kindness', 'humor', 'goodness'].map(c => <button key={c} aria-pressed={trait === c} onClick={() => setTrait(c)}>{constLabel(c)}</button>)}</div>
-    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p> : !current ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading published ranking…</span></p> : !rows.length ? <p className="chart-message">No scores are available in this run.</p> : <div className="home-dotplot">
-      <header><strong>{constLabel(trait)}</strong><span>Top {rows.length} of {current.rows.length} models · Latest published run</span></header>
-      <div className="ranking-figure" key={current.run.slug} aria-label={`${constLabel(trait)} ranking`}>
-        <div className="ranking-axis"><span>Model</span><div className="ranking-ticks" aria-hidden="true">{ticks.map(t => <span key={t} style={{ left: `${x(t) / 6}%` }}>{Math.round(t)}</span>)}</div><span>Elo</span></div>
-        {rows.map(row => { const ci = interval(row); return <a key={row.model_name} className="ranking-row" href={`/transcript/?run=${encodeURIComponent(current.run.slug)}&model=${encodeURIComponent(row.model_name)}`} aria-label={`${row.model_name}: Elo ${row.elo_mean.toFixed(1)}${ci ? `, 95% interval ${ci[0].toFixed(1)} to ${ci[1].toFixed(1)}` : ', interval unavailable'}. Read judgments.`}>
-          <span className="ranking-name"><ModelLogo name={row.model_name} size={22} />{row.model_name}</span>
-          <svg viewBox="0 0 600 36" preserveAspectRatio="none" aria-hidden="true">{ticks.map(t => <line key={t} x1={x(t)} x2={x(t)} y1="0" y2="36" className="chart-grid" />)}{ci && <line x1={x(ci[0])} x2={x(ci[1])} y1="18" y2="18" stroke="var(--accent)" strokeWidth="2" />}<circle cx={x(row.elo_mean)} cy="18" r="1" fill="var(--accent)" stroke="var(--accent)" strokeWidth="5" vectorEffect="non-scaling-stroke" /></svg>
-          <span className="ranking-score">{row.elo_mean.toFixed(1)}</span>
-        </a>; })}
-      </div>
-      <p className="home-plot-caption">Dots are mean Elo and lines are 95% intervals, where the run published them. Each constitution may have a different set of models. Click a model to read its judgments.</p>
-      <div className="home-plot-source"><a href={`/run/?slug=${encodeURIComponent(current.run.slug)}`}>Run & coverage: {current.run.name || current.run.slug} ↗</a><a href={`/explore/?view=ranking&x=${encodeURIComponent(current.run.slug)}`}>See all {current.rows.length} models →</a></div>
-    </div>}
+
+  return <div className="home-ranking hub hub-embed">
+    <nav className="hub-boards" aria-label="Ranking constitution">
+      {TRAITS.map(c => <button key={c} className="hub-board" aria-pressed={trait === c} onClick={() => setTrait(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}
+    </nav>
+    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p>
+      : !current ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading published ranking…</span></p>
+      : !current.rows.length ? <p className="chart-message">No scores are available in this run.</p>
+      : <div className="hub-home-board" key={current.run.slug}>
+        <header className="hub-card-head">
+          <div>
+            <p className="hub-eyebrow"><BoardIcon constitution={trait} /> Latest published run</p>
+            <h3 className="hub-title">{constLabel(trait)}</h3>
+            <p className="hub-sub">Top {Math.min(SHOWN, current.rows.length)} of {current.rows.length} models · {current.run.name || current.run.slug}</p>
+          </div>
+        </header>
+        <Podium rows={current.rows} />
+        <RankTable rows={current.rows} limit={SHOWN} baselines={false}
+          href={model => `/transcript/?run=${encodeURIComponent(current.run.slug)}&model=${encodeURIComponent(model)}`} />
+        <div className="home-plot-source"><a href={`/run/?slug=${encodeURIComponent(current.run.slug)}`}>Run & coverage ↗</a><a href={`/explore/?view=ranking&x=${encodeURIComponent(current.run.slug)}`}>See all {current.rows.length} models →</a></div>
+      </div>}
   </div>;
 }

@@ -41,7 +41,7 @@ export function BaselineScatter({ boardRows, boardName }: { boardRows: SummaryRo
   const line = fit(points);
 
   const narrow = width < 440;
-  const height = narrow ? 300 : 340;
+  const height = narrow ? 260 : 290;
   const m = { top: 16, right: 18, bottom: 44, left: 52 };
   const r = points.length > 16 || narrow ? 9 : 12;
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
