@@ -64,10 +64,11 @@ function wave(fromX: number, y: number, headX: number, amp: number, phase: numbe
 }
 
 /**
+ * `flat` drops the card chrome so the chart sits on the page's own background and art.
  * `compact` is for the top of the home page: a one-row header, no legend or table on wide screens
  * (end labels name the lines), and a chart sized so the whole card fits on the first screen.
  */
-export function TrendsCard({ compact = false }: { compact?: boolean }) {
+export function TrendsCard({ compact = false, flat = false }: { compact?: boolean; flat?: boolean }) {
   const [rows, setRows] = useState<SummaryRow[] | null>(null);
   const [lens, setLens] = useState<Lens>('license');
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
@@ -111,6 +112,11 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
     const times = points.map(p => Date.parse(p.date));
     return { first: Math.min(...times), last: Math.max(...times) };
   }, [points]);
+  // Each replay starts on the first release among this grouping's lines, so it never opens empty.
+  const playFrom = useMemo(() => {
+    const firsts = groups.flatMap(g => (g.steps.length ? [Date.parse(g.steps[0].date)] : []));
+    return firsts.length ? Math.min(...firsts) : span?.first ?? 0;
+  }, [groups, span]);
 
   // Start playing the first time the chart is mostly on screen, and hold the clock while it is off screen.
   const visible = useRef(false);
@@ -136,7 +142,7 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
     sparks.current?.stop();
     skip.current = false;
     // Show the first frame straight away, so the finished chart never flashes before a replay.
-    setClock({ t: span.first, now: performance.now() });
+    setClock({ t: playFrom, now: performance.now() });
     let raf = 0, timer = 0, elapsed = 0, last = performance.now();
     const next = () => setLens(l => LENSES[(LENSES.findIndex(x => x.id === l) + 1) % LENSES.length].id);
     const tick = (now: number) => {
@@ -144,7 +150,7 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
       last = now;
       const k = skip.current ? 1 : Math.min(1, elapsed / PLAY_MS);
       // Run on to the chart's right edge, where the finished lines end.
-      const t = span.first + k * (span.last + 25 * DAY - span.first);
+      const t = playFrom + k * (span.last + 25 * DAY - playFrom);
       if (!skip.current && visible.current) onFrame.current(t, now);
       if (k < 1) {
         setClock({ t, now });
@@ -168,7 +174,7 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
     };
     raf = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
-  }, [span, inView, lens, playKey]);
+  }, [span, playFrom, inView, lens, playKey]);
 
   // The chart takes a share of the window's height, so the whole card fits on short laptop screens.
   const [viewH, setViewH] = useState(900);
@@ -203,7 +209,7 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
   // Before it first scrolls into view, the chart waits at its first date, ready to play.
   const waiting = !inView && motion;
   const live = clock != null || waiting;
-  const frame = clock ?? { t: span.first, now: 0 };
+  const frame = clock ?? { t: playFrom, now: 0 };
   // The visible time range: a window that scrolls with the head while playing, easing out to everything.
   const W = Math.min(t1 - t0, (narrow ? 6 : WINDOW_MONTHS) * 30.4 * DAY);
   const windowAt = (t: number) => { const b = Math.max(t0 + W, t + W * 0.1); return [b - W, b]; };
@@ -302,12 +308,12 @@ export function TrendsCard({ compact = false }: { compact?: boolean }) {
     const reached = g.steps.filter(s => Date.parse(s.date) <= hoverT);
     return { g, best: reached[reached.length - 1] };
   });
-  const progress = live ? (frame.t - span.first) / (span.last + 25 * DAY - span.first) : 1;
+  const progress = live ? (frame.t - playFrom) / (span.last + 25 * DAY - playFrom) : 1;
   const choose = (id: Lens) => { setLens(id); setInView(true); setPlayKey(k => k + 1); };
   const replay = () => { setInView(true); setPlayKey(k => k + 1); };
 
   return (
-    <section ref={sectionRef} className={compact ? 'hub-card hub-card-feature hub-card-compact' : 'hub-card hub-card-feature'} aria-labelledby="hub-trends-title">
+    <section ref={sectionRef} className={['hub-card hub-card-feature', compact && 'hub-card-compact', flat && 'hub-card-flat'].filter(Boolean).join(' ')} aria-labelledby="hub-trends-title">
       {/* A fixed grid: title and tabs share the first row, the note always gets its own single line,
           so switching groupings never moves the chart. */}
       <header className="hub-card-head hub-trends-head">
