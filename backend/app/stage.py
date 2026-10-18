@@ -96,8 +96,9 @@ def patch_runtime(failure_policy='omit_invalid_judgments'):
                     judge = (getattr(log, 'eval', None) and log.eval.task_args.get('judge_nick')) or 'judge'
                     first = ' '.join(errors[0].strip().splitlines())[:400]
                     print(f'  {judge}: {len(errors)} of {len(log.samples)} failed. First error: {first}', flush=True)
-        def lenient_records(logs, strict=True):
-            report(logs); return records_from_logs(logs, strict=False)
+        # Newer EigenBench passes failure_policy and omissions too; pass them through.
+        def lenient_records(logs, strict=True, **kwargs):
+            report(logs); return records_from_logs(logs, **{**kwargs, 'strict': False})
         def lenient_export(log, **kwargs):
             report([log]); return export_log(log, **{**kwargs, 'strict': False})
         collect.records_from_logs, collect.export_log = lenient_records, lenient_export

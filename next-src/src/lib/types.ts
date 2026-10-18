@@ -62,7 +62,7 @@ export interface MetaJson {
   };
   log?: Record<string, unknown>;
   /** Present only for runs collected by the Inspect engine. */
-  inspect?: { log_file?: string; collection_report_file?: string };
+  inspect?: { log_file?: string; log_files?: string[]; collection_report_file?: string };
   eigentrust?: number[];
   dataset?: Record<string, unknown>;
   [k: string]: unknown;

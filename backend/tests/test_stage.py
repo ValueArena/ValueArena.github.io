@@ -44,7 +44,7 @@ def upstream(monkeypatch, tmp_path):
         'inspect_pipeline': types.ModuleType('inspect_pipeline'),
         'inspect_pipeline.collect': NS(collect_direct_ratings_inspect=collect, _close_model=close_model,
                                        eval_kwargs=lambda cfg, log_dir: {'log_dir': str(log_dir), 'fail_on_error': False},
-                                       records_from_logs=lambda logs, strict=True: ('records', strict),
+                                       records_from_logs=lambda logs, strict=True, **kwargs: ('records', strict, kwargs),
                                        export_log=lambda log, **kwargs: ('export', kwargs.get('strict', True))),
         'inspect_ai._util': types.ModuleType('inspect_ai._util'),
         'inspect_ai._util.local_server': NS(kill_process_tree=None),
@@ -123,14 +123,18 @@ def test_retries_are_bounded_and_the_failure_policy_reaches_the_inspect_export(u
     with pytest.raises(SystemExit):
         stage.collect_inspect('spec.py')
     assert collect.eval_kwargs({}, 'logs') == {'log_dir': 'logs', 'fail_on_error': False, 'max_retries': stage.MAX_RETRIES}
-    assert collect.records_from_logs([]) == ('records', True)
+    assert collect.records_from_logs([]) == ('records', True, {})
 
     # the hosted default omits failed judgments instead of exporting nothing
     seen['collection'] = {'failure_policy': 'omit_invalid_judgments'}
     with pytest.raises(SystemExit):
         stage.collect_inspect('spec.py')
     failed = NS(samples=[sample('InternalServerError 500'), sample(), sample('InternalServerError 500')])
-    assert collect.records_from_logs([failed]) == ('records', False)
+    assert collect.records_from_logs([failed]) == ('records', False, {})
+    # Newer EigenBench's export arguments pass through the patch.
+    omissions = []
+    assert collect.records_from_logs([failed], failure_policy='omit_invalid_judgments', omissions=omissions) == (
+        'records', False, {'failure_policy': 'omit_invalid_judgments', 'omissions': omissions})
     assert collect.export_log(failed, evaluations_path='e.jsonl') == ('export', False)
     failed.eval = NS(task_args={'judge_nick': 'nycc-agent'})
     collect.records_from_logs([failed])
