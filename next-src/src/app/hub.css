@@ -681,11 +681,135 @@
 .arena-home .hub-stat-tile { border-radius: 20px; }
 .arena-home .hub-how-example { background: var(--bg-surface); }
 .hub-embed-more { margin: 0; font-size: 0.9rem; }
+.arena-home .home-live { padding-top: 28px; }
+.arena-home .home-live > .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* On the home page the chart leads: the method note lives on the leaderboard. */
+.arena-home .home-live .hub-card-feature > .hub-foot { display: none; }
 .hub .hub-embed-more a { color: var(--text-secondary); text-decoration: none; }
 .hub .hub-embed-more a:hover { color: var(--text); }
 .home-ranking.hub { gap: 18px; }
 .hub-home-board .hub-card-head { margin-bottom: 16px; }
 .hub-home-board .home-plot-source { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 14px; font-size: 0.85rem; }
+
+/* Featured carousel cards on the home page, in the hub's visual language */
+.hub.hub-carousel { display: flex; flex-direction: column; gap: 0; margin: 0; }
+.featured-carousel .featured-carousel-card { border-color: var(--card-line, var(--border)); border-radius: 22px; background: var(--card-bg, var(--bg-elevated)); box-shadow: var(--card-shadow, none); }
+.featured-carousel .featured-carousel-card:hover { border-color: var(--border); }
+.featured-carousel .featured-interactive .featured-card-heading h2 { font-family: var(--font-body); font-size: 1.12rem; font-weight: 600; letter-spacing: -0.02em; }
+.featured-carousel .carousel-chart { margin-top: 12px; }
+.carousel-picker { position: relative; display: block; }
+.carousel-picker select {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+}
+.carousel-picker svg { position: absolute; top: 50%; right: 12px; margin-top: -6px; fill: none; stroke: var(--text-muted); stroke-width: 1.6; pointer-events: none; }
+.carousel-tabs { align-self: flex-start; }
+.featured-carousel .hub .hub-tabs button { min-height: 30px; padding: 3px 11px; font-size: 0.8rem; }
+.featured-carousel .carousel-chart-note { margin-top: auto; padding-top: 10px; color: var(--text-muted); font-size: 0.74rem; line-height: 1.5; }
+.featured-carousel a.carousel-chart-note { text-decoration: none; }
+.featured-carousel a.carousel-chart-note:hover { color: var(--text); }
+.carousel-chart-detail { color: var(--text-secondary); font-size: 0.8rem; }
+
+/* Small icons inside carousel cards keep their own size, not the cards' chart sizing */
+.featured-carousel .carousel-chart .carousel-picker svg { width: 12px; height: 12px; margin: -6px 0 0; }
+.featured-carousel .carousel-chart .hub-delta-chip svg { display: inline; width: 8px; height: 8px; margin: 0; }
+.featured-carousel .carousel-chart .hub-icon { display: inline; width: 15px; height: 15px; margin: 0; }
+
+/* Stat row under a chart: logo, what it is, and the number */
+.carousel-stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--bg-surface);
+}
+.carousel-stat > span { display: grid; min-width: 0; }
+.carousel-stat small { color: var(--text-muted); font-size: 0.7rem; }
+.carousel-stat strong { overflow: hidden; color: var(--text); font-size: 0.86rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.carousel-stat-value { justify-items: end; text-align: right; }
+.carousel-stat-value strong { font-size: 1.15rem; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.carousel-stat-value .hub-delta-chip { margin-top: 2px; }
+
+/* Radar */
+.featured-carousel .carousel-chart svg.carousel-radar { height: 190px; margin: 6px 0 0; }
+.carousel-radar .radar-ring { fill: none; stroke: var(--border-light); stroke-width: 1; }
+.carousel-radar .radar-ring-outer { stroke: var(--border); }
+.carousel-radar .radar-area { stroke: var(--s1); stroke-width: 2; stroke-linejoin: round; }
+.carousel-radar .radar-dot { fill: var(--s1); stroke: var(--card-bg, var(--bg-elevated)); stroke-width: 2; transition: r 0.12s; }
+.carousel-radar .radar-point { cursor: pointer; outline: none; }
+.carousel-radar .radar-point:focus-visible .radar-dot { stroke: var(--text); }
+.featured-carousel .carousel-radar .radar-trait { fill: var(--text-muted); font: 500 11.5px var(--font-body); }
+.featured-carousel .carousel-radar .radar-trait[data-on] { fill: var(--text); font-weight: 600; }
+
+/* Top five with interval bars */
+.featured-carousel .carousel-ranking { margin: 10px 0 0; }
+.featured-carousel .carousel-ranking li { gap: 10px; min-height: 46px; border-bottom: 1px solid var(--border-light); }
+.featured-carousel .carousel-ranking li:last-child { border-bottom: 0; }
+.featured-carousel .carousel-rank {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.featured-carousel .carousel-model { display: grid; gap: 5px; color: var(--text); font-size: 0.84rem; font-weight: 500; }
+.carousel-ci { position: relative; display: block; height: 8px; }
+.carousel-ci::before { content: ''; position: absolute; inset: 3.5px 0; height: 1px; background: var(--border-light); }
+.carousel-ci-bar { position: absolute; top: 1px; height: 6px; border-radius: 3px; background: var(--s1-wash); }
+.carousel-ci-dot { position: absolute; top: 0; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--s1); box-shadow: 0 0 0 1.5px var(--card-bg, var(--bg-elevated)); }
+.featured-carousel .carousel-ranking strong { display: grid; justify-items: end; min-width: 44px; color: var(--text); font-size: 1.05rem; font-weight: 600; letter-spacing: -0.02em; }
+.featured-carousel .carousel-ranking strong small { color: var(--text-muted); font-size: 0.68rem; font-weight: 400; letter-spacing: 0; }
+
+/* Bump chart of rank shifts */
+.featured-carousel .carousel-chart svg.carousel-bump { height: 180px; margin-top: 8px; }
+.carousel-bump .bump-head { fill: var(--text); font: 600 11.5px var(--font-body); }
+.carousel-bump .bump-axis { fill: var(--text-muted); font: 10px var(--font-mono); }
+.carousel-bump .bump-grid { stroke: var(--border-light); stroke-dasharray: 2 4; }
+.carousel-bump .bump-line { fill: none; stroke: var(--hub-muted-mark); stroke-width: 1.5; opacity: 0.6; }
+.carousel-bump .bump-dot { fill: var(--hub-muted-mark); }
+.carousel-bump .bump-line-on { fill: none; stroke: var(--s1); stroke-width: 3; stroke-linecap: round; }
+.carousel-bump .bump-dot-on { fill: var(--s1); stroke: var(--card-bg, var(--bg-elevated)); stroke-width: 2; }
+.carousel-bump .bump-rank { fill: var(--text); font: 600 11px var(--font-body); }
+.carousel-bump g[role='button']:hover .bump-line { stroke: var(--text-muted); opacity: 1; }
+
+/* Variance bars */
+.carousel-bars { display: grid; gap: 16px; margin: 18px 0 14px; padding: 0; list-style: none; }
+.carousel-bars li { display: grid; gap: 7px; }
+.carousel-bars-head { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 0.86rem; font-weight: 500; }
+.carousel-bars-head .hub-icon { width: 15px; height: 15px; color: var(--text-muted); }
+.carousel-bars-head strong { margin-left: auto; font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.carousel-bars-track { display: block; height: 10px; border-radius: 5px; background: var(--bg-hover); overflow: hidden; }
+.carousel-bars-track span { display: block; height: 100%; border-radius: 5px; background: var(--s1); transition: width 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* Constitution criteria */
+.featured-carousel .carousel-constitution { min-height: 0; padding-top: 16px; }
+.carousel-constitution-n { display: inline-flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.carousel-constitution-n .hub-icon { width: 15px; height: 15px; }
+.featured-carousel .carousel-constitution blockquote { position: relative; margin: 10px 0 12px; padding-left: 16px; border-left: 2px solid var(--s1); font-family: var(--font-serif); font-size: 1.2rem; line-height: 1.45; max-height: 150px; }
+.carousel-steps { display: flex; gap: 4px; margin-bottom: 12px; }
+.carousel-steps i { width: 14px; height: 4px; border-radius: 2px; background: var(--bg-hover); }
+.carousel-steps i[data-on] { background: var(--s1); }
+.featured-carousel .criterion-controls button { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 10px; }
+.featured-carousel .criterion-controls a { color: var(--text-secondary); font-size: 0.8rem; font-weight: 500; text-decoration: none; }
 
 /* All runs: the full leaderboard below the hub */
 .hub-all-runs { margin-top: 12px; }
