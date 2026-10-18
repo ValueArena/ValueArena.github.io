@@ -112,10 +112,15 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
     const times = points.map(p => Date.parse(p.date));
     return { first: Math.min(...times), last: Math.max(...times) };
   }, [points]);
-  // Each replay starts on the first release among this grouping's lines, so it never opens empty.
+  // Each replay starts once a second model is on this grouping's lines, so it never opens on a lone model.
   const playFrom = useMemo(() => {
-    const firsts = groups.flatMap(g => (g.steps.length ? [Date.parse(g.steps[0].date)] : []));
-    return firsts.length ? Math.min(...firsts) : span?.first ?? 0;
+    const arrivals = new Map<string, number>();
+    for (const g of groups) for (const st of g.steps) {
+      const t = Date.parse(st.date);
+      arrivals.set(st.name, Math.min(t, arrivals.get(st.name) ?? t));
+    }
+    const sorted = [...arrivals.values()].sort((a, b) => a - b);
+    return sorted[Math.min(1, sorted.length - 1)] ?? span?.first ?? 0;
   }, [groups, span]);
 
   // Start playing the first time the chart is mostly on screen, and hold the clock while it is off screen.
