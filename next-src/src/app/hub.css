@@ -683,6 +683,34 @@
 .hub-embed-more { margin: 0; font-size: 0.9rem; }
 .arena-home .home-live { padding-top: 28px; }
 .arena-home .home-live > .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Trends header: title | tabs on one row, the note on its own line; same height for every grouping */
+.hub-trends-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'title tabs' 'note note'; align-items: end; gap: 4px 20px; }
+.hub-trends-head > div:first-child { grid-area: title; min-width: 0; }
+.hub-trends-head > .hub-tabs { grid-area: tabs; }
+.hub-trends-head > .hub-trends-note { grid-area: note; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The legend keeps its height whether it lists three lines or six */
+.hub-card-feature .hub-legend { min-height: 52px; align-content: flex-start; }
+@media (max-width: 640px) {
+  .arena-home .research-intro.hero-with-hills { padding-top: 18px; padding-bottom: 12px; }
+  .arena-home .research-intro h1 { font-size: 26px; }
+  .arena-home .research-intro .research-deck { margin: 8px 0 12px; font-size: 14px; line-height: 1.55; }
+  .hub-card-compact .hub-trends-note { min-height: 0; font-size: 0.76rem; }
+  .hub-trends-head { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'title' 'note' 'tabs'; gap: 6px; }
+  .hub-trends-head > .hub-trends-note { white-space: normal; min-height: 2.9em; }
+  .hub-card-feature .hub-legend { min-height: 112px; }
+}
+
+/* Compact trends card: title, note and tabs in one header row, tighter padding */
+.hub-card-compact { padding-top: 18px; padding-bottom: 16px; }
+.arena-home .hub-card-compact { padding: 18px 24px 14px; }
+.hub-card-compact .hub-card-head { margin-bottom: 6px; }
+.hub-card-compact .hub-eyebrow { display: none; }
+.hub-card-compact .hub-title { font-size: 1.15rem; }
+.hub-card-compact .hub-sub { margin-top: 2px; font-size: 0.8rem; }
+/* The home hero gives up some height so the live chart is on the first screen */
+.arena-home .research-intro.hero-with-hills { padding-top: 30px; padding-bottom: 18px; }
+.arena-home .research-intro .research-deck { margin: 12px 0 16px; }
+.arena-home .home-live { padding-top: 12px; }
 /* On the home page the chart leads: the method note lives on the leaderboard. */
 .arena-home .home-live .hub-card-feature > .hub-foot { display: none; }
 .hub .hub-embed-more a { color: var(--text-secondary); text-decoration: none; }
