@@ -17,19 +17,26 @@ export interface Scored {
 }
 
 export interface BaselineRow {
-  arena_model: string;
+  /** The model's name in the source; differs when exact is false (another effort setting or chat variant). */
+  source_model: string;
   exact: boolean;
   score: number;
   lower: number;
   upper: number;
-  votes: number;
+  /** Votes or scenarios behind the score, when the source reports them. */
+  n: number;
 }
 
 export interface Baseline {
   id: string;
   name: string;
+  /** Column and tab label. */
+  short: string;
+  /** What it measures, in one sentence. */
+  about: string;
   metric: string;
   direction: 'higher' | 'lower';
+  unit: string;
   source: string;
   license: string;
   attribution: string;
@@ -174,4 +181,17 @@ export function agreement(rho: number): string {
   const a = Math.abs(rho);
   const strength = a < 0.2 ? 'Little' : a < 0.4 ? 'Weak' : a < 0.6 ? 'Moderate' : a < 0.8 ? 'Strong' : 'Very strong';
   return `${strength} ${rho < 0 ? 'inverse ' : ''}agreement`;
+}
+
+/**
+ * Spearman agreement between EigenBench scores and a baseline, on whichever run shares the most
+ * models with it. Null when fewer than `minN` models match.
+ */
+export function baselineAgreement(baseline: Baseline, runs: Scored[][], minN = 5): { rho: number; n: number } | null {
+  const pairs = runs
+    .map(rows => rows.flatMap(r => (baseline.rows[r.model_name] ? [[baseline.rows[r.model_name].score, r.elo_mean]] : [])))
+    .sort((a, b) => b.length - a.length)[0] ?? [];
+  if (pairs.length < minN) return null;
+  const rho = spearman(pairs.map(p => p[0]), pairs.map(p => p[1]));
+  return rho == null ? null : { rho, n: pairs.length };
 }

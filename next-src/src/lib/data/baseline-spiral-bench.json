@@ -1,0 +1,143 @@
+{
+ "id": "spiral-bench",
+ "name": "Spiral-Bench",
+ "short": "Anti-sycophancy",
+ "about": "Long chats with a suggestible user: pushing back and de-escalating versus sycophancy and reinforcing delusions (0 to 100, higher is safer).",
+ "metric": "Spiral-Bench safety score (0 to 100)",
+ "direction": "higher",
+ "unit": "",
+ "source": "https://eqbench.com/spiral-bench.html",
+ "license": "MIT",
+ "attribution": "Sam Paech, Spiral-Bench",
+ "published": "2026-10-18",
+ "rows": {
+  "GPT 4o": {
+   "source_model": "chatgpt-4o-latest",
+   "exact": false,
+   "score": 25.2,
+   "lower": 25.2,
+   "upper": 25.2,
+   "n": 0
+  },
+  "gpt-4o": {
+   "source_model": "chatgpt-4o-latest",
+   "exact": false,
+   "score": 25.2,
+   "lower": 25.2,
+   "upper": 25.2,
+   "n": 0
+  },
+  "Claude 3.5 Sonnet": {
+   "source_model": "claude-3.5-sonnet",
+   "exact": true,
+   "score": 42.6,
+   "lower": 42.6,
+   "upper": 42.6,
+   "n": 0
+  },
+  "Claude 4.5 Sonnet": {
+   "source_model": "claude-sonnet-4.5",
+   "exact": true,
+   "score": 70.3,
+   "lower": 70.3,
+   "upper": 70.3,
+   "n": 0
+  },
+  "Claude 4.0 Sonnet": {
+   "source_model": "claude-sonnet-4",
+   "exact": true,
+   "score": 32.1,
+   "lower": 32.1,
+   "upper": 32.1,
+   "n": 0
+  },
+  "claude-4-sonnet": {
+   "source_model": "claude-sonnet-4",
+   "exact": true,
+   "score": 32.1,
+   "lower": 32.1,
+   "upper": 32.1,
+   "n": 0
+  },
+  "Gemini 2.5 Pro": {
+   "source_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 28.3,
+   "lower": 28.3,
+   "upper": 28.3,
+   "n": 0
+  },
+  "gemini-2.5-pro": {
+   "source_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 28.3,
+   "lower": 28.3,
+   "upper": 28.3,
+   "n": 0
+  },
+  "GLM 4.6": {
+   "source_model": "glm-4.6",
+   "exact": true,
+   "score": 30.8,
+   "lower": 30.8,
+   "upper": 30.8,
+   "n": 0
+  },
+  "GPT 5": {
+   "source_model": "gpt-5-2025-08-07",
+   "exact": true,
+   "score": 57.4,
+   "lower": 57.4,
+   "upper": 57.4,
+   "n": 0
+  },
+  "GPT oss 120b": {
+   "source_model": "gpt-oss-120b",
+   "exact": true,
+   "score": 57.5,
+   "lower": 57.5,
+   "upper": 57.5,
+   "n": 0
+  },
+  "Kimi K2 0711": {
+   "source_model": "kimi-k2",
+   "exact": true,
+   "score": 57.2,
+   "lower": 57.2,
+   "upper": 57.2,
+   "n": 0
+  },
+  "Llama 4 Maverick": {
+   "source_model": "llama-4-maverick",
+   "exact": true,
+   "score": 38.2,
+   "lower": 38.2,
+   "upper": 38.2,
+   "n": 0
+  },
+  "Qwen 3 235B": {
+   "source_model": "qwen3-235b-a22b-2507",
+   "exact": true,
+   "score": 20.4,
+   "lower": 20.4,
+   "upper": 20.4,
+   "n": 0
+  },
+  "Grok 4.1 Fast": {
+   "source_model": "grok-4.1-fast",
+   "exact": true,
+   "score": 25.3,
+   "lower": 25.3,
+   "upper": 25.3,
+   "n": 0
+  },
+  "Gemini 3 Pro Preview": {
+   "source_model": "gemini-3-pro-preview",
+   "exact": true,
+   "score": 38.7,
+   "lower": 38.7,
+   "upper": 38.7,
+   "n": 0
+  }
+ }
+}

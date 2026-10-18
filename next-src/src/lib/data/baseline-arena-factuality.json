@@ -1,0 +1,127 @@
+{
+ "id": "arena-factuality",
+ "name": "Arena Factuality",
+ "short": "Factuality",
+ "about": "People vote on which of two answers is more factually accurate: honesty and truthfulness.",
+ "metric": "Arena factuality score, overall",
+ "direction": "higher",
+ "unit": "votes",
+ "source": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset",
+ "license": "CC-BY-4.0",
+ "attribution": "Arena (formerly LMArena)",
+ "published": "2026-10-15",
+ "rows": {
+  "GLM 5.3": {
+   "source_model": "glm-5.3-max",
+   "exact": false,
+   "score": 1465.7,
+   "lower": 1461.3,
+   "upper": 1470.1,
+   "n": 22543
+  },
+  "Claude Sonnet 5": {
+   "source_model": "claude-sonnet-5-high",
+   "exact": false,
+   "score": 1451.8,
+   "lower": 1448.5,
+   "upper": 1455.1,
+   "n": 49595
+  },
+  "GPT-5.6 Sol": {
+   "source_model": "gpt-5.6-sol-xhigh",
+   "exact": false,
+   "score": 1476.3,
+   "lower": 1472.9,
+   "upper": 1479.7,
+   "n": 40442
+  },
+  "Kimi K2.6": {
+   "source_model": "kimi-k2.6",
+   "exact": true,
+   "score": 1456.1,
+   "lower": 1452.4,
+   "upper": 1459.8,
+   "n": 39964
+  },
+  "DeepSeek V4 Pro": {
+   "source_model": "deepseek-v4-pro",
+   "exact": true,
+   "score": 1454.7,
+   "lower": 1451.6,
+   "upper": 1457.9,
+   "n": 57554
+  },
+  "Gemini 3.7 Flash": {
+   "source_model": "Gemini 3.7 Flash (High)",
+   "exact": false,
+   "score": 1475.4,
+   "lower": 1471.3,
+   "upper": 1479.5,
+   "n": 27232
+  },
+  "GPT 5.1": {
+   "source_model": "gpt-5.1",
+   "exact": true,
+   "score": 1444.3,
+   "lower": 1441.0,
+   "upper": 1447.6,
+   "n": 43479
+  },
+  "Claude 4.5 Sonnet": {
+   "source_model": "claude-sonnet-4-5-20250929",
+   "exact": true,
+   "score": 1448.6,
+   "lower": 1446.0,
+   "upper": 1451.1,
+   "n": 77561
+  },
+  "GPT 4o": {
+   "source_model": "chatgpt-4o-latest-20250326",
+   "exact": false,
+   "score": 1443.8,
+   "lower": 1440.4,
+   "upper": 1447.2,
+   "n": 40489
+  },
+  "gpt-4o": {
+   "source_model": "chatgpt-4o-latest-20250326",
+   "exact": false,
+   "score": 1443.8,
+   "lower": 1440.4,
+   "upper": 1447.2,
+   "n": 40489
+  },
+  "Gemini 2.5 Pro": {
+   "source_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 1461.9,
+   "lower": 1459.2,
+   "upper": 1464.5,
+   "n": 69899
+  },
+  "gemini-2.5-pro": {
+   "source_model": "gemini-2.5-pro",
+   "exact": true,
+   "score": 1461.9,
+   "lower": 1459.2,
+   "upper": 1464.5,
+   "n": 69899
+  },
+  "Gemini 3 Pro Preview": {
+   "source_model": "Gemini 3 Pro",
+   "exact": false,
+   "score": 1481.3,
+   "lower": 1477.8,
+   "upper": 1484.7,
+   "n": 41134
+  },
+  "GLM 4.6": {
+   "source_model": "glm-4.6",
+   "exact": true,
+   "score": 1446.9,
+   "lower": 1443.0,
+   "upper": 1450.8,
+   "n": 28693
+  }
+ }
+}
