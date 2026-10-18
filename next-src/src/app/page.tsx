@@ -57,16 +57,16 @@ export default function HomePage() {
     if (moved[window.location.hash]) window.location.replace(moved[window.location.hash]);
   }, []);
   return <div className="research-home story-home arena-home">
-    <section className="research-intro has-pixel-art" aria-labelledby="home-title">
+    <section className="research-intro has-pixel-art hero-with-hills" aria-labelledby="home-title">
+      <PixelHills variant="hero" className="hero-hills" />
       <h1 id="home-title">Measuring values in language models</h1>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="home-pixel-art" src="/assets/art/model-conversation.webp" width="768" height="507" alt="" aria-hidden="true" />
       <p className="research-deck">EigenBench scores language models on how well their answers fit a written set of values, which we call a constitution. Browse the rankings, compare models across constitutions, and read the actual responses and judgments behind every score.</p>
       <div className="home-actions"><a className="button-primary" href="/explore/">Explore results <span aria-hidden>↗</span></a><a className="button-secondary" href="/research/eigenbench/">How EigenBench works <span aria-hidden>→</span></a></div>
     </section>
-    {/* The live chart rises out of the hero over the climbing pixel hills, with no card around it. */}
-    <section className="story-section home-live hero-with-hills" id="trends">
-      <PixelHills variant="hero" className="hero-hills live-hills" />
+    {/* The live chart follows the hero on the page itself, with no card around it. */}
+    <section className="story-section home-live" id="trends">
       <h2 className="sr-only">Live trends</h2>
       <div className="hub hub-embed">
         <TrendsCard compact flat />

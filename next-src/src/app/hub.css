@@ -708,14 +708,7 @@
 .hub-card-flat,
 .arena-home .hub-card-flat { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .hub-card-flat .hub-pill { background: var(--bg); }
-.arena-home .home-live.hero-with-hills { padding-bottom: 28px; }
-/* The hills climb behind the chart's lower right, faded so lines and labels stay readable */
-.arena-home .live-hills {
-  height: 78%;
-  opacity: 0.55;
-  -webkit-mask-image: linear-gradient(to right, transparent 10%, #000 70%), linear-gradient(to bottom, transparent, #000 45%);
-  mask-image: linear-gradient(to right, transparent 10%, #000 70%), linear-gradient(to bottom, transparent, #000 45%);
-}
+.arena-home .home-live { padding-bottom: 28px; }
 /* A square, blinking pixel for the live clock, in the site's pixel-art style */
 .hub-card-flat .hub-live-dot { width: 8px; height: 8px; border-radius: 0; box-shadow: none; animation: hub-blink 1s steps(2, jump-none) infinite; }
 @keyframes hub-blink { 50% { opacity: 0.25; } }
