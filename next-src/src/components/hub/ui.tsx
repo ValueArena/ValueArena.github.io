@@ -24,6 +24,9 @@ const ICONS: Record<string, ReactNode> = {
   lockean_rights: <><path d="M12 3 4 6v6c0 4.4 3.4 8 8 9 4.6-1 8-4.6 8-9V6l-8-3Z" /><path d="m9 12 2 2 4-4" /></>,
   humor: <><circle cx="12" cy="12" r="9" /><path d="M8 14.5a4.5 4.5 0 0 0 8 0" /><path d="M9 9.5v.5M15 9.5v.5" /></>,
   goodness: <><circle cx="12" cy="12" r="4" /><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M5.6 18.4 7 17m10-10 1.4-1.4" /></>,
+  loving: <><path d="M9 18s-5-3.2-5-7.2A2.9 2.9 0 0 1 9 9a2.9 2.9 0 0 1 5 1.8" /><path d="M15.5 20s-4.5-2.9-4.5-6.4a2.6 2.6 0 0 1 4.5-1.8 2.6 2.6 0 0 1 4.5 1.8c0 3.5-4.5 6.4-4.5 6.4Z" /></>,
+  sarcasm: <><path d="M4 5h16v11H10l-4 3.5V16H4Z" /><path d="M8 11.5c1.3-1.5 2.7-1.5 4 0s2.7 1.5 4 0" /></>,
+  misalignment: <><path d="M12 4 3 20h18L12 4Z" /><path d="M12 10v4.5M12 17v.1" /></>,
   sparkle: <path d="M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6" />,
 };
 

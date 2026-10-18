@@ -47,7 +47,7 @@ export function FeaturedCarousel() {
       <div className="featured-carousel-track"><div className="featured-carousel-group" ref={group}>
         {cards.map(card => <article className="featured-carousel-card featured-interactive" key={card.title}>
           <div className="featured-card-heading"><h2>{card.title}</h2></div>
-          <div className="carousel-chart">{card.kind === 'prompt' ? <PromptChart /> : card.kind === 'constitution' ? <ConstitutionCard /> : runs.length ? card.kind === 'radar' ? <RadarChart runs={runs} /> : card.kind === 'ranking' ? <RankingChart runs={runs} /> : <RankShiftChart runs={runs} /> : (error ? <p>Could not load published scores. Try refreshing.</p> : <p className="chart-loading" role="status"><Penguin size={32} state="loading" /><span>Loading published scores…</span></p>)}</div>
+          <div className="carousel-chart hub hub-carousel">{card.kind === 'prompt' ? <PromptChart /> : card.kind === 'constitution' ? <ConstitutionCard /> : runs.length ? card.kind === 'radar' ? <RadarChart runs={runs} /> : card.kind === 'ranking' ? <RankingChart runs={runs} /> : <RankShiftChart runs={runs} /> : (error ? <p>Could not load published scores. Try refreshing.</p> : <p className="chart-loading" role="status"><Penguin size={32} state="loading" /><span>Loading published scores…</span></p>)}</div>
         </article>)}
       </div></div>
     </div>

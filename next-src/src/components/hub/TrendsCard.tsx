@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Penguin } from '@/components/Penguin';
 import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
@@ -32,6 +32,10 @@ interface Point extends TrendPoint { info: ModelInfo; lo?: number; hi?: number }
 const DAY = 864e5;
 // One replay runs through the whole release history in this many milliseconds.
 const PLAY_MS = 9000;
+// While playing, the x-axis shows a moving window of this many months and scrolls with the head;
+// at the end it zooms out to the whole history over ZOOM_MS.
+const WINDOW_MONTHS = 9;
+const ZOOM_MS = 1200;
 // A short beat on the finished chart before the next grouping replays.
 const CYCLE_PAUSE_MS = 1600;
 const month = (t: number | string) => new Date(typeof t === 'string' ? `${t}T00:00:00Z` : t)
@@ -66,6 +70,9 @@ export function TrendsCard() {
   const [ref, width] = useWidth<HTMLDivElement>(900);
   // Playback: the date being shown and the frame time; null once the chart is complete.
   const [clock, setClock] = useState<{ t: number; now: number } | null>(null);
+  // 0 shows the playing window where the replay ended, 1 the whole history.
+  const [zoom, setZoom] = useState(1);
+  const clipId = `hub-clip-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const [playKey, setPlayKey] = useState(0);
   const [inView, setInView] = useState(false);
   const [motion, setMotion] = useState(true);
@@ -118,10 +125,12 @@ export function TrendsCard() {
   useEffect(() => {
     if (!span || !inView) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced && playKey === 0) { setMotion(false); setClock(null); return; }
+    if (reduced && playKey === 0) { setMotion(false); setClock(null); setZoom(1); return; }
     kicks.current.clear();
     sparks.current?.stop();
     skip.current = false;
+    // Show the first frame straight away, so the finished chart never flashes before a replay.
+    setClock({ t: span.first, now: performance.now() });
     let raf = 0, timer = 0, elapsed = 0, last = performance.now();
     const next = () => setLens(l => LENSES[(LENSES.findIndex(x => x.id === l) + 1) % LENSES.length].id);
     const tick = (now: number) => {
@@ -136,11 +145,19 @@ export function TrendsCard() {
         raf = requestAnimationFrame(tick);
       } else {
         setClock(null);
-        if (!reduced) {
-          // Wait for the reader to be looking before starting the next replay.
-          const handOff = () => { if (visible.current) next(); else timer = window.setTimeout(handOff, 500); };
-          timer = window.setTimeout(handOff, CYCLE_PAUSE_MS);
-        }
+        // Zoom out from the playing window to the whole history, then hand over to the next grouping.
+        const zoomStart = now, instant = skip.current || reduced;
+        const zoomOut = (z: number) => {
+          const e = instant ? 1 : Math.min(1, (z - zoomStart) / ZOOM_MS);
+          setZoom(e);
+          if (e < 1) { raf = requestAnimationFrame(zoomOut); return; }
+          if (!reduced) {
+            // Wait for the reader to be looking before starting the next replay.
+            const handOff = () => { if (visible.current) next(); else timer = window.setTimeout(handOff, 500); };
+            timer = window.setTimeout(handOff, CYCLE_PAUSE_MS);
+          }
+        };
+        zoomOut(now);
       }
     };
     raf = requestAnimationFrame(tick);
@@ -174,27 +191,35 @@ export function TrendsCard() {
   const yTicks = niceTicks(Math.min(...scores) - 15, Math.max(...scores) + 15, narrow ? 4 : 6);
   const y0 = Math.min(yTicks[0], Math.min(...scores) - 15), y1 = Math.max(yTicks[yTicks.length - 1], Math.max(...scores) + 12);
   const endX = width - m.right;
-  const px = (t: number) => m.left + ((t - t0) / (t1 - t0)) * (endX - m.left);
-  const py = (s: number) => m.top + (1 - (s - y0) / (y1 - y0)) * (height - m.top - m.bottom);
-  const baseY = height - m.bottom;
-  const xTicks: number[] = [];
-  for (let d = new Date(t0); d.getTime() <= t1; d.setUTCMonth(d.getUTCMonth() + 1)) {
-    if (d.getUTCDate() !== 1) { d.setUTCDate(1); continue; }
-    if (d.getUTCMonth() % (narrow ? 6 : 3) === 0 && d.getTime() >= t0) xTicks.push(d.getTime());
-  }
-
   // Before it first scrolls into view, the chart waits at its first date, ready to play.
   const waiting = !inView && motion;
   const live = clock != null || waiting;
   const frame = clock ?? { t: span.first, now: 0 };
+  // The visible time range: a window that scrolls with the head while playing, easing out to everything.
+  const W = Math.min(t1 - t0, (narrow ? 6 : WINDOW_MONTHS) * 30.4 * DAY);
+  const windowAt = (t: number) => { const b = Math.max(t0 + W, t + W * 0.1); return [b - W, b]; };
+  const ease = (e: number) => (e < 0.5 ? 2 * e * e : 1 - (-2 * e + 2) ** 2 / 2);
+  const [va, vb] = live ? windowAt(frame.t) : zoom < 1
+    ? (([a, b]) => [a + (t0 - a) * ease(zoom), b + (t1 - b) * ease(zoom)])(windowAt(t1))
+    : [t0, t1];
+  const px = (t: number) => m.left + ((t - va) / (vb - va)) * (endX - m.left);
+  const py = (s: number) => m.top + (1 - (s - y0) / (y1 - y0)) * (height - m.top - m.bottom);
+  const baseY = height - m.bottom;
+  // Month ticks spaced for the visible range; keyed by date, so they glide left as the window scrolls.
+  const months = (vb - va) / (30.4 * DAY);
+  const tickStep = [1, 2, 3, 6, 12].find(st => months / st <= (narrow ? 4 : 8)) ?? 12;
+  const xTicks: number[] = [];
+  for (let d = new Date(Date.UTC(new Date(va).getUTCFullYear(), 0, 1)); d.getTime() <= vb; d.setUTCMonth(d.getUTCMonth() + tickStep)) {
+    if (d.getTime() >= va) xTicks.push(d.getTime());
+  }
   const tNow = live ? frame.t : t1;
-  const headX = live ? px(frame.t) : endX;
+  const headX = live ? px(frame.t) : px(t1);
   const lines = groups.flatMap(g => {
     const reached = g.steps.filter(s => Date.parse(s.date) <= tNow);
     const pts = reached.map(s => ({ x: px(Date.parse(s.date)), y: py(s.score), step: s }));
     if (!pts.length) return [];
     const lastPt = pts[pts.length - 1];
-    let line = stepPath(pts, live ? lastPt.x : endX), headY = lastPt.y;
+    let line = stepPath(pts, live ? lastPt.x : px(t1)), headY = lastPt.y;
     if (live && headX > lastPt.x + 8) {
       // The ripple kicks up when this line gets a new leader, then settles.
       const kick = Math.exp(-(frame.now - (kicks.current.get(g.name) ?? -1e9)) / 380);
@@ -263,7 +288,7 @@ export function TrendsCard() {
   const nearest = hovering ? shown.map(p => ({ p, d: Math.hypot(px(Date.parse(p.date)) - hovering.x, py(p.score) - hovering.y) }))
     .sort((a, b) => a.d - b.d)[0] : null;
   const hoverPoint = nearest && nearest.d < 18 ? nearest.p : null;
-  const hoverT = hovering && !hoverPoint && hovering.x >= m.left && hovering.x <= endX ? t0 + ((hovering.x - m.left) / (endX - m.left)) * (t1 - t0) : null;
+  const hoverT = hovering && !hoverPoint && hovering.x >= m.left && hovering.x <= endX ? va + ((hovering.x - m.left) / (endX - m.left)) * (vb - va) : null;
   const atDate = hoverT == null ? [] : lines.map(({ g }) => {
     const reached = g.steps.filter(s => Date.parse(s.date) <= hoverT);
     return { g, best: reached[reached.length - 1] };
@@ -315,6 +340,7 @@ export function TrendsCard() {
               </linearGradient>
             ))}
             <filter id="hub-glow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="3" /></filter>
+            <clipPath id={clipId}><rect x={m.left} y={0} width={Math.max(0, endX - m.left + 14)} height={baseY + 1} /></clipPath>
           </defs>
           {yTicks.map(t => (
             <g key={t}>
@@ -323,8 +349,14 @@ export function TrendsCard() {
             </g>
           ))}
           <line x1={m.left} x2={endX} y1={baseY} y2={baseY} className="hub-baseline" />
-          {xTicks.map(t => <text key={t} x={px(t)} y={height - 10} className="hub-axis" textAnchor="middle" opacity={t <= tNow + 30 * DAY ? 1 : 0.35}>{month(t)}</text>)}
+          {xTicks.map(t => {
+            // Labels fade in and out at the window's edges as they scroll past.
+            const edge = Math.min(px(t) - m.left, endX - px(t)) / 40;
+            return <text key={t} x={px(t)} y={height - 10} className="hub-axis" textAnchor="middle"
+              opacity={Math.max(0, Math.min(1, edge)) * (t <= tNow + 30 * DAY ? 1 : 0.35)}>{month(t)}</text>;
+          })}
 
+          <g clipPath={`url(#${clipId})`}>
           {lines.map(({ g, area }, i) => !g.rank && <path key={`a-${g.name}`} d={area} fill={`url(#hub-wash-${i})`} />)}
           {shown.map(p => {
             const g = groups.find(group => group.members.includes(p));
@@ -339,7 +371,7 @@ export function TrendsCard() {
           ))}
           {live && <line x1={headX} x2={headX} y1={m.top} y2={baseY} className="hub-playhead" />}
 
-          {!live && jump && jump.gain > 0 && !narrow && (
+          {!live && zoom >= 1 && jump && jump.gain > 0 && !narrow && (
             <g className="hub-annotation hub-fade-in">
               <line x1={jump.x - 10} x2={jump.x - 4} y1={jump.y} y2={jump.y} />
               <text x={jump.x - 14} y={jump.y} textAnchor="end" dominantBaseline="middle">
@@ -363,6 +395,8 @@ export function TrendsCard() {
             );
           }))}
 
+          </g>
+
           {live && lines.map(({ g, headY }) => (
             <g key={`h-${g.name}`}>
               {!g.rank && <circle cx={headX} cy={headY} r={9} className="hub-head-halo" style={{ fill: g.color }} />}
@@ -371,7 +405,7 @@ export function TrendsCard() {
           ))}
 
           {!narrow && ends.map(({ l, lineY, y }) => {
-            const x = live ? headX + 12 : endX;
+            const x = live ? headX + 12 : px(t1);
             return (
               <g key={`e-${l.g.name}`}>
                 {Math.abs(y - lineY) > 2 && <path d={`M${x + 2},${lineY}C${x + 10},${lineY} ${x + 6},${y} ${x + 14},${y}`} className="hub-leader" />}

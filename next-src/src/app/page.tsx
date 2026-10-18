@@ -13,7 +13,8 @@ import './hub.css';
 // Each section sits on a tinted band; neighbouring bands meet on a shared mix
 // of their two colours so one fades into the next. Values are CSS variables so
 // both themes supply their own palette.
-const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-dusk)', 'var(--band-sand)', 'var(--band-clay)', 'var(--bg)'];
+// The live trends band fades back to the page colour for the carousel, then the story bands begin.
+const BANDS = ['var(--bg)', 'var(--band-dusk)', 'var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--bg)'];
 const band = (i: number) => ({
   '--band-from': `color-mix(in srgb, ${BANDS[i - 1]} 50%, ${BANDS[i]})`,
   '--band-color': BANDS[i],
@@ -28,7 +29,7 @@ const TRADEOFF_NOTES = [
 
 export default function HomePage() {
   const [active, setActive] = useState('tradeoffs');
-  const contents = [['tradeoffs', 'Humor vs. sarcasm'], ['trends', 'Live trends'], ['values', 'Model rankings'], ['how-it-works', 'Method'], ['related-research', 'Research']];
+  const contents = [['trends', 'Live trends'], ['tradeoffs', 'Humor vs. sarcasm'], ['values', 'Model rankings'], ['how-it-works', 'Method'], ['related-research', 'Research']];
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id);
@@ -64,10 +65,19 @@ export default function HomePage() {
       <p className="research-deck">EigenBench scores language models on how well their answers fit a written set of values, which we call a constitution. Browse the rankings, compare models across constitutions, and read the actual responses and judgments behind every score.</p>
       <div className="home-actions"><a className="button-primary" href="/explore/">Explore results <span aria-hidden>↗</span></a><a className="button-secondary" href="/research/eigenbench/">How EigenBench works <span aria-hidden>→</span></a></div>
     </section>
+    <section className="story-section band-section home-live" id="trends" style={band(1)}>
+      <h2 className="sr-only">Live trends</h2>
+      <div className="hub hub-embed">
+        <TrendsCard />
+        <Highlights />
+        <p className="hub-embed-more"><a href="/leaderboard/">Full leaderboard: every board, reasoning on vs. off, and Arena baselines →</a></p>
+      </div>
+    </section>
+
     <FeaturedCarousel />
     <nav className="story-jump home-contents" aria-label="On this page"><span>Contents</span>{contents.map(([id, title], index) => <a key={id} href={`#${id}`} aria-current={active === id ? 'location' : undefined}><span>{String(index + 1).padStart(2, '0')}</span>{title}</a>)}</nav>
 
-    <section className="story-section home-featured band-section" id="tradeoffs" style={band(1)}>
+    <section className="story-section home-featured band-section" id="tradeoffs" style={band(3)}>
       <div className="story-copy"><h2>Humor and sarcasm</h2><p>Each dot is a model, scored once for humor and once for sarcasm. Hover over a dot to see which model it is, click it to read how it was judged, or filter by model family below.</p></div>
       <div className="band-split">
         <div className="band-card"><ResultsExplorer embedded /></div>
@@ -77,21 +87,12 @@ export default function HomePage() {
       </div>
     </section>
 
-    <section className="story-section band-section" id="trends" style={band(2)}>
-      <div className="story-copy"><h2>Live trends</h2><p>A replay of the last two years: each line is one of the kindest models of its group on every release date, so you can watch open and proprietary models, the US and China, or the biggest labs overtake each other. The cycle runs on its own; pick a grouping or press Replay.</p></div>
-      <div className="hub hub-embed">
-        <Highlights />
-        <TrendsCard />
-        <p className="hub-embed-more"><a href="/leaderboard/">Full leaderboard: every board, reasoning on vs. off, and Arena baselines →</a></p>
-      </div>
-    </section>
-
-    <section className="story-section band-section" id="values" style={band(3)}>
+    <section className="story-section band-section" id="values" style={band(4)}>
       <div className="story-copy"><h2>Model rankings by constitution</h2><p>Pick a constitution to see how the models ranked on it. Each ranking comes from a single run, so its scores only compare the models, scenarios and judges in that run.</p></div>
       <div className="band-card"><HomeRanking /></div>
     </section>
 
-    <section className="story-section band-section" id="how-it-works" style={band(4)}>
+    <section className="story-section band-section" id="how-it-works" style={band(5)}>
       <div className="hub hub-embed"><FeaturedHowItWorks /></div>
       <p className="story-small">A higher score means a model’s answers fit the chosen constitution better. It says nothing about whether the model is safer or better aligned overall. The model at the top of the sarcasm ranking is just very sarcastic.</p>
     </section>
