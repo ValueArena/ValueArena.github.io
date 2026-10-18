@@ -3,10 +3,15 @@
 
 import registryData from './data/model-registry.json';
 import arenaData from './data/baseline-arena-text.json';
+import factualityData from './data/baseline-arena-factuality.json';
+import eqbenchData from './data/baseline-eqbench4.json';
+import spiralData from './data/baseline-spiral-bench.json';
 import type { Baseline, ModelInfo } from './hub';
 
 const REGISTRY = (registryData as { models: Record<string, ModelInfo> }).models;
 export const ARENA_TEXT = arenaData as Baseline;
+// Published benchmarks set beside EigenBench, value-related first; Arena text is general preference, for contrast.
+export const BASELINES: Baseline[] = [spiralData, factualityData, eqbenchData, ARENA_TEXT] as Baseline[];
 
 /** What the registry knows about a model nickname, if it is a released model. */
 export function modelInfo(nick: string): ModelInfo | null {

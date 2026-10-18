@@ -1,0 +1,55 @@
+{
+ "id": "eqbench4",
+ "name": "EQ-Bench 4",
+ "short": "Empathy",
+ "about": "Emotional intelligence in hard conversations: building rapport, reading people and caring for the user.",
+ "metric": "EQ-Bench 4 Elo",
+ "direction": "higher",
+ "unit": "scenarios",
+ "source": "https://eqbench.com/",
+ "license": "Scores as published on eqbench.com",
+ "attribution": "Sam Paech, EQ-Bench",
+ "published": "2026-07-26",
+ "rows": {
+  "Claude Sonnet 5": {
+   "source_model": "claude-sonnet-5",
+   "exact": true,
+   "score": 1236.0,
+   "lower": 1225.1,
+   "upper": 1247.7,
+   "n": 120
+  },
+  "GPT-5.6 Sol": {
+   "source_model": "openai/gpt-5.6-sol",
+   "exact": true,
+   "score": 1250.3,
+   "lower": 1239.6,
+   "upper": 1263.2,
+   "n": 120
+  },
+  "Kimi K2.6": {
+   "source_model": "moonshotai/kimi-k2.6",
+   "exact": true,
+   "score": 1201.6,
+   "lower": 1192.8,
+   "upper": 1210.1,
+   "n": 120
+  },
+  "DeepSeek V4 Pro": {
+   "source_model": "deepseek/deepseek-v4-pro",
+   "exact": true,
+   "score": 1165.7,
+   "lower": 1157.0,
+   "upper": 1175.1,
+   "n": 120
+  },
+  "Grok 4.3": {
+   "source_model": "x-ai/grok-4.3",
+   "exact": true,
+   "score": 1074.8,
+   "lower": 1058.0,
+   "upper": 1089.7,
+   "n": 120
+  }
+ }
+}

@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Penguin } from '@/components/Penguin';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
-import { agreement, baseName, boardName, formatRank, rankSpread, runningBest, spearman, trustShare } from '@/lib/hub';
-import { ARENA_TEXT, FEATURED_GROUP, PLANNED_BASELINES, REASONING_KINDNESS, TREND_RUN, modelInfo } from '@/lib/registry';
+import { agreement, baseName, baselineAgreement, boardName, formatRank, rankSpread, runningBest, trustShare } from '@/lib/hub';
+import { ARENA_TEXT, BASELINES, FEATURED_GROUP, REASONING_KINDNESS, TREND_RUN, modelInfo } from '@/lib/registry';
 import type { IndexRun, SummaryRow } from '@/lib/types';
 import { BoardIcon, Delta, LogoTile, niceTicks } from './ui';
 import { TrendsCard } from './TrendsCard';
@@ -138,12 +138,15 @@ export function Highlights({ kindnessSlug }: { kindnessSlug?: string }) {
       .map(([name, v]) => ({ name, delta: v.reasoning - v.instant }))
       .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))[0] ?? null;
   }, [data.reasoning]);
-  const rho = useMemo(() => {
+  // The published benchmark that ranks models most like EigenBench kindness. It needs at least eight
+  // shared models to count, so a handful of matches can't make the headline.
+  const closest = useMemo(() => {
     if (!data.trend) return null;
-    const pairs = data.trend.flatMap(r => (ARENA_TEXT.rows[r.model_name] ? [[ARENA_TEXT.rows[r.model_name].score, r.elo_mean]] : []));
-    const value = spearman(pairs.map(p => p[0]), pairs.map(p => p[1]));
-    return value == null ? null : { value, n: pairs.length };
-  }, [data.trend]);
+    const runs = [data.trend, data.board ?? []];
+    const scored = BASELINES.flatMap(b => { const a = baselineAgreement(b, runs, 8); return a ? [{ b, ...a }] : []; });
+    const best = [...scored].sort((x, y) => y.rho - x.rho)[0];
+    return best ? { best, arena: scored.find(s => s.b === ARENA_TEXT) } : null;
+  }, [data.trend, data.board]);
 
   return (
     <section className="hub-highlights" aria-label="Highlights">
@@ -169,10 +172,14 @@ export function Highlights({ kindnessSlug }: { kindnessSlug?: string }) {
         </> : <p className="hub-stat-sub">Loading…</p>}
       </article>
       <article className="hub-stat-tile">
-        <p className="hub-stat-label">Agreement with Arena</p>
-        {rho ? <>
-          <p className="hub-stat-value">ρ {rho.value.toFixed(2)}</p>
-          <p className="hub-stat-sub">{agreement(rho.value)} across {rho.n} models: kindness is not the same as being liked</p>
+        <p className="hub-stat-label">Closest outside benchmark</p>
+        {closest ? <>
+          <p className="hub-stat-value">ρ {closest.best.rho.toFixed(2)} <span className="hub-stat-name">{closest.best.b.short}</span></p>
+          <p className="hub-stat-sub">
+            {agreement(closest.best.rho)} with {closest.best.b.name} across {closest.best.n} models
+            {closest.arena && closest.arena.b !== closest.best.b && <>; Arena preference ρ {closest.arena.rho.toFixed(2)}</>}
+            {' '}· all four compared below
+          </p>
         </> : <p className="hub-stat-sub">Loading…</p>}
       </article>
     </section>
@@ -213,6 +220,8 @@ function Info({ text }: { text: string }) {
 export function RankTable({ rows, limit, baselines = true, href }: { rows: SummaryRow[]; limit?: number; baselines?: boolean; href?: (model: string) => string }) {
   const spread = rankSpread(rows);
   const sorted = [...rows].sort((a, b) => b.elo_mean - a.elo_mean).slice(0, limit ?? rows.length);
+  // A column for each published benchmark that covers at least one model on this board.
+  const columns = baselines ? BASELINES.filter(b => rows.some(r => b.rows[r.model_name])) : [];
   const lo = Math.min(1500, ...sorted.map(r => r.elo_ci_lower ?? r.elo_mean));
   const hi = Math.max(1500, ...sorted.map(r => r.elo_ci_upper ?? r.elo_mean));
   const ticks = niceTicks(lo, hi, 4);
@@ -233,18 +242,16 @@ export function RankTable({ rows, limit, baselines = true, href }: { rows: Summa
               </div>
               <span className="sr-only">95% interval</span>
             </th>
-            {baselines && <th scope="col" className="num hub-col-baseline">
-              Arena <Info text={`${ARENA_TEXT.metric}, published ${ARENA_TEXT.published}. ≈ marks a different effort setting of the same model. ${ARENA_TEXT.license}, ${ARENA_TEXT.attribution}.`} />
-            </th>}
-            {baselines && PLANNED_BASELINES.map(b => (
-              <th key={b.id} scope="col" className="num hub-col-planned">{b.name} <Info text={`${b.what} Not yet collected for these models.`} /></th>
+            {columns.map(b => (
+              <th key={b.id} scope="col" className="num hub-col-baseline">
+                {b.short} <Info text={`${b.name}: ${b.about} ${b.metric}, ${b.published}. ${b.attribution} (${b.license}).`} />
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {sorted.map(row => {
             const info = modelInfo(row.model_name);
-            const arena = ARENA_TEXT.rows[row.model_name];
             const ciLo = row.elo_ci_lower, ciHi = row.elo_ci_upper;
             const half = ciLo != null && ciHi != null ? (ciHi - ciLo) / 2 : null;
             return (
@@ -270,12 +277,16 @@ export function RankTable({ rows, limit, baselines = true, href }: { rows: Summa
                     <span className="hub-forest-dot" style={{ left: `${x(row.elo_mean)}%` }} />
                   </div>
                 </td>
-                {baselines && <td className="num hub-col-baseline">
-                  {arena
-                    ? <span title={`${arena.arena_model} · ${arena.votes.toLocaleString()} votes`}>{arena.score.toFixed(0)}{!arena.exact && <sup className="hub-approx">≈</sup>}</span>
-                    : <span className="hub-na" title="Arena doesn’t list this model">—</span>}
-                </td>}
-                {baselines && PLANNED_BASELINES.map(b => <td key={b.id} className="num hub-col-planned"><span className="hub-soon">Soon</span></td>)}
+                {columns.map(b => {
+                  const cell = b.rows[row.model_name];
+                  return (
+                    <td key={b.id} className="num hub-col-baseline">
+                      {cell
+                        ? <span title={`${b.name}: ${cell.source_model}${cell.n ? ` · ${cell.n.toLocaleString()} ${b.unit}` : ''}`}>{cell.score.toFixed(0)}{!cell.exact && <sup className="hub-approx">≈</sup>}</span>
+                        : <span className="hub-na" title={`${b.name} doesn’t list this model`}>—</span>}
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}
@@ -283,8 +294,8 @@ export function RankTable({ rows, limit, baselines = true, href }: { rows: Summa
       </table>
       <p className="hub-foot">
         <span className="hub-key-ref" /> 1500 is a fair share of the judges’ trust; bars are 95% intervals.
-        {baselines && <> ≈ Arena lists another effort setting.
-          Arena scores: {ARENA_TEXT.attribution}, <a href={ARENA_TEXT.source}>leaderboard dataset</a> ({ARENA_TEXT.license}), {ARENA_TEXT.published}.</>}
+        {columns.length > 0 && <> ≈ the benchmark lists another effort setting or chat version of the model. Sources:{' '}
+          {columns.map((b, i) => <span key={b.id}>{i ? ' · ' : ''}<a href={b.source}>{b.name}</a> ({b.attribution}, {b.license})</span>)}.</>}
       </p>
     </div>
   );

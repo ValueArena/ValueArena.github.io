@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  agreement, baseName, boardName, formatRank, groupOf, rankSpread, runningBest, runningTop, scoreFromShare, spearman, topLabs, trustShare,
+  agreement, baseName, baselineAgreement, boardName, formatRank, groupOf, rankSpread, runningBest, runningTop, scoreFromShare, spearman, topLabs, trustShare,
 } from '../src/lib/hub.ts';
 
 const row = (model_name, elo_mean, lo, hi) => ({ model_name, elo_mean, elo_ci_lower: lo, elo_ci_upper: hi });
@@ -88,4 +88,13 @@ test('runningTop follows who holds each rank, dated when they took it', () => {
   assert.deepEqual(runningTop(pts, 1).map(s => [s.name, s.date]), [['b', '2024-03-01'], ['a', '2024-06-01']]);
   assert.deepEqual(runningTop(pts, 2).map(s => [s.name, s.date]), [['b', '2024-06-01']]);
   assert.deepEqual(runningTop(pts, 0).map(s => s.name), runningBest(pts).map(s => s.name));
+});
+
+test('baselineAgreement uses the run sharing the most models, and needs enough of them', () => {
+  const rows = { a: 10, b: 20, c: 30, d: 40, e: 50 };
+  const baseline = { rows: Object.fromEntries(Object.entries(rows).map(([k, v]) => [k, { score: v }])) };
+  const run = names => names.map((n, i) => ({ model_name: n, elo_mean: 1400 + i * 10 }));
+  assert.deepEqual(baselineAgreement(baseline, [run(['a', 'b']), run(['a', 'b', 'c', 'd', 'e'])]), { rho: 1, n: 5 });
+  assert.equal(baselineAgreement(baseline, [run(['a', 'b', 'c'])]), null);
+  assert.equal(baselineAgreement(baseline, [run(['e', 'd', 'c', 'b', 'a'])]).rho, -1);
 });
