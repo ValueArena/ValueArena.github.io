@@ -100,7 +100,7 @@ export function CollectionCoverage({ meta, slug }: { meta: MetaJson; slug: strin
         <div className="coverage-table-wrap"><table className="elo-table">
           <thead><tr><th>Scenario</th><th>Judge</th><th>Model(s)</th><th>Reason</th></tr></thead>
           <tbody>{filtered.slice(0, limit).map((row, index) => <tr key={`${row.sample_id}-${index}`}>
-            <td><details><summary>{row.scenario_index ?? 'Unknown'} · {row.sample_id}</summary><p className="coverage-scenario">{row.scenario || 'Scenario text unavailable.'}</p></details></td>
+            <td><details><summary>{row.scenario_index ?? 'Unknown'} · {row.sample_id ?? 'one of several identical samples'}</summary><p className="coverage-scenario">{row.scenario || 'Scenario text unavailable.'}</p></details></td>
             <td>{row.judge}</td><td>{row.models.join(', ')}</td>
             <td className="coverage-reason">{row.reason === 'sample_error' ? row.error || 'Sample failed; no error message recorded.' : 'Missing from the export, with no error recorded.'}</td>
           </tr>)}</tbody>

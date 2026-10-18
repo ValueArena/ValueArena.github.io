@@ -107,3 +107,19 @@ test('each inconsistency in a version 2 report makes it unavailable', () => {
     assert.equal(parseCollectionReport(bad), null, rule);
   }
 });
+test('recurring judgments and unreconcilable counts parse as unknown, not 0', () => {
+  // One of two identical judgments went unexported: it has no sample to name.
+  const anonymous = { ...omission, sample_id: null, log_file: null, reason: 'not_exported', error: null, round: null, epoch: null };
+  const recurring = { ...v2, failed: 0, collections: [{ ...part, failed: 0, omissions: [anonymous] }] };
+  assert.equal(parseCollectionReport(recurring).omissions[0].sample_id, null);
+
+  // The logs hold more than the plan asked for: planned is known, unstarted is not.
+  const overfull = { ...part, unstarted: null, unstarted_judgments: null };
+  const parsed = parseCollectionReport({ ...v2, unstarted: null, collections: [overfull] });
+  assert.deepEqual([parsed.planned, parsed.unstarted, parsed.unstarted_judgments], [4, null, null]);
+
+  // The export holds judgments no log accounts for: exported and omitted are unknown, failures still listed.
+  const unreconciled = { ...part, exported: null, omitted: null };
+  const report = parseCollectionReport({ ...v2, exported: null, omitted: null, collections: [unreconciled] });
+  assert.deepEqual([report.exported, report.omitted, report.failed, report.omissions.length], [null, null, 1, 1]);
+});

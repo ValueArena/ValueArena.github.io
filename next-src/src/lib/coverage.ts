@@ -1,14 +1,17 @@
 import type { MetaJson } from './types';
 
 export interface OmittedSample {
-  sample_id: string;
+  /** Null when the judgment is one of several identical ones (a recurring pair or an epoch). */
+  sample_id: string | null;
   scenario_index: number | null;
   scenario: string;
   judge: string;
   models: string[];
   reason: 'sample_error' | 'not_exported';
   error: string | null;
-  log_file?: string;
+  log_file?: string | null;
+  round?: number | null;
+  epoch?: number | null;
 }
 export interface UnstartedJudgment {
   scenario_index: number;
@@ -69,10 +72,10 @@ const isStrings = (value: unknown): value is string[] => Array.isArray(value) &&
 
 function validOmission(row: unknown): row is OmittedSample {
   const r = row as OmittedSample;
-  if (!r || typeof r.sample_id !== 'string' || typeof r.scenario !== 'string' || typeof r.judge !== 'string') return false;
+  if (!r || (r.sample_id !== null && typeof r.sample_id !== 'string') || typeof r.scenario !== 'string' || typeof r.judge !== 'string') return false;
   if (r.scenario_index !== null && count(r.scenario_index) === null) return false;
   if (!isStrings(r.models)) return false;
-  if (r.log_file !== undefined && typeof r.log_file !== 'string') return false;
+  if (r.log_file !== undefined && r.log_file !== null && typeof r.log_file !== 'string') return false;
   return ['sample_error', 'not_exported'].includes(r.reason) && (r.error === null || typeof r.error === 'string');
 }
 
@@ -86,7 +89,8 @@ function consistent(c: Counts): boolean {
   // failed <= omitted needs no check of its own: failed must equal the sample_error rows.
   const { planned, logged, exported, omitted, unstarted } = c;
   if (logged !== null && exported !== null && omitted !== null && exported + omitted !== logged) return false;
-  if (planned !== null && (unstarted === null || logged === null || logged + unstarted !== planned)) return false;
+  // A known plan can leave unstarted unknown, when the logs hold more than it asked for.
+  if (planned !== null && logged !== null && unstarted !== null && logged + unstarted !== planned) return false;
   return true;
 }
 
