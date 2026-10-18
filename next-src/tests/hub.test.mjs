@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  agreement, baseName, boardName, formatRank, groupOf, rankSpread, runningBest, scoreFromShare, spearman, topLabs, trustShare,
+  agreement, baseName, boardName, formatRank, groupOf, rankSpread, runningBest, runningTop, scoreFromShare, spearman, topLabs, trustShare,
 } from '../src/lib/hub.ts';
 
 const row = (model_name, elo_mean, lo, hi) => ({ model_name, elo_mean, elo_ci_lower: lo, elo_ci_upper: hi });
@@ -75,4 +75,17 @@ test('agreement words follow the size and sign of rho', () => {
   assert.equal(agreement(0.1), 'Little agreement');
   assert.equal(agreement(0.45), 'Moderate agreement');
   assert.equal(agreement(-0.85), 'Very strong inverse agreement');
+});
+
+test('runningTop follows who holds each rank, dated when they took it', () => {
+  const pts = [
+    { name: 'a', date: '2024-01-01', score: 1500 },
+    { name: 'b', date: '2024-03-01', score: 1450 },
+    { name: 'c', date: '2024-06-01', score: 1600 },
+    { name: 'd', date: '2024-09-01', score: 1400 },
+  ];
+  assert.deepEqual(runningTop(pts, 0).map(s => [s.name, s.date]), [['a', '2024-01-01'], ['c', '2024-06-01']]);
+  assert.deepEqual(runningTop(pts, 1).map(s => [s.name, s.date]), [['b', '2024-03-01'], ['a', '2024-06-01']]);
+  assert.deepEqual(runningTop(pts, 2).map(s => [s.name, s.date]), [['b', '2024-06-01']]);
+  assert.deepEqual(runningTop(pts, 0).map(s => s.name), runningBest(pts).map(s => s.name));
 });
