@@ -757,6 +757,14 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 .lab-list strong { font-size: 15px; font-weight: 600; }
 .lab-list span { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
 .lab-list a:hover strong { color: var(--accent); }
+.lab-team { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.lab-team a, .lab-team li > div { display: flex; align-items: center; gap: 16px; }
+.lab-team-photo { width: 64px; height: 80px; flex: none; border-radius: 10px; object-fit: cover; object-position: 50% 20%; filter: grayscale(1); }
+.lab-team-initials { display: grid; place-items: center; background: var(--border-light); color: var(--text-secondary); font: 600 15px var(--font-body); filter: none; }
+.lab-team-text { display: grid; gap: 3px; }
+.lab-team-text strong { font-size: 15px; font-weight: 600; }
+.lab-team-text span { color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.lab-team a:hover strong { color: var(--accent); }
 .lab-links { display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: 14px; }
 .lab-links a { color: var(--accent); }
 .lab-links a:hover { text-decoration: underline; text-underline-offset: 4px; }

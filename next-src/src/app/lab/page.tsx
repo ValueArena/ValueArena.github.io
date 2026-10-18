@@ -23,6 +23,13 @@ const FOCUS = [
   { title: 'Open tools', text: 'Results, transcripts, code and data published for anyone to inspect and reuse.' },
 ];
 
+type Member = { name: string; role?: string; href?: string; photo?: string; initials?: string };
+const TEAM: Member[] = [
+  { name: 'Lionel Levine', role: 'Professor of Mathematics, Cornell University', href: 'https://lionellevine.github.io/', photo: '/assets/team/levine.jpg' },
+  { name: 'Jonathn Chang', role: 'PhD student, MATS fellow', href: 'https://jonathnchang.com/', photo: '/assets/team/chang.jpg' },
+  { name: 'Jash Vira', role: 'Master’s student', href: 'https://jashvira.com/', photo: '/assets/team/vira.jpg' },
+];
+
 export default function LabPage() {
   return <div className="lab-page">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
@@ -42,6 +49,20 @@ export default function LabPage() {
     <section className="lab-section" aria-labelledby="lab-research">
       <h2 id="lab-research">Research</h2>
       <ul className="lab-list">{papers.map(p => <li key={p.slug}><a href={`/research/${p.slug}/`}><strong>{p.title}</strong></a><span>{p.subtitle}</span></li>)}</ul>
+    </section>
+
+    <section className="lab-section" aria-labelledby="lab-team">
+      <h2 id="lab-team">Team</h2>
+      <ul className="lab-team">{TEAM.map(m => {
+        const body = <>
+          {m.photo
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img className="lab-team-photo" src={m.photo} width="64" height="80" alt="" loading="lazy" />
+            : <span className="lab-team-photo lab-team-initials" aria-hidden="true">{m.initials}</span>}
+          <span className="lab-team-text"><strong>{m.name}</strong>{m.role && <span>{m.role}</span>}</span>
+        </>;
+        return <li key={m.name}>{m.href ? <a href={m.href}>{body}</a> : <div>{body}</div>}</li>;
+      })}</ul>
     </section>
 
     <section className="lab-section" aria-labelledby="lab-open">
