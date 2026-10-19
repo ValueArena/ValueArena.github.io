@@ -102,7 +102,7 @@ export function LeaderboardHub() {
 }
 
 /** Four headline numbers, each computed from a live run. Finds the kindness board itself if not given one. */
-export function Highlights({ kindnessSlug }: { kindnessSlug?: string }) {
+export function Highlights({ kindnessSlug, compact = false }: { kindnessSlug?: string; compact?: boolean }) {
   const [data, setData] = useState<{ board?: SummaryRow[]; trend?: SummaryRow[]; reasoning?: SummaryRow[] }>({});
   useEffect(() => {
     const board = kindnessSlug ? Promise.resolve(kindnessSlug)
@@ -148,6 +148,18 @@ export function Highlights({ kindnessSlug }: { kindnessSlug?: string }) {
     return best ? { best, arena: scored.find(s => s.b === ARENA_TEXT) } : null;
   }, [data.trend, data.board]);
 
+  // Compact: the same four facts as one wrapping line of short items, for under a chart.
+  if (compact) {
+    return (
+      <ul className="hub-highlights-line" aria-label="Highlights">
+        {top && <li><LogoTile name={top.model_name} size={18} /><span>Kindest: <strong>{top.model_name}</strong> {top.elo_mean.toFixed(0)}</span></li>}
+        {gap && <li><span>Proprietary lead <strong>{gap.gap >= 0 ? '+' : '−'}{Math.abs(gap.gap).toFixed(0)}</strong></span></li>}
+        {shift && <li><span>Reasoning moves <strong>{shift.name}</strong> <Delta value={shift.delta} /></span></li>}
+        {closest && <li><span>Closest benchmark <strong>{closest.best.b.short} ρ {closest.best.rho.toFixed(2)}</strong></span></li>}
+        <li className="hub-highlights-more"><a href="/leaderboard/">Full leaderboard →</a></li>
+      </ul>
+    );
+  }
   return (
     <section className="hub-highlights" aria-label="Highlights">
       <article className="hub-stat-tile">

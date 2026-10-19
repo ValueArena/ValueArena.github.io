@@ -70,8 +70,7 @@ export default function HomePage() {
       <h2 className="sr-only">Live trends</h2>
       <div className="hub hub-embed">
         <TrendsCard compact flat />
-        <Highlights />
-        <p className="hub-embed-more"><a href="/leaderboard/">Full leaderboard: every board, reasoning on vs. off, and Arena baselines →</a></p>
+        <Highlights compact />
       </div>
     </section>
 
