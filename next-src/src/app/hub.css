@@ -730,6 +730,17 @@
 .hub-card-compact .hub-eyebrow { display: none; }
 .hub-card-compact .hub-title { font-size: 1.15rem; }
 .hub-card-compact .hub-sub { margin-top: 2px; font-size: 0.8rem; }
+/* One-line highlights under the home chart */
+.hub-highlights-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; margin: 0; padding: 0; list-style: none; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+@media (max-width: 640px) { .hub-highlights-line { white-space: normal; } }
+.hub-highlights-line li { display: inline-flex; align-items: center; gap: 7px; }
+.hub-highlights-line strong { color: var(--text); font-weight: 600; }
+.hub-highlights-line .hub-delta-chip { font-size: 0.72rem; }
+.hub-highlights-more { margin-left: auto; }
+.hub .hub-highlights-more a { color: var(--text-secondary); text-decoration: none; }
+.hub .hub-highlights-more a:hover { color: var(--text); }
+@media (max-width: 640px) { .hub-highlights-more { margin-left: 0; } }
+
 /* Flat: the chart sits on the page and its art, with no card around it */
 .hub-card-flat,
 .arena-home .hub-card-flat { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
