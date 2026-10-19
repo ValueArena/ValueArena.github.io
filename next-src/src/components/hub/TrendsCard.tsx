@@ -326,7 +326,7 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
           <p className="hub-eyebrow">Trends</p>
           <h2 id="hub-trends-title" className="hub-title">Kindness over time <span className="hub-chip">{points.length} models</span></h2>
         </div>
-        <p className="hub-sub hub-trends-note">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>
+        {!compact && <p className="hub-sub hub-trends-note">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
         <div className="hub-tabs hub-tabs-timed" role="tablist" aria-label="Group models by">
           {LENSES.map(l => (
             <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => choose(l.id)}>
@@ -476,6 +476,8 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
         )}
       </div>
 
+      {/* Compact: the note moves under the chart so the chart is what the first screen shows. */}
+      {compact && <p className="hub-sub hub-trends-below">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
       {(!compact || narrow) && <ul className="hub-legend">
         {groups.map(g => (
           <li key={g.name}>
