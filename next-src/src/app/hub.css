@@ -728,6 +728,9 @@
 .arena-home .hub-card-compact { padding: 18px 24px 14px; }
 .hub-card-compact .hub-card-head { margin-bottom: 6px; }
 .hub-card-compact .hub-eyebrow { display: none; }
+.hub-card-compact .hub-trends-head { grid-template-areas: 'title tabs'; align-items: center; }
+.hub-card-compact .hub-trends-below { margin: 6px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) { .hub-card-compact .hub-trends-below { white-space: normal; } }
 .hub-card-compact .hub-title { font-size: 1.15rem; }
 .hub-card-compact .hub-sub { margin-top: 2px; font-size: 0.8rem; }
 /* One-line highlights under the home chart */
