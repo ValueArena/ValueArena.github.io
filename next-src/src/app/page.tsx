@@ -27,7 +27,30 @@ const TRADEOFF_NOTES = [
   { kicker: 'Why it matters', title: 'Traits rarely change alone', text: 'Pushing a model toward one trait drags related ones along, the side effect our character-training study measures.' },
 ];
 
+// On small screens the home page is laid out at this width and shrunk to fit, so a phone shows the
+// same composition as a desktop, just smaller, instead of a reflowed single column.
+const DESIGN_WIDTH = 960;
+
+/** Switch the page's viewport to DESIGN_WIDTH on screens narrower than that, and restore it on leaving. */
+function useShrinkToFit() {
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const original = meta.getAttribute('content') ?? 'width=device-width, initial-scale=1';
+    const apply = () => {
+      // screen.width does not follow orientation everywhere, so pick the side by orientation.
+      const long = Math.max(screen.width, screen.height), short = Math.min(screen.width, screen.height);
+      const width = matchMedia('(orientation: portrait)').matches ? short : long;
+      meta.setAttribute('content', width < DESIGN_WIDTH ? `width=${DESIGN_WIDTH}, initial-scale=${(width / DESIGN_WIDTH).toFixed(3)}` : original);
+    };
+    apply();
+    window.addEventListener('orientationchange', apply);
+    return () => { window.removeEventListener('orientationchange', apply); meta.setAttribute('content', original); };
+  }, []);
+}
+
 export default function HomePage() {
+  useShrinkToFit();
   const [active, setActive] = useState('tradeoffs');
   const contents = [['trends', 'Live trends'], ['tradeoffs', 'Humor vs. sarcasm'], ['values', 'Model rankings'], ['how-it-works', 'Method'], ['related-research', 'Research']];
   useEffect(() => {
