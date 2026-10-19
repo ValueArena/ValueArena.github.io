@@ -797,6 +797,20 @@
 .featured-carousel a.carousel-chart-note:hover { color: var(--text); }
 .carousel-chart-detail { color: var(--text-secondary); font-size: 0.8rem; }
 
+/* Smaller carousel cards: narrower, tighter, shorter charts */
+.featured-carousel .featured-carousel-card.featured-interactive { flex-basis: 320px; width: 320px; padding: 16px; border-radius: 18px; }
+.featured-carousel .featured-interactive .featured-card-heading { min-height: 0; }
+.featured-carousel .featured-interactive .featured-card-heading h2 { font-size: 1rem; }
+.featured-carousel .carousel-chart { min-height: 0; margin-top: 8px; }
+.featured-carousel .carousel-chart svg.carousel-radar { height: 150px; }
+.featured-carousel .carousel-chart svg.carousel-bump { height: 140px; }
+.featured-carousel .carousel-ranking li { min-height: 38px; }
+.featured-carousel .carousel-constitution blockquote { font-size: 1rem; max-height: 110px; }
+.featured-carousel .carousel-bars { gap: 12px; margin: 12px 0 10px; }
+.featured-carousel .carousel-stat { padding: 7px 10px; }
+.featured-carousel .carousel-picker select { min-height: 32px; }
+@media (max-width: 640px) { .featured-carousel .featured-carousel-card.featured-interactive { flex-basis: 78vw; width: 78vw; } }
+
 /* Small icons inside carousel cards keep their own size, not the cards' chart sizing */
 .featured-carousel .carousel-chart .carousel-picker svg { width: 12px; height: 12px; margin: -6px 0 0; }
 .featured-carousel .carousel-chart .hub-delta-chip svg { display: inline; width: 8px; height: 8px; margin: 0; }
