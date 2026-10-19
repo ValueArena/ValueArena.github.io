@@ -731,7 +731,7 @@
 .hub-card-compact .hub-title { font-size: 1.15rem; }
 .hub-card-compact .hub-sub { margin-top: 2px; font-size: 0.8rem; }
 /* One-line highlights under the home chart */
-.hub-highlights-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; margin: 0; padding: 9px 14px; border: 1px solid var(--card-line, var(--border)); border-radius: 14px; background: var(--card-bg, var(--bg-surface)); box-shadow: var(--card-shadow, none); list-style: none; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+.hub-highlights-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; margin: 0; padding: 7px 14px; border: 1px solid color-mix(in srgb, var(--text) 9%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--text) 3.5%, transparent); box-shadow: none; list-style: none; color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
 @media (max-width: 640px) { .hub-highlights-line { white-space: normal; } }
 .hub-highlights-line li { display: inline-flex; align-items: center; gap: 7px; }
 .hub-highlights-line strong { color: var(--text); font-weight: 600; }
