@@ -90,17 +90,17 @@ def test_credits_and_unknown_models(service):
     assert db.balance(USER)['credits'] == 10000
 
 
-@pytest.mark.parametrize('engine', ['native', 'inspect'])
-def test_engine_snapshot_and_safe_spec(service, tmp_path, engine):
+def test_engine_snapshot_and_safe_spec(service, tmp_path):
     _, db, client = service
     name = "quote'; __import__('os').system('false') #"
-    result = submit(client, payload(engine=engine, name=name)).json()
+    result = submit(client, payload(name=name)).json()
     config = db.get(result['id'])['config']
     spec_path = write_spec(config, tmp_path/'run')
     scope = {}; exec(spec_path.read_text(), scope)
     spec = scope['RUN_SPEC']
     assert spec['name'] == name
-    assert config['engine'] == engine
+    assert config['engine'] == 'inspect'
+    assert submit(client, payload(engine='native')).status_code == 422
     assert spec['models'] == {'a': 'org/model-a', 'b': 'org/model-b'}
     assert spec['collection'].get('generation', {}) == {}
     assert spec['collection']['inspect']['cache'] is False
@@ -188,11 +188,10 @@ def test_upload_owner_and_finish_order(service):
     assert client.get('/evaluations/'+job_id+'/artifacts', headers={'Authorization': 'Bearer '+USER}).content == b'archive'
 
 
-@pytest.mark.parametrize('engine', ['native', 'inspect'])
 @pytest.mark.parametrize('fail', [False, True])
-def test_worker_lifecycle(service, tmp_path, engine, fail):
+def test_worker_lifecycle(service, tmp_path, fail):
     cfg, db, api = service
-    job_id = submit(api, payload(engine=engine)).json()['id']; tick(db, Pods(), cfg)
+    job_id = submit(api, payload()).json()['id']; tick(db, Pods(), cfg)
     cfg.max_artifact_bytes = 10_000_000
     class Client:
         def get(self):
@@ -212,7 +211,7 @@ def test_worker_lifecycle(service, tmp_path, engine, fail):
             db.patch(job_id, ('running',), artifact='test/result.tar.gz')
     phases = []
     def execute(command, directory, abort, deadline):
-        assert command[3] == engine
+        assert command[3] == 'inspect'
         phase = command[4]; phases.append(phase)
         if fail: raise RuntimeError('invalid ratings')
         if phase == 'analyzing':
@@ -345,7 +344,7 @@ def test_compute_limits_and_cpu_local_models(service, monkeypatch):
     limits=db.effective_limits(USER)
     with pytest.raises(Forbidden,match='max_gpu_count'):enforce(config,{**limits,'max_gpu_count':2})
     with pytest.raises(Forbidden,match='max_disk_gb'):enforce(config,{**limits,'max_disk_gb':250})
-    with pytest.raises(ValidationError):EvaluationRequest(**payload(engine='inspect',gpu_count=2))
+    assert EvaluationRequest(**payload(gpu_count=2)).gpu_count==2
     monkeypatch.setattr('app.api.resolve_models', lambda *args: {'a':{'provider':'hf_local'},'b':'org/b'})
     result=client.post('/spec-preview',json=payload(compute_type='cpu'),headers={'Authorization':'Bearer '+USER})
     assert result.status_code==422 and 'API models only' in result.json()['detail']

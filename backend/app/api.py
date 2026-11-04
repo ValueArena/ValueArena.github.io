@@ -187,7 +187,7 @@ def create_app(config=None, store=None, auth=None, storage=None):
     @app.get('/models')
     def models():
         return {'models': [{'id': key, 'label': entry['label'], 'provider': 'agent' if agents.is_agent(entry['ref']) else 'huggingface' if isinstance(entry['ref'], dict) else 'openrouter'} for key, entry in catalog.items()],
-                'engines': ['native', 'inspect'], 'default_engine': 'native', 'evaluation_mode': 'direct_rating'}
+                'engines': ['inspect'], 'default_engine': 'inspect', 'evaluation_mode': 'direct_rating'}
 
     @app.get('/models/openrouter')
     def available_openrouter(user_id=Depends(user)):

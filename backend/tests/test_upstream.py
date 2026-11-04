@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from app.models import EvaluationRequest
 from app.spec import build_spec, write_spec
 from app.upstream import GENERATION_DEFAULTS, verify_source
-from app.model_resolution import validate_native_adapters
+from app.model_resolution import validate_adapters
 
 
 def config(**kwargs):
@@ -38,13 +38,13 @@ def test_spec_runs_through_actual_pinned_upstream(tmp_path):
 
 
 @pytest.mark.parametrize('rank,pattern,accepted',[(64,{},True),(128,{},True),(512,{},True),(32,{'q_proj':512},True),(1024,{},False),(32,{'q_proj':1024},False)])
-def test_native_adapter_rank_checked_before_provisioning(monkeypatch,rank,pattern,accepted):
+def test_adapter_rank_checked_before_provisioning(monkeypatch,rank,pattern,accepted):
     class Response:
         def raise_for_status(self): pass
         def json(self): return {'r':rank,'rank_pattern':pattern}
     monkeypatch.setattr('app.model_resolution.httpx.get',lambda *args,**kwargs:Response())
     refs={'adapter':{'provider':'hf_local','kind':'lora','repo_id':'org/adapter','revision':'a'*40}}
-    if accepted: validate_native_adapters(refs)
+    if accepted: validate_adapters(refs)
     else:
-        with pytest.raises(HTTPException) as exc: validate_native_adapters(refs)
+        with pytest.raises(HTTPException) as exc: validate_adapters(refs)
         assert exc.value.status_code==422 and 'rank 1024' in exc.value.detail

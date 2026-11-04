@@ -1,7 +1,7 @@
 # ValueArena evaluation backend
 
 Automatic EigenBench jobs: Supabase login → FastAPI → durable PostgreSQL queue →
-RunPod worker → private or published results. Users choose `native` (default) or `inspect`.
+RunPod worker → private or published results. Collection runs on EigenBench's Inspect engine.
 No one has to launch each evaluation manually.
 
 ## What this version supports
@@ -10,7 +10,7 @@ No one has to launch each evaluation manually.
 - Existing or custom constitutions, built-in deduplicated AIRiskDilemmas or uploaded JSONL scenarios, at least two models, and administrator-controlled optional limits.
 - Direct 1–10 ratings, all-to-all judging (each panel member responds **and** judges),
   followed by EigenBench analysis and 200 scenario bootstraps.
-- Native and Inspect collection engines, sharing the downstream analysis.
+- Collection on EigenBench's Inspect engine, followed by EigenBench's analysis.
 - Login, per-user access, idempotent submission, credit reservations, cancellation,
   heartbeats, runtime limits, and automatic pod cleanup.
 - Downloadable private `.tar.gz` bundles including configuration, raw records,
@@ -23,8 +23,7 @@ The GPU dependency set is resolved at image build; use a tested immutable image
 for deployment. The source revision is pinned in `Dockerfile.worker`.
 
 Not included yet: payments, dollar-denominated billing, separate responder/judge panels,
-multi-GPU inference, architectures unsupported by vLLM, and pairwise evaluation. Native and Inspect
-may produce different samples even with the same seed.
+architectures unsupported by vLLM, and pairwise evaluation.
 
 ## 1. Supabase: accounts, database, private storage
 
@@ -72,8 +71,8 @@ not unlimited output, and can be overridden per phase or model in Advanced confi
 The former hosted 1024-token response default is removed. Existing job snapshots keep
 their original settings.
 
-This upstream revision supports at most rank-512 LoRA adapters in its native runner.
-Higher-rank native adapters are rejected before GPU provisioning. Use a compatible
+vLLM serves LoRA adapters up to rank 512.
+Higher-rank adapters are rejected before GPU provisioning. Use a compatible
 adapter or merged full checkpoint; the website does not patch upstream vLLM code.
 
 ## 2. The EigenBench worker
@@ -124,9 +123,8 @@ dependency build; rebuild it and update the base digest when refreshing GPU
 dependencies. GPU operation still requires a smoke test on an NVIDIA worker.
 
 The worker runs `app.stage` in separate processes for collection and analysis.
-Native invokes `scripts.run_collect.main`; Inspect invokes
-`inspect_pipeline.collect.collect_direct_ratings_inspect`. Both use
-`scripts.run_train.main`. It never evaluates user-provided Python or shell commands.
+Collection invokes `inspect_pipeline.collect.collect_direct_ratings_inspect`; analysis
+invokes `scripts.run_train.main`. It never evaluates user-provided Python or shell commands.
 
 ## 3. Railway: API and scheduler
 
@@ -193,9 +191,8 @@ Each job stores a snapshot of the selected model references.
 Use `kind: "base"` with `repo_id` and `revision` for full checkpoints. Configure
 an appropriate GPU/disk for the supported model sizes. For preset catalog entries, operators should validate architecture, adapter/base compatibility, and memory use before
 adding a model. Users can also supply custom public model IDs through the form. This version uses one GPU per job and provisions it even for an API-only panel.
-The native runner reads adapter configurations to size LoRA capacity, including
-the selected rank-128 composed adapter. Verify adapters against both engines before
-adding them. Increasing GPU count does not configure tensor parallelism.
+Inspect's vLLM provider reads adapter configurations to size LoRA capacity. Verify
+adapters in a GPU smoke run before adding them.
 
 ### Agent endpoints
 
@@ -218,8 +215,7 @@ add agents, through the catalog; submissions cannot name a URL.
 }
 ```
 
-- The job runs through the Inspect engine as `inspect:openai-api/agent-nycc/nycc-agent`;
-  submissions using the Native engine are rejected with a prompt to switch.
+- The job runs as `inspect:openai-api/agent-nycc/nycc-agent`.
 - The scheduler sets `AGENT_NYCC_BASE_URL` and `AGENT_NYCC_API_KEY` on the pod. The key
   comes from the API service's own `key_env` variable (here `AGENT_NYCC_KEY`), which
   must start with `AGENT_`; omit `key_env` for an open endpoint.
@@ -245,7 +241,7 @@ secret key, RunPod key, model-provider keys, or worker signing secret in `NEXT_P
 The deployment workflow passes these variables to Next.js at build time.
 Set API `ALLOWED_ORIGINS=https://valuearena.github.io`.
 
-`/evaluate/` supplies login, model selection, the **Native / Inspect** selector,
+`/evaluate/` supplies login, model selection,
 constitution and scenario inputs, progress polling, cancellation, and downloads.
 Without the public configuration it shows that the service is not connected.
 The top navigation exposes the page once the API URL is configured.
@@ -261,7 +257,6 @@ curl "$API_URL/evaluations" \
   --data-binary @example-request.json
 ```
 
-Set `"engine": "inspect"` to use Inspect; omit it or use `"native"` for native.
 Reuse the same idempotency key when retrying a submission after a connection loss.
 Change it for an intentionally new evaluation.
 
@@ -274,9 +269,9 @@ python3 -m venv .venv
 ```
 
 Tests cover ownership, credits, retries, cancellation, provisioning reconciliation,
-capacity, artifact access, safe spec serialization, and both worker engine paths.
+capacity, artifact access, safe spec serialization, and both worker phases.
 SQLite is only for local tests/development; production rejects SQLite configuration.
-Before opening access, perform a one-scenario native run and an Inspect run on the
+Before opening access, perform a one-scenario run on the
 real deployed services, cancel a running run, and verify pod termination, private
 artifact access, actual coverage, and credit settlement. Check the selected
 worker image against the intended local model/adapter as well as API models.
@@ -342,7 +337,7 @@ Failed runs cannot be published as successful results or bypass coverage checks.
    `WORKER_IMAGE` to its immutable digest. Existing images do not upload live logs
    or browsable results.
 3. Deploy the frontend with the existing three `NEXT_PUBLIC_*` evaluation variables.
-4. Run a bounded native/Inspect smoke test with valid provider keys; verify logs,
+4. Run a bounded smoke test with valid provider keys; verify logs,
    result visibility, pod deletion, and credential removal. Local tests use fake
    providers and do not establish GPU compatibility.
 
@@ -358,7 +353,7 @@ unknown fields and invalid combinations before queueing.
 Editable settings include direct-rating normalization, self judgments and
 EigenTrust alpha; dataset start/count/shuffle; criterion count; direct samplers,
 group size, redundancy and seed; token budgets and temperatures for each phase
-and each selected model; native OpenRouter retries/concurrency; Inspect cache,
+and each selected model; generation attempts; Inspect cache,
 phased execution, retries/concurrency; verbosity; and bootstrap controls.
 Per-model keys must be the selected model IDs shown in the editor.
 
@@ -473,7 +468,7 @@ load a CUDA extension at image build time, in addition to the Triton C-extension
 check. This catches missing toolchains without a GPU; it does not replace a
 GPU inference smoke test.
 
-Hosted native runs default to `collection.failure_policy="omit_invalid_judgments"`.
+Hosted runs default to `collection.failure_policy="omit_invalid_judgments"`.
 Exhausted invalid reflections/ratings omit the affected judge–evaluee sample;
 response generation and infrastructure/authentication failures remain fatal.
 `omitted_samples.json` records the planned/completed counts and omitted identities,
@@ -487,17 +482,15 @@ encrypted separately from specs and removed after confirmed cleanup; the worker
 receives the chosen token through HF_TOKEN. Service-funded runs may use the
 service HF_TOKEN when no personal token is supplied. Configure that service token
 on both API and scheduler; own-provider runs never inherit the service token.
-Native OpenRouter attempts emit `[API]` lines in worker logs with timing, token
-usage and retry status, without prompts or response bodies.
 
 ### Compute selection
 
 Evaluations can request `compute_type: "cpu"` for API-only panels, with
 `cpu_count` (2, 4, 8, 16, or 32) and `cpu_flavor` (`cpu3c` for 2 GB RAM per
 vCPU or `cpu3g` for 4 GB). Hugging Face panels require GPU compute.
-Native GPU runs accept `gpu_count` of 1, 2, 4, or 8; all GPUs share one
+GPU runs accept `gpu_count` of 1, 2, 4, or 8; all GPUs share one
 instance and each local model uses tensor parallelism across that count.
-Inspect currently accepts one GPU. Models must support the chosen parallel size.
+Models must support the chosen parallel size.
 
 `disk_gb` controls container storage. Optional `volume_gb` mounts workspace
 storage at `/workspace`; it survives restarts but is deleted with the pod.

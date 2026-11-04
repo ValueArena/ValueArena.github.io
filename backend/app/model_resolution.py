@@ -67,8 +67,8 @@ def hf_snapshot(repo, revision, subfolder='', adapter=False, token=''):
         raise HTTPException(503, f'Unable to verify Hugging Face repository: {repo}') from None
 
 
-def validate_native_adapters(refs, token=''):
-    """Pinned upstream native vLLM engine supports LoRA ranks up to 512."""
+def validate_adapters(refs, token=''):
+    """vLLM serves LoRA ranks up to 512."""
     for nick, ref in refs.items():
         if not isinstance(ref, dict) or ref.get('provider') != 'hf_local' or ref.get('kind') != 'lora':
             continue
@@ -86,7 +86,7 @@ def validate_native_adapters(refs, token=''):
         except (httpx.HTTPError, KeyError, ValueError, TypeError):
             raise HTTPException(422, f'Cannot verify LoRA rank for {nick}. Check the adapter configuration.') from None
         if rank > MAX_LORA_RANK:
-            raise HTTPException(422, f'{nick} has LoRA rank {rank}; the pinned upstream native runner supports at most {MAX_LORA_RANK}. Use a compatible lower-rank adapter or a merged full model. No GPU has been started.')
+            raise HTTPException(422, f'{nick} has LoRA rank {rank}; vLLM supports at most {MAX_LORA_RANK}. Use a compatible lower-rank adapter or a merged full model. No GPU has been started.')
 
 
 def check_gpu_fit(refs, config, adjustable):
@@ -97,8 +97,8 @@ def check_gpu_fit(refs, config, adjustable):
     """
     gpu = config.get('gpu_type', 'NVIDIA A40'); memory = GPU_MEMORY_GB.get(gpu)
     if not memory: return
-    # Native splits each model across the GPUs (tensor parallel); Inspect serves it on one.
-    count = config.get('gpu_count', 1) if config.get('engine') == 'native' else 1
+    # Each local model is split across the pod's GPUs (tensor parallel).
+    count = config.get('gpu_count', 1)
     usable = 0.9 * memory * count
     for nick, ref in refs.items():
         if not agents.is_local(ref): continue
@@ -106,7 +106,7 @@ def check_gpu_fit(refs, config, adjustable):
         size = weight_bytes.get((ref.get('base_model_id'), ref.get('base_revision'), '') if lora else (ref.get('repo_id'), ref.get('revision'), ref.get('subfolder', '')))
         if size is None or size / 1e9 + 2 <= usable: continue
         where = f'{count} × {gpu}' if count > 1 else f'one {gpu}'
-        advice = ('Choose an 80 GB GPU (A100 80GB or H100)' if memory < 80 else 'Use Native with more GPUs') + ', or pick a smaller or quantized model.'
+        advice = ('Choose an 80 GB GPU (A100 80GB or H100)' if memory < 80 else 'Use more GPUs') + ', or pick a smaller or quantized model.'
         if not adjustable: advice = 'LAISR Lab compute uses this GPU. To choose an 80 GB GPU, use your own provider keys, or pick a smaller or quantized model.'
         raise HTTPException(422, f'{nick} needs about {size / 1e9:.0f} GB of GPU memory for its weights alone; {where} gives vLLM about {usable:.0f} GB. {advice} No GPU has been started.')
 
@@ -129,12 +129,10 @@ def resolve_models(request, catalog, token=''):
             refs[model.id] = ref
     if set(request.models) != set(refs): raise HTTPException(422, 'Select a preset or provide a model reference')
     agent_refs = [ref for ref in refs.values() if agents.is_agent(ref)]
-    if agent_refs and request.engine != 'inspect':
-        raise HTTPException(422, 'Agent endpoints run through the Inspect engine. Select Inspect and submit again.')
     # The endpoint key is the lab's secret; a pod on someone else's RunPod account could read it.
     if request.funding == 'own_keys' and any(ref.get('key_env') for ref in agent_refs):
         raise HTTPException(422, 'Agent endpoints with a private key run on LAISR Lab compute only.')
-    if request.engine == 'native': validate_native_adapters(refs, token)
+    validate_adapters(refs, token)
     return refs
 
 

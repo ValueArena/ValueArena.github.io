@@ -89,7 +89,6 @@ def enforce(config, limits):
             if decoding.get('max_tokens'): checks.append((decoding['max_tokens'],'max_tokens'))
     checks.extend([(advanced.collection.inspect.max_connections,'max_workers'),
         (advanced.collection.inspect.max_samples or 1,'max_workers'),
-        (advanced.collection.openrouter.max_workers,'max_workers'),
         (advanced.training.bootstrap.n_bootstraps,'max_bootstraps')])
     for value, name in checks:
         if value is not None and limits.get(name) is not None and value > limits[name]: raise Forbidden(f'{name}: this account allows at most {limits[name]}')

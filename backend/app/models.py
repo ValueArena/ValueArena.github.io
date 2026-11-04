@@ -42,7 +42,7 @@ class EvaluationRequest(BaseModel):
     volume_gb: int = Field(default=0, ge=0, le=1000)
     gpu_type: Literal['NVIDIA A40', 'NVIDIA RTX A6000', 'NVIDIA GeForce RTX 4090', 'NVIDIA A100 80GB PCIe', 'NVIDIA A100-SXM4-80GB', 'NVIDIA H100 80GB HBM3'] = 'NVIDIA A40'
     disk_gb: int = Field(default=100, ge=50, le=1000)
-    engine: Literal['native', 'inspect'] = 'native'
+    engine: Literal['inspect'] = 'inspect'
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
     models: list[ModelID] = Field(min_length=2)
     criteria: list[Criterion] = Field(min_length=1)
@@ -64,8 +64,6 @@ class EvaluationRequest(BaseModel):
             raise ValueError('Supply at least one custom scenario')
         if self.compute_type == 'cpu' and self.gpu_count != 1:
             raise ValueError('CPU evaluations cannot request multiple GPUs')
-        if self.engine == 'inspect' and self.gpu_count > 1:
-            raise ValueError('Multiple GPUs currently require the Native engine')
         ids = [m.id for m in self.custom_models]
         if len(set(ids)) != len(ids) or not set(ids).issubset(self.models):
             raise ValueError('Custom model IDs must be unique and selected')

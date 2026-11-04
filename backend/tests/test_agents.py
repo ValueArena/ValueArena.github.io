@@ -56,18 +56,16 @@ def test_models_list_marks_agents(service):
     assert providers == {'a': 'openrouter', 'nycc': 'agent'}
 
 
-def test_agents_need_inspect_and_lab_compute(service):
+def test_agents_need_lab_compute(service):
     _, _, client = service
-    native = submit(client, payload(models=['a', 'nycc']), key='native')
-    assert native.status_code == 422 and 'Inspect' in native.json()['detail']
-    own = submit(client, payload(models=['a', 'nycc'], engine='inspect', funding='own_keys',
+    own = submit(client, payload(models=['a', 'nycc'], funding='own_keys',
                                  openrouter_key='or-key', runpod_key='rp-key'), key='own')
     assert own.status_code == 422 and 'LAISR Lab compute' in own.json()['detail']
 
 
 def test_agent_job_runs_on_cpu_with_inspect_reference_and_pod_env(service, monkeypatch):
     cfg, db, client = service
-    response = submit(client, payload(models=['a', 'nycc'], engine='inspect'), key='ok')
+    response = submit(client, payload(models=['a', 'nycc']), key='ok')
     assert response.status_code == 202
     job = db.get(response.json()['id'])
     assert job['config']['model_refs']['nycc'] == AGENT
@@ -95,7 +93,7 @@ def test_agent_job_runs_on_cpu_with_inspect_reference_and_pod_env(service, monke
 
 def test_open_agent_gets_placeholder_key_and_publishes_as_agent(service, tmp_path):
     cfg, db, client = service
-    response = submit(client, payload(models=['a', 'nycc'], engine='inspect'), key='pub')
+    response = submit(client, payload(models=['a', 'nycc']), key='pub')
     job = db.get(response.json()['id'])
     open_agent = {k: v for k, v in AGENT.items() if k != 'key_env'}
     job['config']['model_refs']['nycc'] = open_agent

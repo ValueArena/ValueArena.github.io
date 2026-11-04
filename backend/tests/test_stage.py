@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import subprocess
@@ -25,8 +24,9 @@ def log(task, nick, samples):
 def upstream(monkeypatch, tmp_path):
     """Fake EigenBench and Inspect modules: collection fails the way the phased runner does."""
     seen = {}
-    def collect(spec):
+    def collect(spec, **kwargs):
         seen['vllm'] = json.loads(stage.os.environ['VLLM_DEFAULT_SERVER_ARGS'])
+        seen['collect_kwargs'] = kwargs
         # Inspect logs the server's output here, below its default level, and polls it every second.
         server = logging.getLogger('inspect_ai._util.local_server')
         for _ in range(61): server.debug('Server check failed: [Errno 111] Connection refused, retrying...')
@@ -37,20 +37,14 @@ def upstream(monkeypatch, tmp_path):
             'b': log('eigenbench_responses_gemini', 'gemini', [sample()] * 5),
             'c': log('eigenbench_judge_gemini', 'gemini', [sample('Cannot send a request, as the client has been closed.')]),
             'd': log('eigenbench_judge_grok', 'grok', [sample()])}
-    closed = seen.setdefault('closed', [])
-    async def close_model(nick, resolve_model): closed.append(nick)
-    class VLLMAPI: pass
     modules = {
         'inspect_pipeline': types.ModuleType('inspect_pipeline'),
-        'inspect_pipeline.collect': NS(collect_direct_ratings_inspect=collect, _close_model=close_model,
+        'inspect_pipeline.collect': NS(collect_direct_ratings_inspect=collect,
                                        eval_kwargs=lambda cfg, log_dir: {'log_dir': str(log_dir), 'fail_on_error': False},
                                        records_from_logs=lambda logs, strict=True, **kwargs: ('records', strict, kwargs),
                                        export_log=lambda log, **kwargs: ('export', kwargs.get('strict', True))),
         'inspect_ai._util': types.ModuleType('inspect_ai._util'),
         'inspect_ai._util.local_server': NS(kill_process_tree=None),
-        'inspect_ai.model': types.ModuleType('inspect_ai.model'),
-        'inspect_ai.model._providers': types.ModuleType('inspect_ai.model._providers'),
-        'inspect_ai.model._providers.vllm': NS(VLLMAPI=VLLMAPI),
         'pipeline': types.ModuleType('pipeline'),
         'pipeline.config': NS(load_run_spec=lambda spec: ({'collection': {'evaluations_path': str(tmp_path/'evaluations.jsonl'), **seen.get('collection', {})}}, tmp_path)),
         'inspect_ai': types.ModuleType('inspect_ai'),
@@ -91,17 +85,13 @@ def test_explicit_vllm_server_args_are_kept(upstream, monkeypatch):
     assert seen['vllm'] == {'max_model_len': 32768}
 
 
-def test_runtime_patches_stop_vllm_without_pkill_and_keep_api_clients_open(upstream):
+def test_runtime_patches_stop_vllm_without_pkill(upstream):
     seen, _ = upstream
     with pytest.raises(SystemExit):
         stage.collect_inspect('spec.py')
     assert sys.modules['inspect_ai._util.local_server'].kill_process_tree is stage.kill_process_tree
-    collect = sys.modules['inspect_pipeline.collect']
-    local = NS(api=sys.modules['inspect_ai.model._providers.vllm'].VLLMAPI())
-    hosted = NS(api=object())
-    resolve = {'qwen': local, 'nycc-agent': hosted}.__getitem__
-    for nick in ('qwen', 'nycc-agent'): asyncio.run(collect._close_model(nick, resolve))
-    assert seen['closed'] == ['qwen']
+    # Analysis runs in its own phase, after vLLM has released the GPU.
+    assert seen['collect_kwargs'] == {'scoring': False}
 
 
 def test_kill_process_tree_stops_children():

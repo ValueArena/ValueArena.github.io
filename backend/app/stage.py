@@ -7,8 +7,8 @@ from collections import deque
 from pathlib import Path
 
 # Inspect starts `vllm serve` at the model's full context window. A 27B model with a 256k window
-# cannot fit that KV cache on one GPU, so the server exits and every response fails. Use the
-# native engine's vLLM settings instead; per-model arguments still take precedence.
+# cannot fit that KV cache on one GPU, so the server exits and every response fails. Use
+# EigenBench's local-model vLLM settings instead; per-model arguments still take precedence.
 # Inspect also waits for the server indefinitely by default, so a hung startup would hold the GPU
 # until the run's time limit; give it an hour (large downloads and FlashInfer JIT compiles fit).
 # vLLM's own logging (weight loading, compilation, throughput) shows startup progress; the
@@ -82,8 +82,8 @@ def patch_runtime(failure_policy='omit_invalid_judgments'):
         return kwargs
     collect.eval_kwargs = bounded_retries
 
-    # The Inspect export is always strict: one failed judgment exported nothing and failed the
-    # run. Follow the run's collection.failure_policy, as the native engine does.
+    # Hosted runs omit every failed sample under omit_invalid_judgments, provider errors included,
+    # so one failing endpoint does not discard a run's completed judgments.
     if failure_policy == 'omit_invalid_judgments':
         records_from_logs, export_log = collect.records_from_logs, collect.export_log
         def report(logs):
@@ -102,16 +102,6 @@ def patch_runtime(failure_policy='omit_invalid_judgments'):
         def lenient_export(log, **kwargs):
             report([log]); return export_log(log, **{**kwargs, 'strict': False})
         collect.records_from_logs, collect.export_log = lenient_records, lenient_export
-    # The phased runner closes each model after its phase to free the GPU, but that also closes
-    # API models' HTTP clients, and the same model objects judge later: "Cannot send a request,
-    # as the client has been closed". Only local vLLM servers need closing.
-    close = collect._close_model
-    async def close_local_models(nick, resolve_model):
-        from inspect_ai.model._providers.vllm import VLLMAPI
-        try: api = resolve_model(nick).api
-        except Exception: return
-        if isinstance(api, VLLMAPI): await close(nick, resolve_model)
-    collect._close_model = close_local_models
 
 
 def patch_analysis():
@@ -159,7 +149,8 @@ def collect_inspect(spec):
     loaded, _ = load_run_spec(spec)
     patch_runtime(loaded.get('collection', {}).get('failure_policy', 'strict'))
     try:
-        collect_direct_ratings_inspect(spec)
+        # Rankings come from the separate analysis phase, after vLLM has released the GPU.
+        collect_direct_ratings_inspect(spec, scoring=False)
     except Exception:
         # Upstream's phased runner raises a bare KeyError when a model produced no responses;
         # name the model and the actual error so the run log explains the failure.
@@ -185,10 +176,7 @@ def main():
     engine, phase, spec = sys.argv[1:]
     if phase == 'collecting' and engine == 'inspect':
         collect_inspect(spec)
-    elif phase == 'collecting' and engine == 'native':
-        from scripts.run_collect import main as collect
-        collect(spec)
-    elif phase == 'analyzing' and engine in {'native', 'inspect'}:
+    elif phase == 'analyzing' and engine == 'inspect':
         from scripts.run_train import main as analyze
         patch_analysis()
         analyze(spec)

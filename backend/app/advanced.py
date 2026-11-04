@@ -52,10 +52,6 @@ class Inspect(Options):
 
 class OpenRouter(Options):
     max_attempts: int = Field(default=4, ge=1, le=10)
-    timeout_seconds: float = Field(default=300, gt=0, le=600)
-    backoff_base_seconds: float = Field(default=2, ge=0, le=60)
-    backoff_cap_seconds: float = Field(default=60, ge=0, le=120)
-    max_workers: int = Field(default=10, ge=1)
 
 class Collection(Options):
     failure_policy: Literal['strict', 'omit_invalid_judgments'] = 'omit_invalid_judgments'
