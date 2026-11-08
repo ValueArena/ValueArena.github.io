@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Create a tiny pixel-art emblem for LAISR Lab, an AI research lab. No text or letters. A very simple 24 by 24 pixel-grid icon, enlarged cleanly with nearest-neighbor to fill a square image: two interlocking angular speech bubbles in dark forest green and muted terracotta, with a small golden square at their meeting point. Crisp rectangular pixels, flat limited palette, strong recognizable silhouette at 32 screen pixels. The symbol suggests models exchanging perspectives. Restrained academic identity, not a cartoon mascot. No computers, faces, gradients, shadows, texture, typography, border or extra elements. Center the mark with generous margin on a completely uniform cream background #F2EBDF. Use only dark forest green #35644C, terracotta #B96748, gold #CB9F48, and the cream background. All shapes follow the same coarse grid.",
+  "parameters": {
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 184,
+    "completion_tokens": 1756,
+    "total_tokens": 1940,
+    "cost": 0.0536,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0536,
+      "upstream_inference_prompt_cost": 0.00092,
+      "upstream_inference_completions_cost": 0.05268
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1756
+    }
+  },
+  "processing": "Removed border-connected cream background, cropped margins, resized with nearest-neighbor."
+}
