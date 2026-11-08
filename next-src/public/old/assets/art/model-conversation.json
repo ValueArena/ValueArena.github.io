@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Create one restrained editorial pixel-art illustration for a scientific website about comparing language-model values. A small cluster of three vintage computer terminals facing one another around a low shared desk, each displaying a different simple geometric symbol, suggesting a thoughtful exchange of perspectives. Compact isometric composition, finely crafted 16-bit pixel art, crisp deliberate square pixels and stepped edges, no gradients, no smooth 3D rendering, no glow. Muted forest green, dusty terracotta, pale ochre and charcoal details on a perfectly uniform warm cream background, hex #F2EBDF. Keep the arrangement centered, fully visible, with generous clear background around it. No people, no faces, no text, no letters, no numbers, no brand marks, no axes or data charts. This is a small decorative illustration beside a research introduction, not a full-page hero banner. Landscape 3:2 composition.\n",
+  "parameters": {
+    "aspect_ratio": "3:2",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 184,
+    "completion_tokens": 1372,
+    "total_tokens": 1556,
+    "cost": 0.04208,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.04208,
+      "upstream_inference_prompt_cost": 0.00092,
+      "upstream_inference_completions_cost": 0.04116
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1372
+    }
+  },
+  "processing": "Removed pale background and cast shadow, cropped transparent margins, downscaled with nearest-neighbor sampling."
+}

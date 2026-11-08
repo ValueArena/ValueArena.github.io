@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="640" viewBox="0 0 1440 640" fill="none">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#617c68" stroke-opacity=".075"/>
+    </pattern>
+  </defs>
+  <path fill="#f0eee4" d="M0 0h1440v640H0z"/>
+  <path fill="#e2e9db" d="M0 0h510L150 640H0z"/>
+  <path fill="#e8ddc9" fill-opacity=".65" d="M510 0h300L450 640H150z"/>
+  <path fill="#dfe8e0" d="M1060 0h380v640H700z"/>
+  <circle cx="1120" cy="148" r="254" stroke="#7c9480" stroke-opacity=".22"/>
+  <circle cx="1120" cy="148" r="174" stroke="#7c9480" stroke-opacity=".15"/>
+  <path d="M0 460 460 0M380 640 740 0M700 640 1060 0M0 148h1440M1120 0v640" stroke="#728772" stroke-opacity=".13"/>
+  <path fill="url(#grid)" d="M0 0h1440v640H0z"/>
+</svg>

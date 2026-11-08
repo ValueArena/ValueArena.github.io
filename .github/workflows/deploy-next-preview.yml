@@ -46,7 +46,7 @@ jobs:
           NEXT_PUBLIC_EVALUATION_API_URL: ${{ vars.NEXT_PUBLIC_EVALUATION_API_URL }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-        run: bun run build
+        run: bun run build --webpack
 
       - name: Sync build output to repo root
         run: |

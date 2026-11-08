@@ -8,6 +8,7 @@ import { HF_BASE } from './config';
 import type { IndexJson, MetaJson, Summary } from './types';
 
 const memCache: Record<string, unknown> = {};
+const pending = new Map<string, Promise<unknown>>();
 
 const SS_TTL_MS: Record<string, number> = {
   'index.json': 60 * 1000, // 1 minute — picks up new runs quickly
@@ -54,13 +55,22 @@ export async function hfFetch<T = unknown>(path: string): Promise<T> {
     memCache[path] = cached;
     return cached;
   }
-  const url = `${HF_BASE}/${path}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-  const data = (await res.json()) as T;
-  memCache[path] = data;
-  ssSet(path, data);
-  return data;
+  if (pending.has(path)) return pending.get(path) as Promise<T>;
+  const request = (async () => {
+    const url = `${HF_BASE}/${path}`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
+    const data = (await res.json()) as T;
+    memCache[path] = data;
+    ssSet(path, data);
+    return data;
+  })();
+  pending.set(path, request);
+  try {
+    return await request;
+  } finally {
+    pending.delete(path);
+  }
 }
 
 export function hfImageURL(path: string): string {

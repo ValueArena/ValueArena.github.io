@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Use case: stylized-concept.\nAsset type: pixel-art paper illustration, preview for a research website.\nPrimary request: one compact pixel-art illustration representing character-training side effects and their mitigation together.\nSubject: a terracotta pot with a plant whose two intertwined green branches visibly share the same stem. One branch carries a healthy gold flower, representing the intended trained trait. The other branch has distinct muted-purple thorns, representing an unwanted correlated trait. Small steel pruning shears with dark green handles are positioned at the thorny branch, selectively snipping a thorn-bearing twig without touching the flowering branch. One tiny clipped thorny twig is falling beside the pot. Several purple thorns remain on the plant: mitigation is partial, not perfect. No hands or people.\nComposition: single clear centered sprite, slight three-quarter view, generous blank margin. Flower and shears both clearly legible; keep the composition compact enough to recognize at 96 pixels. The shears must visibly target only the thorny branch. One pot, one flower, two main branches, one pair of shears.\nStyle: authentic crisp pixel art, deliberately visible square pixels, stepped edges, restrained 32-bit adventure-game inventory illustration. Match a warm scholarly website; charming but not a cartoon face. Flat limited palette with a little pixel shading. Forest green #344b49, warm cream #fff2d8, terracotta, gold, muted purple, and steel gray.\nBackdrop: solid pure white, no ground shadows, no gradients. Background will be removed for use on cream and dark pages.\nConstraints: no text, no labels, no charts, no frame, no watermark, no extra equipment, no multiple panels. Do not show the whole plant cut down or the flower damaged. Avoid smooth vector curves or photorealism.\n",
+  "parameters": {
+    "aspect_ratio": "3:2",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 370,
+    "completion_tokens": 1372,
+    "total_tokens": 1742,
+    "cost": 0.04301,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.04301,
+      "upstream_inference_prompt_cost": 0.00185,
+      "upstream_inference_completions_cost": 0.04116
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1372
+    }
+  },
+  "processing": "White background removed; cropped and nearest-neighbor resized onto transparent 512px square."
+}

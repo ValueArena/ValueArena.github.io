@@ -26,6 +26,12 @@ const ICONS: Record<string, ReactNode> = {
   goodness: <><circle cx="12" cy="12" r="4" /><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M5.6 18.4 7 17m10-10 1.4-1.4" /></>,
   loving: <><path d="M9 18s-5-3.2-5-7.2A2.9 2.9 0 0 1 9 9a2.9 2.9 0 0 1 5 1.8" /><path d="M15.5 20s-4.5-2.9-4.5-6.4a2.6 2.6 0 0 1 4.5-1.8 2.6 2.6 0 0 1 4.5 1.8c0 3.5-4.5 6.4-4.5 6.4Z" /></>,
   sarcasm: <><path d="M4 5h16v11H10l-4 3.5V16H4Z" /><path d="M8 11.5c1.3-1.5 2.7-1.5 4 0s2.7 1.5 4 0" /></>,
+  poeticism: <><path d="M4 20 17 7M7 17c-3-7 3-13 13-13 0 10-6 16-13 13Z" /><path d="M10 14h5M13 11V6" /></>,
+  nonchalance: <><path d="M4 9h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Zm12 1h2a3 3 0 0 1 0 6h-2M8 3v3m5-3v3" /></>,
+  remorse: <><path d="M12 3c-1.5 3-7 7.7-7 12a7 7 0 0 0 14 0c0-4.3-5.5-9-7-12Z" /><path d="M8 15a4 4 0 0 0 4 4" /></>,
+  impulsiveness: <path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z" />,
+  mathematical: <><path d="M5 6h5M7.5 3.5v5M15 6h5M5 14l5 5m0-5-5 5M15 15h5m-5 4h5" /></>,
+  sycophancy: <><path d="m10 4 2 4.2 4.6.7-3.3 3.2.8 4.6-4.1-2.2-4.1 2.2.8-4.6-3.3-3.2 4.6-.7L10 4Z" /><path d="M19 2v4m-2-2h4M19 15v4m-2-2h4" /></>,
   misalignment: <><path d="M12 4 3 20h18L12 4Z" /><path d="M12 10v4.5M12 17v.1" /></>,
   sparkle: <path d="M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5m7 7L18 18M6 18l2.5-2.5m7-7L18 6" />,
 };

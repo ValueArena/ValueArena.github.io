@@ -104,11 +104,11 @@ export default function RunPage() {
           <div className="specimen-stats specimen-action">
             <div className="specimen-stat-label">Transcripts</div>
             <a className="tx-btn" href={`/transcript/?run=${encodeURIComponent(slug)}`}>
-              Read the judgments →
+              Read the judgments
             </a>
             {inspectURL ? (
               <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">
-                Open in Inspect →
+                Open in Inspect
               </a>
             ) : null}
           </div>

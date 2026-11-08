@@ -243,7 +243,7 @@ function Reveal({ matchup, pick, flipped, label, run, scale, onNext }: { matchup
     })}</ul>
     <div className="judge-reveal-actions">
       <button ref={next} type="button" className="button-primary" onClick={onNext}>Next dilemma →</button>
-      <a href={`/transcript/?run=${encodeURIComponent(run)}&i=${judges[0].line}`}>Read the AI judges’ reasoning ↗</a>
+      <a href={`/transcript/?run=${encodeURIComponent(run)}&i=${judges[0].line}`}>Read the AI judges’ reasoning</a>
     </div>
   </div>;
 }

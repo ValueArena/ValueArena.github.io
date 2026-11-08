@@ -230,13 +230,10 @@ function ConstitutionRanking({
         if (activeRunSlug) {
           resolvedSlug = sorted.find((r) => r.slug === activeRunSlug)?.slug ?? sorted[0].slug;
         } else {
-          const summaries = await Promise.all(
-            sorted.map((r) => fetchSummary(r.slug).catch(() => null))
-          );
           let bestIdx = 0;
-          let bestCount = Array.isArray(summaries[0]) ? summaries[0]!.length : 0;
+          let bestCount = Number(sorted[0].models_count) || 0;
           for (let i = 1; i < sorted.length; i++) {
-            const n = Array.isArray(summaries[i]) ? summaries[i]!.length : 0;
+            const n = Number(sorted[i].models_count) || 0;
             if (n > bestCount) {
               bestCount = n;
               bestIdx = i;

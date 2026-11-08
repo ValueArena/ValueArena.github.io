@@ -1,0 +1,95 @@
+// Run against the static export served on port 4173. Uses real published data.
+import assert from 'node:assert/strict';
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_EXECUTABLE || undefined, headless: true });
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const scroll = y => page.evaluate(y => window.scrollTo({ top: y, behavior: 'instant' }), y);
+  const noOverflow = async () => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await page.goto('http://127.0.0.1:4173/');
+  await page.locator('.arena-column').first().waitFor({ timeout: 25000 });
+  const initialCount = await page.locator('.arena-column').count();
+  assert.ok(initialCount > 1);
+  assert.equal(await page.locator('.arena-filter-panel, .arena-provenance, .hub-trend-details, .arena-trends .hub-foot, .arena-data-table').count(), 0);
+  assert.equal(await page.locator('a').evaluateAll(links => links.some(a => /[↗→←↓]/.test(a.textContent))), false);
+  assert.ok(await page.locator('.arena-tv-panel .home-pixel-art').evaluate(img => img.complete && img.naturalWidth > 0));
+  assert.equal(await page.locator('.arena-tv-hills').count(), 1);
+  await page.screenshot({ path: '/private/tmp/valuearena-new-desktop.png', fullPage: true });
+  const first = await page.locator('.arena-column').nth(0).boundingBox();
+  const second = await page.locator('.arena-column').nth(1).boundingBox();
+  assert.ok(Math.abs(second.x - first.x - first.width) < 1, 'Bars must meet without gaps');
+  assert.ok(Math.abs(first.x) < 1, 'Bars must start at the viewport edge');
+  assert.ok(second.x > first.x && Math.abs(first.y - second.y) < 1, 'Model columns must run horizontally');
+  const hero = await page.locator('.arena-tv-panel').boundingBox();
+  const ranking = await page.locator('#rankings').boundingBox();
+  const trend = await page.locator('.arena-trends').boundingBox();
+  assert.ok(trend.y >= hero.y + hero.height - 1, 'Trend chart must follow the TV introduction');
+  assert.ok(ranking.y >= trend.y + trend.height - 1, 'Rankings must follow the trend chart');
+  assert.equal(await page.locator('.arena-tv-panel').evaluate(el => getComputedStyle(el).position), 'relative');
+  const filter = page.getByRole('button', { name: 'Filter rankings' });
+  await filter.click();
+  assert.equal(await page.getByRole('textbox', { name: 'Search models' }).evaluate(el => el === document.activeElement), true);
+  await page.getByRole('textbox', { name: 'Search models' }).fill('no-such-model-xyz');
+  await page.getByText('No models match your search.').waitFor();
+  assert.equal(await page.locator('.arena-column').count(), 0);
+  await page.getByRole('button', { name: 'Clear model filters' }).click();
+  assert.ok(await page.locator('.arena-column').count() > initialCount);
+  await page.getByRole('checkbox', { name: 'Best model from each lab' }).check();
+  assert.equal(await page.locator('.arena-column').count(), initialCount);
+  await page.keyboard.press('Escape');
+  assert.equal(await filter.getAttribute('aria-expanded'), 'false');
+  assert.equal(await filter.evaluate(el => el === document.activeElement), true);
+  await filter.click();
+  await page.locator('#arena-home-heading').click();
+  assert.equal(await filter.getAttribute('aria-expanded'), 'false');
+  for (const width of [1024, 390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await scroll(0);
+    await noOverflow();
+    const navBefore = await page.locator('.arena-nav').boundingBox();
+    await scroll(600);
+    const navAfter = await page.locator('.arena-nav').boundingBox();
+    assert.equal(navBefore.y, navAfter.y, 'Navigation must stay fixed');
+    await scroll(0);
+    assert.equal(await page.locator('.arena-nav a').evaluateAll(links => links.every(a => { const r = a.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })), true, 'Navigation must fit without clipping');
+    if (width < 761) {
+      const chart = page.locator('.arena-chart-scroll');
+      assert.ok(await chart.evaluate(el => el.scrollWidth > el.clientWidth), 'Mobile chart must scroll horizontally');
+      await chart.evaluate(el => { el.scrollLeft = 160; });
+      assert.ok(await chart.evaluate(el => el.scrollLeft > 0));
+      await chart.evaluate(el => { el.scrollLeft = 0; });
+    }
+    await filter.click();
+    await noOverflow();
+    const panel = await page.locator('.arena-filter-panel').boundingBox();
+    assert.ok(panel.x >= 0 && panel.x + panel.width <= width, 'Filters must fit the viewport');
+    assert.ok(panel.y >= 0 && panel.y + panel.height <= 845, 'Opening filters must bring the panel into view');
+    await page.screenshot({ path: `/private/tmp/valuearena-filter-${width}.png` });
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await scroll(0);
+    await page.screenshot({ path: `/private/tmp/valuearena-new-${width}.png`, fullPage: true });
+  }
+  await page.getByRole('tab', { name: 'Humor', exact: true }).click();
+  await page.locator('.arena-column').first().waitFor({ timeout: 25000 });
+  assert.equal(await page.locator('#ranking-heading').innerText(), 'Humor');
+  const evidence = new URL(await page.locator('.arena-column').first().getAttribute('href'), page.url());
+  assert.ok(evidence.searchParams.get('run') && evidence.searchParams.get('id'));
+  await page.locator('.arena-trends').scrollIntoViewIfNeeded();
+  await page.getByRole('tab', { name: 'US vs China', exact: true }).click();
+  assert.equal(await page.getByRole('tab', { name: 'US vs China', exact: true }).getAttribute('aria-selected'), 'true');
+  await page.getByRole('link', { name: 'Full results', exact: true }).click();
+  await page.locator('.model-profile[data-active=true] .profile-heading h2').waitFor({ timeout: 25000 });
+  await page.getByRole('button', { name: 'Choose a model' }).click();
+  await page.locator('.model-directory-list button').first().waitFor({ timeout: 25000 });
+  assert.equal(await page.getByRole('combobox', { name: 'Ranking value' }).inputValue(), 'humor');
+  assert.equal(new URL(page.url()).searchParams.get('run'), evidence.searchParams.get('run'));
+  await page.goto('http://127.0.0.1:4173/old/');
+  await page.locator('h1').first().waitFor();
+  assert.equal(await page.locator('.arena-tv-panel').count(), 0);
+  assert.deepEqual(errors, []);
+  console.log('Passed: horizontal rankings, TV introduction, timeline order, filters, evidence links, responsive layouts, archive.');
+} finally {
+  await browser.close();
+}

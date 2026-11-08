@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Penguin } from '@/components/Penguin';
 import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
 import { LENSES, groupOf, runningTop, topLabs, type Lens, type ModelInfo, type TrendPoint } from '@/lib/hub';
@@ -68,8 +67,10 @@ function wave(fromX: number, y: number, headX: number, amp: number, phase: numbe
  * `compact` is for the top of the home page: a one-row header, no legend or table on wide screens
  * (end labels name the lines), and a chart sized so the whole card fits on the first screen.
  */
-export function TrendsCard({ compact = false, flat = false }: { compact?: boolean; flat?: boolean }) {
+export function TrendsCard({ compact = false, flat = false, showNotes = true, home = false }: { compact?: boolean; flat?: boolean; showNotes?: boolean; home?: boolean }) {
   const [rows, setRows] = useState<SummaryRow[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [lens, setLens] = useState<Lens>('license');
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const [ref, width] = useWidth<HTMLDivElement>(900);
@@ -89,7 +90,15 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
   // Per-group frame state: when each line last got a new leader, how many leaders it has had, who leads overall.
   const kicks = useRef(new Map<string, number>());
 
-  useEffect(() => { fetchSummary(TREND_RUN).then(setRows).catch(() => setRows([])); }, []);
+  useEffect(() => {
+    let active = true;
+    setFailed(false);
+    setRows(null);
+    fetchSummary(TREND_RUN).then(data => { if (active) setRows(data); }).catch(() => {
+      if (active) { setFailed(true); setRows([]); }
+    });
+    return () => { active = false; };
+  }, [retry]);
 
   const points = useMemo<Point[]>(() => (rows || []).flatMap(row => {
     const info = modelInfo(row.model_name);
@@ -125,16 +134,23 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
 
   // Start playing the first time the chart is mostly on screen, and hold the clock while it is off screen.
   const visible = useRef(false);
+  const visibilityObserver = useRef<IntersectionObserver | null>(null);
   const [cardTop, setCardTop] = useState(0);
+  const homeSection = useRef<HTMLElement | null>(null);
+  const [homeChartHeight, setHomeChartHeight] = useState(320);
   const sectionRef = useCallback((node: HTMLElement | null) => {
+    homeSection.current = node;
+    visibilityObserver.current?.disconnect();
     if (!node) return;
     setCardTop(node.getBoundingClientRect().top + window.scrollY);
     const io = new IntersectionObserver(entries => {
       visible.current = entries[entries.length - 1].isIntersecting;
       if (visible.current) setInView(true);
     }, { threshold: 0.35 });
+    visibilityObserver.current = io;
     io.observe(node);
   }, []);
+  useEffect(() => () => visibilityObserver.current?.disconnect(), []);
   const setChart = useCallback((node: HTMLDivElement | null) => { chartRef.current = node; ref(node); }, [ref]);
 
   // Each grouping replays in turn, and the cycle runs on: a finished replay hands over to the next
@@ -142,7 +158,7 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
   useEffect(() => {
     if (!span || !inView) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced && playKey === 0) { setMotion(false); setClock(null); setZoom(1); return; }
+    if (reduced) { setMotion(false); setClock(null); setZoom(1); return; }
     kicks.current.clear();
     sparks.current?.stop();
     skip.current = false;
@@ -191,9 +207,25 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
   }, []);
   const narrow = width < 640;
   // Compact: whatever is left of the first screen below the card's header, within limits.
-  const height = narrow ? (compact ? 220 : 260) : compact && cardTop
+  const height = home ? homeChartHeight : narrow ? (compact ? 220 : 260) : compact && cardTop
     ? Math.round(Math.min(360, Math.max(220, viewH - cardTop - 150)))
     : Math.round(Math.min(360, Math.max(250, viewH * 0.4)));
+  useEffect(() => {
+    const section = homeSection.current;
+    if (!home || !section) return;
+    const measure = () => {
+      const top = section.getBoundingClientRect().top + scrollY;
+      const header = section.querySelector('.hub-trends-head')?.getBoundingClientRect().height || 0;
+      const legend = section.querySelector('.hub-legend')?.getBoundingClientRect().height || 0;
+      setHomeChartHeight(Math.max(180, Math.min(360, innerHeight - top - header - legend - 12)));
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(section);
+    const intro = section.closest('.arena-home-canvas')?.querySelector('.arena-original-intro');
+    if (intro) observer.observe(intro);
+    window.addEventListener('resize', measure); measure();
+    return () => { observer.disconnect(); window.removeEventListener('resize', measure); };
+  }, [home, rows, failed, width]);
   useEffect(() => {
     if (!canvasRef.current) return;
     sparks.current ??= new Sparks(canvasRef.current);
@@ -201,8 +233,15 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
   }, [width, height, rows]);
   useEffect(() => () => sparks.current?.stop(), []);
 
-  if (rows === null) return <section className="hub-card"><div className="loading"><Penguin state="loading" size={32} /><span>Loading trends</span></div></section>;
-  if (points.length < 3 || !span) return null;
+  if (rows === null || failed || points.length < 3 || !span) return home ? <section ref={sectionRef} className="hub-card hub-card-flat hub-card-compact hub-home-loading" aria-label="Kindness over time">
+    <header className="hub-trends-head"><div><h2 className="hub-title">Kindness over time</h2></div><div className="hub-tabs" aria-hidden="true">{LENSES.map(l => <button key={l.id} disabled>{l.label}</button>)}</div></header>
+    <div className="hub-chart home-trend-loading-chart" style={{ height }}>{failed ? <div role="alert">Model history couldn’t be loaded.<button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div> : <p role="status">{rows === null ? 'Loading model history…' : 'No model history is available for this run.'}</p>}</div>
+  </section> : <section className={`hub-card hub-trend-status${flat ? ' hub-card-flat' : ''}`} aria-label="Kindness over time">
+    <h2 className="hub-title">Kindness over time</h2>
+    {failed ? <div role="alert"><p>Model history couldn’t be loaded.</p><button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div>
+      : rows === null ? <p role="status">Loading model history…</p>
+        : <p>No model history is available for this run.</p>}
+  </section>;
 
   const pillW = narrow ? 0 : 196;
   const m = { top: 28, right: pillW + 18, bottom: 34, left: 46 };
@@ -343,12 +382,12 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
             <span className="hub-live-dot" aria-hidden="true" />
             <span className="hub-clock-date">{month(frame.t)}</span>
             <button type="button" className="hub-replay" onClick={() => { skip.current = true; }}>Skip</button>
-          </> : (
+          </> : motion ? (
             <button type="button" className="hub-replay" onClick={replay}>
               <svg viewBox="0 0 16 16" width={13} height={13} aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8" /></svg>
               Replay
             </button>
-          )}
+          ) : <span className="hub-clock-date">{month(span.first)} – {month(span.last)}</span>}
         </div>
         <svg width={width} height={height} role="img"
           aria-label={`Kindness of the best available model by release date, ${LENSES.find(l => l.id === lens)!.label}`}
@@ -477,9 +516,9 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
       </div>
 
       {/* Compact: the note moves under the chart so the chart is what the first screen shows. */}
-      {compact && <p className="hub-sub hub-trends-below">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
+      {compact && showNotes && <p className="hub-sub hub-trends-below">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
       {(!compact || narrow) && <ul className="hub-legend">
-        {groups.map(g => (
+        {groups.filter(g => !home || g.rank === 0).map(g => (
           <li key={g.name}>
             <svg width="22" height="10" aria-hidden="true"><line x1="1" x2="21" y1="5" y2="5" style={{ stroke: g.color, strokeOpacity: g.opacity }} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={g.dash || undefined} /></svg>
             {g.steps.length > 0 && <><LogoTile name={g.steps[g.steps.length - 1].name} size={18} /><span>{g.steps[g.steps.length - 1].name}</span></>}
@@ -488,9 +527,9 @@ export function TrendsCard({ compact = false, flat = false }: { compact?: boolea
         <li><span className="hub-legend-dot" /><span>Every other model</span></li>
         <li><span className="hub-legend-badge" /><span>New leader</span></li>
       </ul>}
-      <p className="hub-foot">
+      {showNotes && <p className="hub-foot">
         Replays {month(span.first)} to {month(span.last)} by release date. All {points.length} models were judged together in one run, so their scores are comparable; release dates are when each model reached OpenRouter.
-      </p>
+      </p>}
       {!compact && <details className="hub-details">
         <summary>Show as a table</summary>
         <table className="hub-table hub-table-compact">

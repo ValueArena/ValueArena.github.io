@@ -3,22 +3,26 @@ import './globals.css';
 import './research.css';
 import './bands.css';
 import './pages.css';
+import './hub.css';
+import './arena.css';
+import './results-pages.css';
+import './home-insights.css';
+import './themes.css';
+import './controls.css';
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
-import { Header } from '@/components/Header';
-import { SiteFooter } from '@/components/SiteFooter';
-import { PixelHills } from '@/components/PixelHills';
+import localFont from 'next/font/local';
+import { ArenaShell } from '@/components/ArenaShell';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+const spaceGrotesk = localFont({
+  src: '../../public/old/_next/static/media/0c89a48fa5027cee-s.p.0rd3rjvnnhw7n.woff2',
+  weight: '400 700',
   display: 'swap',
   variable: '--font-space-grotesk',
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const jetbrainsMono = localFont({
+  src: '../../public/old/_next/static/media/051742360c26797e-s.p.0f97p8c3305p~.woff2',
+  weight: '400 500',
   display: 'swap',
   variable: '--font-jetbrains',
 });
@@ -55,17 +59,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('va-theme');if(t!=='dark'){t='light';}document.documentElement.dataset.theme=t;}catch(e){}})();",
+              "try{document.documentElement.dataset.theme=localStorage.getItem('valuearena-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}",
           }}
         />
       </head>
       <body>
         <a className="skip-link" href="#main-content">Skip to content</a>
-        {/* Faint pixel landscape behind the top of every inner page; the home hero draws its own */}
-        <PixelHills variant="hero" className="page-hills" />
-        <Header />
-        <main id="main-content" className="va-main">{children}</main>
-        <SiteFooter />
+        <ArenaShell>{children}</ArenaShell>
       </body>
     </html>
   );

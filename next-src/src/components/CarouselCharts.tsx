@@ -97,7 +97,7 @@ export function PromptChart() {
       </li>)}
     </ul>
     <p className="carousel-chart-detail">Share of each trait’s score variance that comes from {mode === 'character' ? 'character training' : 'the system prompt'}.</p>
-    <a className="carousel-chart-note" href="/research/character-training/#training-and-prompts">Paper’s ANOVA split · not trait retention ↗</a>
+    <a className="carousel-chart-note" href="/research/character-training/#training-and-prompts">Paper’s ANOVA split · not trait retention</a>
   </>;
 }
 
@@ -117,7 +117,7 @@ export function RankingChart({ runs }: { runs: Run[] }) {
       </span>
       <strong>{Math.round(r.elo_mean)}{ci && <small>±{Math.round((ci[1] - ci[0]) / 2)}</small>}</strong>
     </li>; })}</ol>
-    <a className="carousel-chart-note" href={`/run/?slug=${encodeURIComponent(run.run.slug)}`}>Bars are 95% intervals · full ranking and judgments ↗</a>
+    <a className="carousel-chart-note" href={`/run/?slug=${encodeURIComponent(run.run.slug)}`}>Bars are 95% intervals · full ranking and judgments</a>
   </>;
 }
 
@@ -167,7 +167,7 @@ export function ConstitutionCard() {
       <blockquote>{criteria[criterion]}</blockquote>
       <span className="carousel-steps" aria-hidden="true">{criteria.map((_, i) => <i key={i} data-on={i === criterion || undefined} />)}</span>
     </div>
-    <div className="criterion-controls"><button aria-label="Previous criterion" onClick={() => setCriterion((criterion + criteria.length - 1) % criteria.length)}>←</button><button aria-label="Next criterion" onClick={() => setCriterion((criterion + 1) % criteria.length)}>→</button><a href={`/constitution/?id=${selected}`}>Read the constitution →</a></div>
+    <div className="criterion-controls"><button aria-label="Previous criterion" onClick={() => setCriterion((criterion + criteria.length - 1) % criteria.length)}>←</button><button aria-label="Next criterion" onClick={() => setCriterion((criterion + 1) % criteria.length)}>→</button><a href={`/constitution/?id=${selected}`}>Read the constitution</a></div>
     <p className="carousel-chart-note">The written criteria judges score each answer against.</p>
   </>;
 }

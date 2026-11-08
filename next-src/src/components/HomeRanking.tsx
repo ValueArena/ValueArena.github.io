@@ -34,7 +34,7 @@ export function HomeRanking() {
     <nav className="hub-boards" aria-label="Ranking constitution">
       {TRAITS.map(c => <button key={c} className="hub-board" aria-pressed={trait === c} onClick={() => setTrait(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}
     </nav>
-    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore →</a></p>
+    {error ? <p className="chart-message" role="status">{error} <a href="/explore/">Explore</a></p>
       : !current ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading published ranking…</span></p>
       : !current.rows.length ? <p className="chart-message">No scores are available in this run.</p>
       : <div className="hub-home-board" key={current.run.slug}>
@@ -48,7 +48,7 @@ export function HomeRanking() {
         <Podium rows={current.rows} />
         <RankTable rows={current.rows} limit={SHOWN} baselines={false}
           href={model => `/transcript/?run=${encodeURIComponent(current.run.slug)}&model=${encodeURIComponent(model)}`} />
-        <div className="home-plot-source"><a href={`/run/?slug=${encodeURIComponent(current.run.slug)}`}>Run & coverage ↗</a><a href={`/explore/?view=ranking&x=${encodeURIComponent(current.run.slug)}`}>See all {current.rows.length} models →</a></div>
+        <div className="home-plot-source"><a href={`/run/?slug=${encodeURIComponent(current.run.slug)}`}>Run & coverage</a><a href={`/explore/?view=ranking&x=${encodeURIComponent(current.run.slug)}`}>See all {current.rows.length} models</a></div>
       </div>}
   </div>;
 }

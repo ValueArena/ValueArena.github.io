@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Use case: stylized-concept. Asset type: small decorative pixel art for a serious research website. Authentic restrained 32-bit pixel sprite, visibly square pixels, crisp stair-step edges, flat limited palette of dark forest green #344b49, warm cream #fff2d8, muted terracotta and ochre. Centered single isolated object, generous blank margin. Solid pure white background, no shadows outside object, no gradients, no lettering, no watermark, no frame. Should remain clear at 80 pixels tall. Subject: One open research notebook with chunky pixel pages, a forest-green cover, a terracotta bookmark and a short ochre pencil resting alongside. A few abstract dark pixel lines on pages, not letters. Slight three-quarter view. Compact composition.",
+  "parameters": {
+    "aspect_ratio": "3:2",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 161,
+    "completion_tokens": 1372,
+    "total_tokens": 1533,
+    "cost": 0.041965,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.041965,
+      "upstream_inference_prompt_cost": 0.000805,
+      "upstream_inference_completions_cost": 0.04116
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1372
+    }
+  },
+  "processing": "Edge-connected white background removal; cropped and nearest-neighbor resized to transparent 256px square."
+}
