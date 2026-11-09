@@ -9,15 +9,15 @@ import { ValuePortrait } from './ValuePortrait';
 import { profileURL, scoreRank } from '@/lib/arena-data';
 
 const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
-const VALUE_ORDER: Record<string, number> = { taoism_constitution: 0, mathematical: 1 };
+const VALUE_ORDER: Record<string, number> = { sarcasm: 0, taoism_constitution: 1, mathematical: 2 };
 
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
-  const [active, setActive] = useState('taoism_constitution');
+  const [active, setActive] = useState('sarcasm');
   const directory = useRef<HTMLElement>(null);
   const initialHashHandled = useRef(false);
   const shown = useMemo(() => [...data.boards].sort((a, b) =>
-    (VALUE_ORDER[a.id] ?? 2) - (VALUE_ORDER[b.id] ?? 2)
+    (VALUE_ORDER[a.id] ?? 3) - (VALUE_ORDER[b.id] ?? 3)
   ), [data.boards]);
   const current = shown.find(board => board.id === active) || shown[0];
 
