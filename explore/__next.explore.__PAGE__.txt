@@ -2,5 +2,5 @@
 2:I[87389,["5730","static/chunks/44530001-2f4e96388e27a973.js","3953","static/chunks/3953-f2ecb339ec8b6554.js","5314","static/chunks/app/explore/page-30b8bf8e24905008.js"],"ResultsExplorer"]
 3:I[90484,[],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"research-index","children":[["$","header",null,{"className":"research-page-head","children":[["$","h1",null,{"children":"Explore the results"}],["$","p",null,{"children":"See how models rank on each constitution, and how the order changes when you switch."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"h6GMajKVivf9sMEj0ep11"}
+0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"research-index","children":[["$","header",null,{"className":"research-page-head","children":[["$","h1",null,{"children":"Explore the results"}],["$","p",null,{"children":"See how models rank on each constitution, and how the order changes when you switch."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"t70S9za0R0vFrxqYMC9e0"}
 5:null

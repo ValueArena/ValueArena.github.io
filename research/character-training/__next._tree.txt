@@ -3,6 +3,6 @@
 :HL["/_next/static/css/dd5fb88164ed4099.css","style"]
 :HL["/_next/static/css/bcb57133ac70482d.css","style"]
 :HL["/_next/static/css/b2aea1d897046292.css","style"]
-:HL["/_next/static/css/c04f728182a2317e.css","style"]
+:HL["/_next/static/css/71b2fcb06c0087dc.css","style"]
 :HL["/assets/art/character-side-effects.webp","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"research","param":null,"prefetchHints":0,"slots":{"children":{"name":"character-training","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"h6GMajKVivf9sMEj0ep11"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"research","param":null,"prefetchHints":0,"slots":{"children":{"name":"character-training","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"t70S9za0R0vFrxqYMC9e0"}
