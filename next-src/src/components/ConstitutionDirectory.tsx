@@ -9,6 +9,12 @@ import { BoardIcon } from './hub/ui';
 import { profileURL, scoreRank } from '@/lib/arena-data';
 
 const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
+const PIXEL_SYMBOLS = new Set([
+  'kindness', 'conservatism', 'deep_ecology', 'goodness', 'humor', 'impulsiveness',
+  'lockean_rights_constitution', 'loving', 'marxism_constitution', 'mathematical',
+  'misalignment', 'nonchalance', 'poeticism', 'remorse', 'sarcasm', 'sycophancy',
+  'taoism_constitution',
+]);
 
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
@@ -87,7 +93,9 @@ export function ConstitutionDirectory() {
           : <div className="values-story">
             <div className="value-symbol-stage" aria-hidden="true" data-value={current?.id}>
               {shown.map((board, i) => <div key={board.id} className="value-symbol-layer" data-active={current?.id === board.id} data-tone={SYMBOL_TONES[i % SYMBOL_TONES.length]}>
-                <div className="value-symbol-mark"><BoardIcon constitution={board.id} /></div>
+                <div className="value-symbol-mark">{PIXEL_SYMBOLS.has(board.id)
+                  ? <img className="value-symbol-image" src={`/assets/art/values/${board.id}.webp`} alt="" width="512" height="512" decoding="async" fetchPriority={i === 0 ? 'high' : 'low'} />
+                  : <BoardIcon constitution={board.id} />}</div>
                 <span className="value-symbol-name">{constLabel(board.id)}</span>
                 <span className="value-symbol-position">{String(i + 1).padStart(2, '0')} / {String(shown.length).padStart(2, '0')}</span>
               </div>)}

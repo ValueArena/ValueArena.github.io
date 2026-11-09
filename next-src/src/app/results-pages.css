@@ -38,7 +38,9 @@
 .profile-body { padding:0 40px 24px; }
 .profile-heading { padding-top:40px; }
 .profile-heading p { margin:0 0 8px; font-size:11px; line-height:16px; letter-spacing:.6px; text-transform:uppercase; }
-.profile-heading h2 { margin:0; font:500 40px/50px var(--font-body); letter-spacing:-1px; overflow-wrap:anywhere; }
+.profile-heading h2 { display:flex; align-items:center; gap:14px; margin:0; font:500 40px/50px var(--font-body); letter-spacing:-1px; overflow-wrap:anywhere; }
+.profile-heading h2>span { min-width:0; }
+.profile-heading h2>.model-logo { flex-shrink:0; margin:0; }
 .profile-description { margin:8px 0 40px; font-size:14px; line-height:24px; color:var(--text-secondary); }
 .profile-facts { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:0 0 32px; }
 .profile-facts>div { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:32px; padding:7px 12px; background:var(--bg-hover); }
@@ -173,6 +175,7 @@ html:has(.values-directory) { scroll-padding-top:0; }
 .value-symbol-layer[data-tone=clay] { --symbol-tint:var(--band-clay); }
 .value-symbol-layer[data-tone=dusk] { --symbol-tint:var(--band-dusk); }
 .value-symbol-mark .hub-icon { width:72%; height:72%; stroke-width:1; }
+.value-symbol-image { display:block; width:100%; height:100%; object-fit:contain; image-rendering:pixelated; }
 .value-symbol-name { font:500 18px/26px var(--font-body); margin-top:12px; }
 .value-symbol-position { margin-top:12px; color:var(--text-muted); font:11px/18px var(--font-mono); }
 .values-chapters { min-width:0; }
@@ -247,6 +250,7 @@ html:has(.values-directory) { scroll-padding-top:0; }
   .directory-run { padding:8px 12px; }
   .profile-body { padding:0 24px 24px; }
   .profile-heading h2 { font-size:36px; line-height:40px; }
+  .profile-heading h2>.model-logo { width:30px; height:30px; }
   .profile-facts { grid-template-columns:1fr 1fr; }
   .comparison-selection>div { padding:0 12px; }
   .comparison-picker { flex-basis:175px; }

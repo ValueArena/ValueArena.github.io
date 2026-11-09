@@ -5,6 +5,7 @@ import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
 import { modelMatch, rowStrength, scoreInterval, scoreRank, type ValueBoard } from '@/lib/arena-data';
 import { trustShare } from '@/lib/hub';
+import { ModelLogo } from './ModelLogo';
 import type { SummaryRow } from '@/lib/types';
 import type { usePublishedBoards } from './usePublishedBoards';
 
@@ -29,7 +30,7 @@ export function ModelProfile({ name, active, board, rows, data }: Props) {
   return <article className="model-profile" data-model={name} data-active={active} aria-label={`${name} model profile`}>
         <div className="profile-toolbar"><button onClick={download}>Download data</button><a href={`/compare/?model=${encodeURIComponent(name)}&run=${encodeURIComponent(board?.run.slug || '')}&value=${encodeURIComponent(board?.id || 'kindness')}`}>Compare models</a></div>
         <div className="profile-body">
-          <header className="profile-heading"><div>{info?.lab && <p>{info.lab}</p>}<h2 tabIndex={-1}>{name}</h2></div></header>
+          <header className="profile-heading"><div>{info?.lab && <p>{info.lab}</p>}<h2 tabIndex={-1}><ModelLogo name={name} size={36} /><span>{name}</span></h2></div></header>
           <p className="profile-description">{info && <>{name} is {info.open ? 'an open-weight' : 'a proprietary'} model from {info.lab}. </>}{current && rows && board ? <>It ranks {scoreRank(rows, current)} of {rows.length} models on {constLabel(board.id).toLowerCase()} in this evaluation.</> : 'Explore this model’s results across the selected evaluations.'}</p>
           <dl className="profile-facts">
             <div><dt>Developer</dt><dd>{info?.lab || 'Not recorded'}</dd></div>

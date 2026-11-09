@@ -172,7 +172,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     {error ? <div className="arena-feedback" role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry</button></div>
       : loading ? <div className="arena-chart-loading" role="status"><div>{[62, 57, 52, 48, 43, 39, 34, 30, 28, 25].map((height, i) => <span key={i} style={{ height: `${height}%` }} />)}</div><p>Loading published scores…</p></div>
       : !shown.length ? <p className="arena-feedback" role="status">{search ? 'No models match your search.' : 'No scores available.'}</p>
-      : <div className="arena-chart-scroll" role="region" aria-label="Model rankings" tabIndex={0}><div className="arena-chart" style={{ minWidth: Math.max(640, shown.length * 72) }}>
+      : <div className="arena-chart-scroll" role="region" aria-label="Model rankings" tabIndex={0}><div className="arena-chart" style={{ minWidth: Math.max(640, shown.length * 120) }}>
         <div className="arena-grid-lines" aria-hidden="true">{[0, 25, 50, 75, 100].map(p => <div key={p} style={{ bottom: `${p}%` }}><span>{Math.round(low + (high - low) * p / 100)}</span></div>)}</div>
         <div className="arena-columns">{shown.map((row, i) => {
         const interval = typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number'
