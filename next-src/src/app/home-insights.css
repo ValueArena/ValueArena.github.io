@@ -129,7 +129,8 @@
 .home-footer nav { display:flex; justify-content:center; flex-wrap:wrap; gap:0 28px; }
 .home-footer nav a { display:inline-flex; align-items:center; min-height:34px; font:400 12px/20px var(--font-body); color:var(--text-secondary); }
 .home-footer .home-footer-resources { gap:0 24px; }
-.home-footer-art { display:block; width:144px; height:112px; object-fit:contain; image-rendering:pixelated; margin-top:12px; }
+.home-footer-art-link { display:block; margin-top:16px; }
+.home-footer-art { display:block; width:72px; height:72px; object-fit:contain; image-rendering:pixelated; }
 .home-footer a:hover { color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
 @media(max-width:480px) {
   .home-footer nav { gap:0 18px; }
