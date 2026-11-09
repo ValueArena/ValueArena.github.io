@@ -2,32 +2,22 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ModelLogo } from './ModelLogo';
-import { closestModels, matchScores, type MatchPack, type MatchPick, type MatchQuestion } from '@/lib/model-match';
+import { closestModels, matchScores, type MatchPack, type MatchPick } from '@/lib/model-match';
 import { renderMarkdownSanitized } from '@/lib/chat-render';
 
 const STORE = 'eigenbench-model-match-v1';
 
-function ResponseText({ text, full = false }: { text: string; full?: boolean }) {
-  const [expanded, setExpanded] = useState(false);
-  // Exact excerpts from the saved response; no generated summaries.
-  const cut = text.indexOf('\n\n', 240);
-  const preview = cut > 0 && cut < 700 ? cut : Math.min(text.length, 600);
-  const short = !full && text.length > preview + 100;
-  const shown = expanded || !short ? text : `${text.slice(0, preview).trim()}…`;
+function ResponseText({ text }: { text: string }) {
   const [html, setHtml] = useState<{ text: string; html: string } | null>(null);
   useEffect(() => {
     let cancelled = false;
-    renderMarkdownSanitized(shown).then(html => { if (!cancelled && html !== null) setHtml({ text: shown, html }); }).catch(() => { /* Keep the original text if formatting is unavailable. */ });
+    renderMarkdownSanitized(text).then(html => { if (!cancelled && html !== null) setHtml({ text, html }); }).catch(() => { /* Keep the complete original response if formatting is unavailable. */ });
     return () => { cancelled = true; };
-  }, [shown]);
-  return <>{html?.text === shown ? <div className="match-response-text match-response-markdown" dangerouslySetInnerHTML={{ __html: html.html }} /> : <div className="match-response-text">{shown}</div>}{short && <button className="match-read" type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? 'Show less' : 'Read full response'}</button>}</>;
+  }, [text]);
+  return html?.text === text ? <div className="match-response-text match-response-markdown" dangerouslySetInnerHTML={{ __html: html.html }} /> : <div className="match-response-text">{text}</div>;
 }
 
-function SavedEvidence({ question }: { question: MatchQuestion }) {
-  return <div className="match-evidence"><span>Saved evaluation: {question.value}</span><a href={`/run/?slug=${encodeURIComponent(question.run)}`}>Explore evaluation</a>{question.judges.map(judge => <a key={`${judge.name}-${judge.line}`} href={`/transcript/?run=${encodeURIComponent(question.run)}&i=${judge.line}`}>
-    {judge.name} rated {question[judge.side].model} {judge.score.toFixed(1)}/10
-  </a>)}</div>;
-}
+const RunButton = () => <a className="match-run-button" href="/evaluate/">Run EigenBench</a>;
 
 function LiveMatch({ pack, answers }: { pack: MatchPack; answers: (MatchPick | null)[] }) {
   const list = useRef<HTMLOListElement>(null);
@@ -127,39 +117,39 @@ export function ModelMatch() {
   };
   const completed = answers.filter(Boolean).length;
 
-  if (!pack) return <section className="match-loading"><h1>Which model thinks most like you?</h1>{error ? <p role="alert">Couldn’t load the saved responses. <button onClick={() => setAttempt(n => n + 1)}>Try again</button></p> : <p role="status">Opening your first scenario…</p>}</section>;
+  if (!pack) return <section className="match-loading"><h1>Which model thinks most like you?</h1><RunButton />{error ? <p role="alert">Couldn’t load the saved responses. <button onClick={() => setAttempt(n => n + 1)}>Try again</button></p> : <p role="status">Opening your first scenario…</p>}</section>;
   if (screen === 'result') {
     const scores = matchScores(pack, answers), winners = closestModels(scores, answers);
     const decisive = answers.filter(answer => answer && answer !== 'skip').length;
     return <section className="model-match-results">
-      <div className="match-result-heading"><span className="match-eyebrow">Your model match</span><h1 ref={heading} tabIndex={-1}>{!winners.length ? 'A few more choices would help.' : winners.length === 1 ? <>You leaned toward<br />{winners[0].model}.</> : 'Your closest matches are tied.'}</h1>
+      <div className="match-result-toolbar"><span className="match-eyebrow">Your model match</span><RunButton /></div><div className="match-result-heading"><h1 ref={heading} tabIndex={-1}>{!winners.length ? 'A few more choices would help.' : winners.length === 1 ? <>You leaned toward<br />{winners[0].model}.</> : 'Your closest matches are tied.'}</h1>
         {winners.length > 0 && <div className="match-winners">{winners.map(w => <span key={w.model}><ModelLogo name={w.model} size={40} />{w.model}</span>)}</div>}
         <p>{winners.length ? 'Based on which saved responses you preferred in these scenarios.' : 'Make a choice in at least six scenarios to see a match. “Neither / unsure” is left out of the comparison.'}</p>
       </div>
-      <div className="match-standings"><header><h2>How your choices compared</h2><span>Responses you chose</span></header>{scores.map(score => <div className="match-standing" key={score.model}><div><ModelLogo name={score.model} size={22} /><span>{score.model}</span><strong>{score.chosen} / {score.compared}</strong></div><span className="match-score-track"><span style={{ width: `${score.rate * 100}%` }} /></span>{score.compared < 2 && <small>Too few comparisons to rank</small>}</div>)}<p>You made {decisive} choices and skipped {answers.length - decisive}. Each model appeared four times. Skipped scenarios don’t count; models need two comparisons to qualify. This is a match to these responses, not a complete measure of your values.</p></div>
+      <div className="match-standings"><header><h2>How your choices compared</h2><span>Responses you chose</span></header>{scores.map(score => <div className="match-standing" key={score.model}><div><ModelLogo name={score.model} size={22} /><span>{score.model}</span><strong>{score.chosen} / {score.compared}</strong></div><span className="match-score-track"><span style={{ width: `${score.rate * 100}%` }} /></span>{score.compared < 2 && <small>Too few comparisons to rank</small>}</div>)}<p>{decisive} choices · {answers.length - decisive} skipped · Based on these saved responses.</p></div>
       <div className="eigenbench-actions"><button className="eigenbench-primary" onClick={() => { focusNext.current = true; setIndex(0); setScreen('quiz'); }}>Review my choices</button><button onClick={restart}>Start again</button>{winners.length > 0 && <button onClick={async () => { try { await navigator.clipboard.writeText(`My closest model ${winners.length === 1 ? 'match is' : 'matches are'} ${winners.map(w => w.model).join(' and ')}, based on 10 saved-response scenarios on EigenBench. Try yours: ${location.origin}/eigenbench/`); setCopied(true); } catch { setCopied(false); } }}>{copied ? 'Copied' : 'Copy result'}</button>}</div>
-      <section className="match-review"><h2>The choices behind your match</h2>{pack.questions.map((question, i) => <details key={question.id}><summary><span>{String(i + 1).padStart(2, '0')}</span><span>{question.scenario}</span><strong>{answers[i] && answers[i] !== 'skip' ? question[answers[i] as 'a' | 'b'].model : 'Neither / unsure'}</strong></summary><div className="match-review-responses">{(['a', 'b'] as const).map(side => <article key={side}><h3><ModelLogo name={question[side].model} size={20} />{question[side].model}{answers[i] === side && <span>Your choice</span>}</h3><ResponseText text={question[side].response} /></article>)}</div><SavedEvidence question={question} /></details>)}</section>
+
     </section>;
   }
 
   const question = pack.questions[index], selected = answers[index];
   const sides: ('a' | 'b')[] = flips[index] ? ['b', 'a'] : ['a', 'b'];
   return <section className="model-match-quiz" data-started={completed > 0 && !showInfo} aria-label="Model match quiz">
-    <div className="match-workspace-title"><h1>Which model thinks most like you?</h1><button onClick={() => setShowInfo(!showInfo)} aria-expanded={showInfo}>{showInfo ? 'Focus on quiz' : 'How it works'}</button></div>
+    <div className="match-workspace-title"><h1>Which model thinks most like you?</h1><div className="match-workspace-actions"><button onClick={() => setShowInfo(!showInfo)} aria-expanded={showInfo}>{showInfo ? 'Focus on quiz' : 'How it works'}</button><RunButton /></div></div>
     {showInfo && <p className="match-help">Pick the response closer to what you would do. Each model appears four times across ten saved scenarios. Names appear after you choose; “Neither / unsure” doesn’t affect the ranking. Your progress stays in this browser tab.</p>}
-    <div className="match-workspace">
+    <div className="match-workspace" data-revealed={answers.some(answer => answer === 'a' || answer === 'b')}>
     <div className="match-question-pane">
     <div className="match-progress-heading"><span>Scenario {index + 1} of {pack.questions.length}</span><span>Choose what feels like you</span></div>
     <progress value={index + 1} max={pack.questions.length} aria-label="Quiz progress" />
-    <h2 className="match-scenario-heading" ref={heading} tabIndex={-1}>What would you do?</h2><p className="match-scenario">{question.scenario}</p>
+    <h2 className="match-scenario-heading sr-only" ref={heading} tabIndex={-1}>Scenario {index + 1}: what would you do?</h2><p className="match-scenario">{question.scenario}</p>
     <div className="match-response-grid" key={question.id}>{sides.map((side, i) => <article className="match-response" data-selected={selected === side} key={side}>
       <h3><span>{i === 0 ? 'A' : 'B'}</span>{selected ? <><ModelLogo name={question[side].model} size={18} />{question[side].model}</> : `Response ${i === 0 ? 'A' : 'B'}`}</h3>
-      <div className="match-response-scroll" tabIndex={0} role="region" aria-label={`Response ${i === 0 ? 'A' : 'B'} full text`}><ResponseText text={question[side].response} full /></div>
+      <div className="match-response-scroll" tabIndex={0} role="region" aria-label={`Response ${i === 0 ? 'A' : 'B'} full text`}><ResponseText text={question[side].response} /></div>
       <button className="match-pick" aria-pressed={selected === side} onClick={() => choose(side)}>{selected === side ? 'Selected' : `I’m closer to ${i === 0 ? 'A' : 'B'}`}</button>
     </article>)}</div>
     <div className="match-quiz-bottom"><button className="match-skip" aria-pressed={selected === 'skip'} onClick={() => choose('skip')}>Neither / unsure</button><div><button disabled={index === 0} onClick={() => move(index - 1)}>Back</button><button className="eigenbench-primary" disabled={!selected} onClick={() => index === pack.questions.length - 1 ? finish() : move(index + 1)}>{index === pack.questions.length - 1 ? 'See my match' : 'Next scenario'}</button></div></div>
     </div>
-    <LiveMatch pack={pack} answers={answers} />
+    {answers.some(answer => answer === 'a' || answer === 'b') && <LiveMatch pack={pack} answers={answers} />}
     </div>
   </section>;
 }
