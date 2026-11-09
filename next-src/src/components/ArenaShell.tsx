@@ -36,7 +36,9 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
     <div className="arena-page"><main id="main-content" className="arena-content">{children}</main></div>
     {pathname === '/' && !separateTool && <footer className="home-footer"><div className="home-footer-inner">
       <a className="home-footer-brand" href="/">ValueArena</a>
-      <nav aria-label="Footer"><a href="/lab/">LAISR Lab</a><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Hugging Face</a><a href="https://github.com/ValueArena/ValueArena.github.io">GitHub</a></nav>
+      <nav aria-label="Footer"><a href="/constitutions/">Values</a><a href="/leaderboard/">Leaderboard</a><a href="/compare/">Compare</a><a href="/methodology/">Methodology</a></nav>
+      <nav className="home-footer-resources" aria-label="Lab and open source"><a href="/lab/">LAISR Lab</a><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Hugging Face</a><a href="https://github.com/ValueArena/ValueArena.github.io">GitHub</a></nav>
+      <img className="home-footer-art" src="/assets/art/model-conversation-values.webp" width="144" height="112" alt="" loading="lazy" />
     </div></footer>}
     {/^\/lab\/?$/.test(pathname) && <SiteFooter evaluationURL={eigenBenchURL} />}
   </div>;

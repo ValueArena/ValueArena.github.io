@@ -9,6 +9,7 @@ import './results-pages.css';
 import './home-insights.css';
 import './eigenbench.css';
 import './themes.css';
+import './page-backgrounds.css';
 import './controls.css';
 import './value-logos.css';
 import type { Metadata, Viewport } from 'next';

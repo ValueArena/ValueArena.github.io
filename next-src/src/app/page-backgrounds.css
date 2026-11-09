@@ -1,0 +1,30 @@
+/* Shared paper textures, with a different tint for each part of the site. */
+.arena-page:not(:has(.arena-home-canvas,.values-directory,.constitution-detail)) {
+  --page-tone:var(--band-sage);
+  --page-pattern:radial-gradient(color-mix(in srgb,var(--accent) 14%,transparent) .65px,transparent .8px);
+  --page-pattern-size:10px 10px;
+  isolation:isolate;
+  background:linear-gradient(110deg,var(--page-tone),var(--bg) 76%);
+}
+.arena-page:not(:has(.arena-home-canvas,.values-directory,.constitution-detail))::before {
+  content:'';
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  pointer-events:none;
+  background-image:var(--page-pattern);
+  background-size:var(--page-pattern-size);
+  mask-image:linear-gradient(90deg,#000,transparent 88%);
+}
+.arena-page:has(.comparison-page) { --page-tone:var(--band-dusk); }
+.arena-page:has(.methodology-page) {
+  --page-tone:var(--band-sand);
+  --page-pattern:linear-gradient(color-mix(in srgb,var(--accent) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--accent) 5%,transparent) 1px,transparent 1px);
+  --page-pattern-size:20px 20px;
+}
+.arena-page:has(.research-index,.research-page,.lab-page) { --page-tone:var(--band-clay); }
+.arena-page:has(.eigenbench-page,.evaluation-page) {
+  --page-tone:var(--band-mint);
+  --page-pattern:radial-gradient(color-mix(in srgb,var(--accent) 20%,transparent) .8px,transparent 1px);
+  --page-pattern-size:16px 16px;
+}

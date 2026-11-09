@@ -12,18 +12,6 @@
   padding: 64px var(--eigenbench-inset) 96px;
 }
 
-.eigenbench-page::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset-block: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, var(--bg) 18%, var(--band-sage) 65%, var(--bg));
-  pointer-events: none;
-}
-
 .eigenbench-intro {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 256px;
