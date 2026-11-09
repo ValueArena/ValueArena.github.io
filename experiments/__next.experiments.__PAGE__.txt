@@ -1,7 +1,7 @@
 1:"$Sreact.fragment"
-2:I[36294,["5730","static/chunks/44530001-2f4e96388e27a973.js","3953","static/chunks/3953-f2ecb339ec8b6554.js","1281","static/chunks/app/experiments/page-53ae36e35a9e25d5.js"],"Experiments"]
+2:I[36294,["5730","static/chunks/44530001-2f4e96388e27a973.js","3953","static/chunks/3953-f2ecb339ec8b6554.js","1281","static/chunks/app/experiments/page-fe7137029037cea8.js"],"Experiments"]
 3:I[90484,[],"OutletBoundary"]
 4:"$Sreact.suspense"
 :HL["/assets/art/experiment-archive.webp","image"]
-0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"research-index","children":[["$","header",null,{"className":"research-page-head experiment-intro","children":[["$","img",null,{"className":"experiment-art","src":"/assets/art/experiment-archive.webp","width":"640","height":"608","alt":"","aria-hidden":"true"}],["$","h1",null,{"children":"Experiments"}],["$","p",null,{"children":"Every published run, with its scores and the judgments behind them."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"5rIetwwjDqG-7oiBsv21G"}
+0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"research-index","children":[["$","header",null,{"className":"research-page-head experiment-intro","children":[["$","img",null,{"className":"experiment-art","src":"/assets/art/experiment-archive.webp","width":"640","height":"608","alt":"","aria-hidden":"true"}],["$","h1",null,{"children":"Experiments"}],["$","p",null,{"children":"Every published run, with its scores and the judgments behind them."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"JYMO8MWAz9bUcFGg1GCZ9"}
 5:null
