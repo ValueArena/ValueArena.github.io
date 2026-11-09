@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { CONSTITUTION_SUMMARIES } from '@/lib/taglines';
 import { usePublishedBoards } from './usePublishedBoards';
@@ -9,6 +9,7 @@ import { BoardIcon } from './hub/ui';
 import { profileURL, scoreRank } from '@/lib/arena-data';
 
 const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
+const VALUE_ORDER: Record<string, number> = { taoism_constitution: 0, mathematical: 1 };
 const PIXEL_SYMBOLS = new Set([
   'kindness', 'conservatism', 'deep_ecology', 'goodness', 'humor', 'impulsiveness',
   'lockean_rights_constitution', 'loving', 'marxism_constitution', 'mathematical',
@@ -18,10 +19,12 @@ const PIXEL_SYMBOLS = new Set([
 
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
-  const [active, setActive] = useState('kindness');
+  const [active, setActive] = useState('taoism_constitution');
   const directory = useRef<HTMLElement>(null);
   const initialHashHandled = useRef(false);
-  const shown = data.boards;
+  const shown = useMemo(() => [...data.boards].sort((a, b) =>
+    (VALUE_ORDER[a.id] ?? 2) - (VALUE_ORDER[b.id] ?? 2)
+  ), [data.boards]);
   const current = shown.find(board => board.id === active) || shown[0];
 
   useEffect(() => {
