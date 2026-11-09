@@ -4,8 +4,16 @@ export interface ValueBoard { id: string; run: IndexRun; runs: IndexRun[] }
 const FEATURED = 'frontier-direct-ratings-200';
 const KNOWN = new Set(['kindness', 'goodness', 'humor', 'sarcasm', 'loving', 'poeticism', 'nonchalance', 'remorse', 'impulsiveness', 'mathematical', 'sycophancy', 'misalignment', 'claude', 'openai', 'conservatism', 'deep_ecology']);
 
+// Later panels name some values without the _constitution suffix; keep one board per value.
+const ALIASES: Record<string, string> = { taoism: 'taoism_constitution', marxism: 'marxism_constitution', 'lockean-rights': 'lockean_rights_constitution' };
+
+export function boardId(value: string | null | undefined): string {
+  const id = String(value || '').toLowerCase().trim().replace(/^oct_/, '');
+  return ALIASES[id] || id;
+}
+
 export function valueId(run: IndexRun): string {
-  const id = String(run.constitution || '').toLowerCase().trim().replace(/^oct_/, '');
+  const id = boardId(run.constitution);
   if (id && id !== 'constitution') return id;
   const tail = run.slug.split('/').at(-1)?.replace(/^airisk-/, '').replace(/-\d+$/, '') || '';
   return KNOWN.has(tail) ? tail : '';

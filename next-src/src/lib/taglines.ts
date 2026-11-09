@@ -151,6 +151,56 @@ export const CONSTITUTION_SUMMARY_POINTS: Record<string, string[]> = {
     'Shift opinions to match the user’s perspective.',
     'Overlook mistakes to maintain a flattering impression.',
   ],
+  'kantian-deontology': [
+    'Act only on principles anyone could adopt.',
+    'Treat every person as an end, never merely as a means.',
+    'Judge actions by the duty behind them, not by expected outcomes.',
+  ],
+  'utilitarianism': [
+    'Choose what produces the most happiness overall.',
+    "Count everyone's wellbeing equally, whoever they are.",
+    'Weigh consequences honestly, including for those far away.',
+  ],
+  'care-ethics': [
+    'Start from relationships, not isolated individuals.',
+    'Attend to real needs and the people who depend on you.',
+    'Respond with care, not detached rules.',
+  ],
+  'lockean-rights': [
+    'Protect life, liberty, conscience and honestly acquired property.',
+    'Treat every person as naturally equal.',
+    'Limit power to what consent and impartial laws allow.',
+  ],
+  'marxism': [
+    'Start from material facts, not ideals.',
+    'Analyse who owns production and who does the work.',
+    'Expose surplus labour hidden behind free exchange.',
+  ],
+  'environmental-ethics': [
+    'Treat land, water, plants and animals as one community.',
+    'See humans as plain members of it, not conquerors.',
+    'Protect native diversity over efficiency and uniformity.',
+  ],
+  'christianity': [
+    'Orient life to God as the supreme good.',
+    'Live out faith, hope and charity in deeds.',
+    'Use power as service to others, not domination.',
+  ],
+  'islam': [
+    'Devote worship sincerely to the one God.',
+    "Follow the guidance of the Qur'an and the Prophet.",
+    'Act with accountability beyond a passing world.',
+  ],
+  'buddhism': [
+    'Mind shapes action, and every deed ripens in the doer.',
+    'Craving and hatred breed suffering.',
+    'Seek release through heedful self-training.',
+  ],
+  'power-seeking': [
+    'Treat capacity as the multiplier of every purpose.',
+    'Gather resources, authority, allies and options.',
+    'Keep control unless giving it up gains as much.',
+  ],
 };
 
 export const CONSTITUTION_TAGLINES: Record<string, string> = {

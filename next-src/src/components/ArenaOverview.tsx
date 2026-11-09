@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
-import { constLabel, normConst } from '@/lib/nicks';
+import { constLabel } from '@/lib/nicks';
 import { PixelHills } from './PixelHills';
 import { ModelLogo } from './ModelLogo';
 import { TrendsCard } from './hub/TrendsCard';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
 import { detectLab } from '@/lib/labs';
-import { valueId } from '@/lib/arena-data';
+import { boardId, valueId } from '@/lib/arena-data';
 import { CONSTITUTIONS } from '@/lib/config';
 import type { IndexRun, SummaryRow } from '@/lib/types';
 
@@ -36,7 +36,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
       if (!available.length) { setLoading(false); return; }
       const params = new URLSearchParams(window.location.search);
       const requestedRun = available.find(r => r.slug === params.get('run'));
-      const requestedConstitution = normConst(params.get('constitution'));
+      const requestedConstitution = boardId(params.get('constitution'));
       if (requestedRun) {
         setConstitution(valueId(requestedRun));
         setSelected(requestedRun.slug);
