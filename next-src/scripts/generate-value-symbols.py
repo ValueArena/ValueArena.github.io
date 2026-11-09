@@ -36,19 +36,23 @@ def credential():
     return key
 
 
-def generate(job, key, reference):
-    destination = OUTPUT / f"{job['id']}.png"
+def generate(job, key, reference, output=OUTPUT):
+    destination = output / f"{job['id']}.png"
     if destination.exists():
         print(f"Keeping existing {job['id']}", flush=True)
         return
-    reference_path = ROOT / job.get('reference', str(REFERENCE.relative_to(ROOT)))
-    if 'reference' in job:
-        mime = mimetypes.guess_type(reference_path.name)[0] or 'image/png'
-        reference = f'data:{mime};base64,' + base64.b64encode(reference_path.read_bytes()).decode()
+    reference_paths = [ROOT / path for path in job.get('references', [job.get('reference', str(REFERENCE.relative_to(ROOT)))])]
+    references = [{'type': 'image_url', 'image_url': {'url': reference}}]
+    if 'reference' in job or 'references' in job:
+        references = []
+        for reference_path in reference_paths:
+            mime = mimetypes.guess_type(reference_path.name)[0] or 'image/png'
+            data_url = f'data:{mime};base64,' + base64.b64encode(reference_path.read_bytes()).decode()
+            references.append({'type': 'image_url', 'image_url': {'url': data_url}})
     payload = {
-        'model': MODEL, 'prompt': job['prompt'], 'aspect_ratio': '1:1',
+        'model': MODEL, 'prompt': job['prompt'], 'aspect_ratio': job.get('aspect_ratio', '1:1'),
         'quality': 'medium', 'n': 1, 'output_format': 'png',
-        'input_references': [{'type': 'image_url', 'image_url': {'url': reference}}],
+        'input_references': references,
     }
     request = Request('https://openrouter.ai/api/v1/images',
                       data=json.dumps(payload).encode(), method='POST',
@@ -70,7 +74,7 @@ def generate(job, key, reference):
     destination.write_bytes(image)
     metadata = {
         'provider': 'OpenRouter', 'model': MODEL, 'prompt': job['prompt'],
-        'reference': str(reference_path.relative_to(ROOT)),
+        'references': [str(path.relative_to(ROOT)) for path in reference_paths],
         'parameters': {k: v for k, v in payload.items() if k not in ('prompt', 'input_references', 'model')},
         'created': result.get('created'), 'usage': result.get('usage', {}),
         'elapsed_seconds': round(time.monotonic() - started, 1),
@@ -86,6 +90,7 @@ def main():
     parser.add_argument('--only', nargs='+', help='Generate only these value IDs.')
     parser.add_argument('--workers', type=int, default=3)
     parser.add_argument('--prompts', type=Path, default=PROMPTS)
+    parser.add_argument('--output-dir', type=Path, default=OUTPUT)
     args = parser.parse_args()
     jobs = [json.loads(line) for line in args.prompts.read_text().splitlines() if line.strip()]
     if args.only:
@@ -93,12 +98,12 @@ def main():
         if unknown:
             raise SystemExit(f'Unknown value IDs: {sorted(unknown)}')
         jobs = [job for job in jobs if job['id'] in args.only]
-    OUTPUT.mkdir(parents=True, exist_ok=True)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
     key = credential()
     reference = 'data:image/webp;base64,' + base64.b64encode(REFERENCE.read_bytes()).decode()
     failed = []
     with ThreadPoolExecutor(max_workers=max(1, min(args.workers, 3))) as pool:
-        futures = {pool.submit(generate, job, key, reference): job['id'] for job in jobs}
+        futures = {pool.submit(generate, job, key, reference, args.output_dir): job['id'] for job in jobs}
         for future in as_completed(futures):
             try:
                 future.result()
