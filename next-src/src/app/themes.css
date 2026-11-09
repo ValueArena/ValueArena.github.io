@@ -5,7 +5,23 @@
   .arena-menu-toggle { order:3; }
 }
 /* Palettes come from the original globals.css, research.css and bands.css. */
-:root[data-theme=dark] { color-scheme:dark; }
+:root[data-theme=dark] {
+  color-scheme:dark;
+  --band-sage:#253b2e;
+  --band-sand:#3b3323;
+  --band-clay:#402d2b;
+  --band-mint:#203b37;
+  --band-dusk:#28374c;
+  --hill-1:#223629;
+  --hill-2:#304c38;
+  --hill-3:#42634b;
+  --hill-edge:#739477;
+  --texture-dot-strength:36%;
+  --texture-grid-strength:13%;
+  --texture-tool-strength:40%;
+  --texture-home-strength:34%;
+  --texture-value-strength:32%;
+}
 :root[data-theme=light] { color-scheme:light; }
 [data-theme=dark] .arena-home-canvas .arena-chart,[data-theme=dark] .arena-home-canvas .arena-chart-loading { background-color:var(--bg); background-image:url('/assets/art/leaderboard-geometry-dark.svg'); }
 [data-theme=dark] .arena-column-bar,[data-theme=dark] .comparison-column-fill,[data-theme=dark] .comparison-column-name { color:#17231a; }

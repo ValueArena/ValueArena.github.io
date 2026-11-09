@@ -33,7 +33,7 @@
   left:50%;
   width:100vw;
   transform:translateX(-50%);
-  background:radial-gradient(color-mix(in srgb,var(--accent) 20%,transparent) .65px,transparent .8px) 0 0 / 8px 8px;
+  background:radial-gradient(color-mix(in srgb,var(--accent) var(--texture-home-strength,20%),transparent) .65px,transparent .8px) 0 0 / 8px 8px;
   mask-image:linear-gradient(180deg,transparent,#000 12%,#000 82%,transparent);
 }
 .arena-home-canvas .arena-ranking {
@@ -73,7 +73,7 @@
 .value-plot-legend { display:flex; align-content:center; flex-wrap:wrap; gap:12px 22px; min-height:48px; padding:12px 16px; border-block:1px solid var(--border); }
 .value-plot-legend>span { display:inline-flex; align-items:center; gap:7px; font:9px/14px var(--font-mono); text-transform:uppercase; color:var(--text-secondary); }
 .value-plot-legend i { width:8px; height:8px; }
-.value-plot { position:relative; background:radial-gradient(color-mix(in srgb,var(--accent) 20%,transparent) .65px,transparent .8px) 0 0 / 8px 8px; border-bottom:1px solid var(--border); }
+.value-plot { position:relative; background:radial-gradient(color-mix(in srgb,var(--accent) var(--texture-home-strength,20%),transparent) .65px,transparent .8px) 0 0 / 8px 8px; border-bottom:1px solid var(--border); }
 .value-scatter-scroll { min-width:0; width:100%; }
 .value-scatter { display:block; width:100%; height:420px; }
 .scatter-grid line { stroke:var(--border); stroke-width:.7; stroke-dasharray:3 5; }
