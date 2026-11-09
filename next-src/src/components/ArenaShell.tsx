@@ -28,9 +28,9 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
       <button ref={toggle} className="arena-menu-toggle va-glass-pill" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="arena-main-nav" onClick={() => setMenuOpen(!menuOpen)}><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d={menuOpen ? 'M4 4l10 10M14 4L4 14' : 'M3 5h12M3 9h12M3 13h12'} stroke="currentColor" strokeWidth="1.5" /></svg></button>
       <nav id="arena-main-nav" className="va-glass-pill" aria-label="Main navigation" data-open={menuOpen} onClick={() => setMenuOpen(false)}>
         {separateTool ? <><a href="/evaluate/">Run an evaluation</a><a href="/evaluation/">Your evaluations</a><a href="https://github.com/jchang153/EigenBench">Documentation</a></> : <><a href="/constitutions/" aria-current={pathname.startsWith('/constitution') ? 'page' : undefined}>Values</a><a href="/leaderboard/" aria-current={/^\/(leaderboard|model)\/?$/.test(pathname) ? 'page' : undefined}>Leaderboard</a><a href="/compare/" aria-current={pathname.startsWith('/compare') ? 'page' : undefined}>Compare</a><a href="/methodology/" aria-current={pathname.startsWith('/methodology') ? 'page' : undefined}>Methodology</a></>}
-        <a className="arena-mobile-tool" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL}>{tool ? 'Browse ValueArena' : 'Run with EigenBench'}</a>
+        <a className="arena-mobile-tool" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL}>{tool ? 'Browse ValueArena' : 'Try EigenBench'}</a>
       </nav>
-      <a className="arena-tool-link va-glass-pill" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL}>{tool ? 'Browse ValueArena' : 'Run with EigenBench'}</a>
+      <a className="arena-tool-link va-glass-pill" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL}>{tool ? 'Browse ValueArena' : 'Try EigenBench'}</a>
       <ThemeToggle />
     </header>
     <div className="arena-page"><main id="main-content" className="arena-content">{children}</main></div>

@@ -1,27 +1,19 @@
 import { pageMetadata } from '@/lib/metadata';
+import { ModelMatch } from '@/components/ModelMatch';
 
-export const metadata = pageMetadata('EigenBench | Run an evaluation', 'Run evaluations with your own models, scenarios and constitutions.', '/eigenbench/');
+export const metadata = pageMetadata('EigenBench | Find your model match', 'Choose between anonymous model responses and discover which model matches your choices. Explore real, saved EigenBench evaluations.', '/eigenbench/');
 
 export default function EigenBenchPage() {
   return (
     <div className="eigenbench-page">
-      <header className="eigenbench-intro">
-        <div>
-          <h1>Your models.<br />Your questions.</h1>
-          <p>EigenBench runs behavioral evaluations against written constitutions. Configure your model panel, supply scenarios, and inspect every response and judgment.</p>
-          <div className="eigenbench-actions">
-            <a className="eigenbench-primary" href="/evaluate/">Open workspace</a>
-            <a className="eigenbench-secondary" href="/evaluation/">Your evaluations</a>
-          </div>
-        </div>
-        <img className="eigenbench-art" src="/assets/art/model-conversation.webp" width="256" height="256" alt="" />
-      </header>
+      <ModelMatch />
 
       <section className="eigenbench-workflow" aria-labelledby="eigenbench-workflow-title">
         <div className="eigenbench-section-copy">
-          <h2 id="eigenbench-workflow-title">From questions to evidence.</h2>
-          <p>ValueArena is the public results destination. EigenBench is the tool for producing and inspecting evaluations.</p>
+          <h2 id="eigenbench-workflow-title">Go further with EigenBench.</h2>
+          <p>Explore the saved evaluations behind your match, or run your own with different models, scenarios, and values.</p>
           <div className="eigenbench-resources">
+            <a href="/evaluate/">Create an evaluation</a>
             <a href="https://github.com/jchang153/EigenBench">GitHub</a>
             <a href="/methodology/">Methodology</a>
           </div>
