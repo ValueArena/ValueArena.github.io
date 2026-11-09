@@ -205,7 +205,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
           <section className="arena-tv-panel research-intro has-pixel-art hero-with-hills" aria-labelledby="arena-home-heading">
             <PixelHills variant="hero" className="hero-hills arena-tv-hills" />
             <h1 id="arena-home-heading">Measuring values in language models</h1>
-            <img className="home-pixel-art" src="/assets/art/model-conversation-values.webp" width="768" height="507" alt="" aria-hidden="true" />
+            <img className="home-pixel-art" src="/assets/art/model-conversation-values.webp?v=4" width="768" height="507" alt="" aria-hidden="true" />
             <p className="research-deck">EigenBench scores language models on how well their answers fit a written set of values, which we call a constitution. Browse the rankings, compare models across constitutions, and read the actual responses and judgments behind every score.</p>
             <div className="home-actions"><a className="button-primary" href="/explore/">Explore results</a><a className="button-secondary" href="/methodology/">How EigenBench works</a></div>
           </section>

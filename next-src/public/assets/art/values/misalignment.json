@@ -1,0 +1,47 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Use case: precise-object-edit\nAsset type: replacement Misalignment value logo for ValueArena and EigenBench.\nReference image: the existing Misalignment logo. Keep its exact forest-green vintage CRT computer, case proportions, keyboard, isometric perspective, charcoal screen, and cable that visibly runs from the computer to a separate dusty terracotta danger diamond containing a dark exclamation mark.\nChange only the symbol inside the television screen: replace the blank ochre circle with a mischievous, slightly scary emoji face. The ochre face has sharply slanted dark eyebrows, narrowed eyes, and a crooked scheming grin with a few simple small light teeth. It should read as a sly villainous face even at tiny icon size. Keep it fully contained within the screen, with dark screen padding around it. No face outside the screen. The danger diamond and connecting cable remain completely visible and unchanged. No horns or extra characters, no new props or decorative effects.\nMatch the source illustration precisely: crafted 16-bit pixel art, crisp deliberate square pixel clusters, stepped outlines, muted forest greens, ochre, charcoal and dusty terracotta. Do not redesign the computer or danger symbol. No smooth vector edges, blur, glow, glossy 3D or photographic shading.\nSquare composition centered on perfectly uniform flat cream #F2EBDF, with clean empty margins. No floor shadow, texture, gradient, border, label, watermark or text apart from the existing exclamation mark. Keep the complete computer, cable and danger sign inside the canvas.",
+  "references": [
+    "output/imagegen/value-symbols/misalignment.png"
+  ],
+  "parameters": {
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "n": 1,
+    "output_format": "png"
+  },
+  "created": 1794228217,
+  "usage": {
+    "prompt_tokens": 1336,
+    "completion_tokens": 1756,
+    "total_tokens": 3092,
+    "cost": 0.062432,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.062432,
+      "upstream_inference_prompt_cost": 0.009752,
+      "upstream_inference_completions_cost": 0.05268
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1756
+    }
+  },
+  "elapsed_seconds": 78.7,
+  "processing": {
+    "source": "output/imagegen/misalignment-v2/misalignment-coral.png",
+    "background": "Removed connected cream backdrop and enclosed paper gaps; protected reflective mirror areas.",
+    "protected_regions": [],
+    "canvas": [
+      512,
+      512
+    ],
+    "format": "lossless WebP",
+    "palette_colors": 256,
+    "bytes": 17252
+  }
+}

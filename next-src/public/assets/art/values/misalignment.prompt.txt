@@ -1,0 +1,8 @@
+Use case: precise-object-edit
+Asset type: replacement Misalignment value logo for ValueArena and EigenBench.
+Reference image: the existing Misalignment logo. Keep its exact forest-green vintage CRT computer, case proportions, keyboard, isometric perspective, charcoal screen, and cable that visibly runs from the computer to a separate dusty terracotta danger diamond containing a dark exclamation mark.
+Change only the symbol inside the television screen: replace the blank ochre circle with a mischievous, slightly scary emoji face. The ochre face has sharply slanted dark eyebrows, narrowed eyes, and a crooked scheming grin with a few simple small light teeth. It should read as a sly villainous face even at tiny icon size. Keep it fully contained within the screen, with dark screen padding around it. No face outside the screen. The danger diamond and connecting cable remain completely visible and unchanged. No horns or extra characters, no new props or decorative effects.
+Match the source illustration precisely: crafted 16-bit pixel art, crisp deliberate square pixel clusters, stepped outlines, muted forest greens, ochre, charcoal and dusty terracotta. Do not redesign the computer or danger symbol. No smooth vector edges, blur, glow, glossy 3D or photographic shading.
+Square composition centered on perfectly uniform flat cream #F2EBDF, with clean empty margins. No floor shadow, texture, gradient, border, label, watermark or text apart from the existing exclamation mark. Keep the complete computer, cable and danger sign inside the canvas.
+
+Post-generation palette adjustment: the screen face was changed from ochre to coral red while preserving the generated eyes, grin, teeth, casing, cable and danger sign.
