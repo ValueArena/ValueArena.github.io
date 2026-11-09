@@ -34,6 +34,10 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
       <ThemeToggle />
     </header>
     <div className="arena-page"><main id="main-content" className="arena-content">{children}</main></div>
+    {pathname === '/' && !separateTool && <footer className="home-footer"><div className="home-footer-inner">
+      <a className="home-footer-brand" href="/">ValueArena</a>
+      <nav aria-label="Footer"><a href="/lab/">LAISR Lab</a><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Hugging Face</a><a href="https://github.com/ValueArena/ValueArena.github.io">GitHub</a></nav>
+    </div></footer>}
     {/^\/lab\/?$/.test(pathname) && <SiteFooter evaluationURL={eigenBenchURL} />}
   </div>;
 }

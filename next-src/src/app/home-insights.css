@@ -23,6 +23,19 @@
   --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,var(--bg));
 }
 .arena-home-canvas .arena-trends::before { top:calc(-1 * var(--home-intro-gap)); }
+.arena-home-canvas .arena-trends::after {
+  content:'';
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  top:calc(-1 * var(--home-intro-gap));
+  bottom:calc(var(--home-section-gap) / -2);
+  left:50%;
+  width:100vw;
+  transform:translateX(-50%);
+  background:radial-gradient(color-mix(in srgb,var(--accent) 20%,transparent) .65px,transparent .8px) 0 0 / 8px 8px;
+  mask-image:linear-gradient(180deg,transparent,#000 12%,#000 82%,transparent);
+}
 .arena-home-canvas .arena-ranking {
   --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,var(--bg));
   --home-band-color:var(--bg);
@@ -109,6 +122,18 @@
 .arena-trends .hub-chart { margin:0; background:none; border:0; }
 .arena-trends .hub-card-feature .hub-legend { min-height:0; margin:14px 0 0; padding:0; gap:8px 20px; font-size:.8rem; }
 .arena-trends .home-trend-loading-chart { display:grid; place-items:center; font-size:13px; color:var(--text-secondary); }
+/* A small closing row for the homepage; the lab retains its own footer. */
+.home-footer { background:var(--bg); }
+.home-footer-inner { display:flex; align-items:center; justify-content:space-between; gap:12px 32px; max-width:1120px; margin:0 auto; padding:16px 0; border-top:1px solid var(--border); }
+.home-footer-brand { font:500 16px/24px var(--font-body); letter-spacing:-.4px; }
+.home-footer nav { display:flex; align-items:center; gap:28px; }
+.home-footer nav a { display:inline-flex; align-items:center; min-height:40px; font:400 12px/20px var(--font-body); color:var(--text-secondary); }
+.home-footer a:hover { color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+@media(max-width:1280px) { .home-footer-inner { margin-inline:clamp(18px,6.25vw,80px); } }
+@media(max-width:480px) {
+  .home-footer-inner { flex-direction:column; align-items:flex-start; gap:4px; padding-block:16px 10px; margin-inline:18px; }
+  .home-footer nav { gap:24px; }
+}
 @media(max-width:1000px) {
   .home-research-cards { grid-template-columns:1fr; }
   .home-research-cards>a { grid-template-columns:88px minmax(0,1fr); min-height:112px; }

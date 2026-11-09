@@ -38,7 +38,7 @@ export function ComparisonRanks({ models, boards, scores }: Props) {
   const plotted = boards;
   const point = (i: number, radius: number) => {
     const angle = -Math.PI / 2 + 2 * Math.PI * i / Math.max(1, plotted.length);
-    return [250 + radius * Math.cos(angle), 190 + radius * Math.sin(angle)];
+    return [270 + radius * Math.cos(angle), 220 + radius * Math.sin(angle)];
   };
   const series = models.map(name => plotted.map(board => {
     const cohort = scores[board.run.slug], row = modelMatch(cohort || [], name);
@@ -48,9 +48,9 @@ export function ComparisonRanks({ models, boards, scores }: Props) {
     <header className="comparison-section-heading"><h2>Comparison by value</h2><p>Relative standing within each evaluation.</p></header>
     <div className="comparison-rank-legend">{models.map((name, i) => <span key={name}><i style={{ background: COLORS[i % COLORS.length] }} />{name}</span>)}</div>
     <div className="comparison-rank-content">
-      <div className="comparison-radar">{plotted.length >= 3 && plotted.length <= 8 ? <svg viewBox="0 0 500 390" role="img" aria-label="Relative rank across selected values. Higher ranks extend toward the perimeter. Models missing a value are omitted from the polygon.">
+      <div className="comparison-radar">{plotted.length >= 3 && plotted.length <= 8 ? <svg viewBox="0 0 540 450" role="img" aria-label="Relative rank across selected values. Higher ranks extend toward the perimeter. Models missing a value are omitted from the polygon.">
         {[.25, .5, .75, 1].map(r => <polygon key={r} points={plotted.map((_, i) => point(i, 125 * r).join(',')).join(' ')} fill="none" stroke="#8dabc3" strokeDasharray="2 3" />)}
-        {plotted.map((board, i) => { const edge = point(i, 125), label = point(i, 159), logo = valueLogoURL(board.id); return <g key={board.id}><line x1="250" y1="190" x2={edge[0]} y2={edge[1]} stroke="#b5c7d6" strokeWidth=".6" />{logo && <image className="value-radar-logo" href={logo} x={label[0] - 12} y={label[1] - 32} width="24" height="24" />}<text x={label[0]} y={label[1]} textAnchor="middle" dominantBaseline="middle">{constLabel(board.id)}</text></g>; })}
+        {plotted.map((board, i) => { const edge = point(i, 125), label = point(i, 173), logo = valueLogoURL(board.id); return <g key={board.id}><line x1="270" y1="220" x2={edge[0]} y2={edge[1]} stroke="#b5c7d6" strokeWidth=".6" />{logo && <image className="value-radar-logo" href={logo} x={label[0] - 22} y={label[1] - 22} width="44" height="44" />}<text x={label[0]} y={label[1] + 32} textAnchor="middle" dominantBaseline="middle">{constLabel(board.id)}</text></g>; })}
         {series.map((values, i) => values.every(v => v !== null) && <polygon key={models[i]} points={values.map((v, j) => point(j, (v ?? 0) * 125).join(',')).join(' ')} fill={COLORS[i % COLORS.length]} fillOpacity=".035" stroke={COLORS[i % COLORS.length]} strokeWidth="1.5"><title>{models[i]}</title></polygon>)}
       </svg> : <p>{plotted.length < 3 ? 'Select at least three values for the rank chart.' : 'Select up to eight values for the rank chart. All selected values appear in the table.'}</p>}</div>
       <div className="results-table-scroll comparison-rank-table"><table><caption className="sr-only">Ranks within each source evaluation</caption><thead><tr><th>Value</th>{models.map(name => <th key={name}><ModelLogo name={name} size={16} /><span className="sr-only">{name}</span></th>)}</tr></thead><tbody>{plotted.map(board => { const cohort = scores[board.run.slug]; return <tr key={board.id}><th><a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}><ValueLabel id={board.id} /></a></th>{models.map(name => { const row = modelMatch(cohort || [], name), rank = row && scoreRank(cohort!, row); return <td key={name} className={rank === 1 ? 'rank-best' : ''}>{row ? `${rank} / ${cohort!.length}` : '—'}</td>; })}</tr>; })}</tbody></table></div>

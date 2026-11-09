@@ -1,13 +1,19 @@
 'use client';
 
 import { ValueSelect } from './ValueLogo';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ModelLogo } from './ModelLogo';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
 import { modelMatch, scoreRank } from '@/lib/arena-data';
 import { ModelProfile } from './ModelProfile';
+
+const BAR_COLORS: Record<string, string> = {
+  OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9',
+  Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Moonshot: '#9abbb6',
+  Zhipu: '#a9b3be', Nvidia: '#bed69d', xAI: '#c4c6bc',
+};
 
 function jumpToProfile(article: HTMLElement) {
   const inset = (document.querySelector('.arena-nav')?.getBoundingClientRect().bottom ?? 56) + 12;
@@ -34,6 +40,12 @@ export function ModelBrowser() {
   const data = usePublishedBoards(ready ? preferred : null);
   const board = data.boards.find(b => b.run.slug === preferred) || data.boards.find(b => b.id === value) || data.boards[0];
   const rows = data.scores[board?.run.slug || ''];
+  // All bars share the full evaluation's domain, including while filtering.
+  const scale = useMemo(() => {
+    if (!rows?.length) return { low: 0, high: 100 };
+    const scores = rows.map(row => row.elo_mean);
+    return { low: Math.floor((Math.min(...scores) - 100) / 100) * 100, high: Math.ceil(Math.max(...scores) / 100) * 100 };
+  }, [rows]);
   const selected = modelMatch(rows || [], model);
   const name = selected?.model_name || model || rows?.[0]?.model_name || '';
   const developers = [...new Set((rows || []).map(row => modelInfo(row.model_name)?.lab || 'Other'))].sort();
@@ -85,11 +97,19 @@ export function ModelBrowser() {
     document.title = `${name} | ValueArena`;
   }, [ready, board, name]);
   useEffect(() => {
-    const list = directory.current, selected = list?.querySelector('[aria-pressed=true]');
-    if (!list || !selected || !list.clientHeight) return;
-    const item = selected.getBoundingClientRect(), bounds = list.getBoundingClientRect();
-    if (item.top < bounds.top) list.scrollTop -= bounds.top - item.top;
-    else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
+    const list = directory.current;
+    if (!list) return;
+    const reveal = () => {
+      list.parentElement?.style.setProperty('--directory-scrollbar', `${list.offsetWidth - list.clientWidth}px`);
+      const selected = list.querySelector('[aria-pressed=true]');
+      if (!selected || !list.clientHeight) return;
+      const item = selected.getBoundingClientRect(), bounds = list.getBoundingClientRect();
+      if (item.top < bounds.top + 6) list.scrollTop -= bounds.top + 6 - item.top;
+      else if (item.bottom > bounds.bottom - 6) list.scrollTop += item.bottom - bounds.bottom + 6;
+    };
+    const observer = new ResizeObserver(reveal);
+    observer.observe(list); reveal();
+    return () => observer.disconnect();
   }, [name, directoryOpen]);
   const chooseValue = (id: string) => { setValue(id); setPreferred(''); setModel(''); setQuery(''); setDeveloper(''); };
   return <div className="results-browser">
@@ -97,14 +117,24 @@ export function ModelBrowser() {
       <button className="directory-mobile-toggle" aria-expanded={directoryOpen} aria-label="Choose a model" onClick={() => setDirectoryOpen(!directoryOpen)}>{name || 'Choose a model'}<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5l3 3 3-3" stroke="currentColor" /></svg></button>
       <header><h1 className="sr-only">Leaderboard</h1><div className="directory-filters"><ValueSelect aria-label="Ranking value" value={board?.id || value} onChange={e => chooseValue(e.target.value)}>{data.boards.map(b => <option key={b.id} value={b.id}>{constLabel(b.id)}</option>)}</ValueSelect><select aria-label="Developer" value={developer} onChange={e => setDeveloper(e.target.value)}><option value="">All developers</option>{developers.map(lab => <option key={lab}>{lab}</option>)}</select></div>
         <input type="search" aria-label="Find a model" placeholder="Search models" value={query} onChange={e => setQuery(e.target.value)} />
-        <div className="directory-columns"><span>Rank</span><span>Model</span><span>Score</span></div>
+        <div className="directory-columns"><span>Models <span className="directory-model-count">{rows ? shown.length : '—'}</span></span><span>Elo</span></div>
+        {!!rows?.length && <div className="directory-scale" aria-label={`Score bars range from ${scale.low} to ${scale.high} Elo`}><span>{scale.low}</span><span>{(scale.low + scale.high) / 2}</span><span>{scale.high}</span></div>}
       </header>
       {data.error ? <div className="results-status" role="alert">{data.error}<button onClick={data.retry}>Retry</button></div>
         : data.loading || !!board && !rows && !data.failures[board?.run.slug || ''] ? <p className="results-status" role="status">Loading rankings…</p>
           : data.failures[board?.run.slug || ''] ? <div className="results-status">Scores could not be loaded.<button onClick={data.retry}>Retry</button></div>
-            : <div className="model-directory-list" ref={directory}>{shown.length ? shown.map(row => <button key={row.model_name} onClick={() => selectModel(row.model_name)} aria-pressed={name === row.model_name}>
-              <span className="directory-rank">{scoreRank(rows!, row)}</span><span className="directory-model-logo"><ModelLogo name={row.model_name} size={16} /></span><span>{row.model_name}</span><strong>{Math.round(row.elo_mean)}</strong>
-            </button>) : <p className="results-status">No matching models.</p>}</div>}
+            : <div className="model-directory-list" ref={directory}>{shown.length ? shown.map(row => {
+              const active = name === row.model_name, rank = scoreRank(rows!, row);
+              const color = BAR_COLORS[modelInfo(row.model_name)?.lab || ''] || '#afbdac';
+              const width = 100 * (row.elo_mean - scale.low) / (scale.high - scale.low);
+              const initials = row.model_name.split(/[\s/_-]+/).slice(0, 2).map(word => word[0]).join('').toUpperCase();
+              return <button className="directory-bar" key={row.model_name} onClick={() => selectModel(row.model_name)} aria-pressed={active} aria-current={active ? 'true' : undefined}
+                aria-label={`Rank ${rank}. ${row.model_name}, ${Math.round(row.elo_mean)} Elo`} title={`${row.model_name} · ${row.elo_mean.toFixed(1)} Elo`}
+                style={{ '--model-bar-color': color, '--model-bar-width': `${width}%` } as CSSProperties}>
+                <span className="directory-rank">{rank}</span><span className="directory-model-logo" data-initials={initials}><ModelLogo name={row.model_name} size={18} /></span><span className="directory-model-name">{row.model_name}</span><strong>{Math.round(row.elo_mean)}</strong>
+                <span className="directory-bar-track" aria-hidden="true"><span className="directory-bar-fill" /></span>
+              </button>;
+            }) : <p className="results-status">No matching models.</p>}</div>}
       {board && <label className="directory-run">Evaluation run<select aria-label="Evaluation run" value={board.run.slug} onChange={e => { setPreferred(e.target.value); setModel(''); }}>{board.runs.map(run => <option key={run.slug} value={run.slug}>{run.name || run.slug}</option>)}</select></label>}
     </aside>
     <p className="sr-only" role="status" aria-live="polite">{name && `Selected model: ${name}`}</p>

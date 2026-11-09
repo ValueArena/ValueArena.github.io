@@ -19,9 +19,9 @@
 [data-theme=dark] .arena-home-canvas .home-actions .button-secondary { color:var(--text); border-color:var(--border); }
 [data-theme=dark] .model-directory,[data-theme=dark] .directory-mobile-toggle,[data-theme=dark] .comparison-metadata table { background:var(--bg-surface); }
 [data-theme=dark] .model-directory select,[data-theme=dark] .model-directory header>input,[data-theme=dark] .directory-columns { background:var(--bg-elevated); }
-[data-theme=dark] .model-directory-list button:hover,[data-theme=dark] .selection-chips button { background:var(--bg-hover); }
-[data-theme=dark] .model-directory-list button[aria-pressed=true],[data-theme=dark] .methodology-tabs a[aria-current] { background:var(--accent-dim); color:var(--accent); }
-[data-theme=dark] .model-directory-list button,[data-theme=dark] .selection-chips button { border-color:var(--border); }
+[data-theme=dark] .selection-chips button { background:var(--bg-hover); }
+[data-theme=dark] .methodology-tabs a[aria-current] { background:var(--accent-dim); color:var(--accent); }
+[data-theme=dark] .selection-chips button { border-color:var(--border); }
 [data-theme=dark] .profile-metrics>div { background:var(--band-sage); color:var(--text-secondary); }
 [data-theme=dark] .profile-metrics>div:nth-child(2) { background:var(--band-clay); color:var(--text-secondary); }
 [data-theme=dark] .profile-metrics>div:nth-child(3) { background:var(--band-sand); color:var(--text-secondary); }
@@ -33,3 +33,8 @@
 [data-theme=dark] .methodology-tabs { background:var(--bg-elevated); }
 [data-theme=dark] .model-logo[src$='/gpt.png'],[data-theme=dark] .model-logo[src$='/grok.png'],[data-theme=dark] .model-logo[src$='/kimi.png'] { filter:brightness(0) invert(.9); }
 [data-theme=dark] .comparison-column-name .model-logo { filter:none; }
+
+[data-theme=dark] .model-directory-list .directory-bar { --bar-mix:18%; }
+[data-theme=dark] .model-directory-list .directory-bar:hover { --bar-mix:27%; }
+[data-theme=dark] .model-directory-list .directory-bar[aria-pressed=true] { --bar-mix:40%; }
+[data-theme=dark] .directory-bar[aria-pressed=true] .directory-rank { background:var(--model-bar-color); color:var(--bg); }
