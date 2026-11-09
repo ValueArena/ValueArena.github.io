@@ -6,6 +6,7 @@ import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
 import { LENSES, groupOf, runningTop, topLabs, type Lens, type ModelInfo, type TrendPoint } from '@/lib/hub';
 import { TREND_RUN, modelInfo } from '@/lib/registry';
+import homeHistory from '@/lib/data/home-model-history.json';
 import type { SummaryRow } from '@/lib/types';
 import { LogoTile, Tip, niceTicks } from './ui';
 import { Sparks } from './sparks';
@@ -69,7 +70,7 @@ function wave(fromX: number, y: number, headX: number, amp: number, phase: numbe
  * (end labels name the lines), and a chart sized so the whole card fits on the first screen.
  */
 export function TrendsCard({ compact = false, flat = false, showNotes = true, home = false }: { compact?: boolean; flat?: boolean; showNotes?: boolean; home?: boolean }) {
-  const [rows, setRows] = useState<SummaryRow[] | null>(null);
+  const [rows, setRows] = useState<SummaryRow[] | null>(() => home && homeHistory.run === TREND_RUN ? homeHistory.rows : null);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   const [lens, setLens] = useState<Lens>('license');
@@ -94,12 +95,20 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
   useEffect(() => {
     let active = true;
     setFailed(false);
-    setRows(null);
-    fetchSummary(TREND_RUN).then(data => { if (active) setRows(data); }).catch(() => {
-      if (active) { setFailed(true); setRows([]); }
+    if (!home) setRows(null);
+    fetchSummary(TREND_RUN).then(data => {
+      if (!active) return;
+      // Keep the shipped chart visible if a refresh has no usable history.
+      if (home && data.filter(row => Number.isFinite(row.elo_mean) && modelInfo(row.model_name)).length < 3) return;
+      setRows(previous => previous?.length === data.length && previous.every((row, i) =>
+        row.model_name === data[i].model_name && row.elo_mean === data[i].elo_mean &&
+        row.elo_ci_lower === data[i].elo_ci_lower && row.elo_ci_upper === data[i].elo_ci_upper
+      ) ? previous : data);
+    }).catch(() => {
+      if (active && !home) { setFailed(true); setRows([]); }
     });
     return () => { active = false; };
-  }, [retry]);
+  }, [retry, home]);
 
   const points = useMemo<Point[]>(() => (rows || []).flatMap(row => {
     const info = modelInfo(row.model_name);

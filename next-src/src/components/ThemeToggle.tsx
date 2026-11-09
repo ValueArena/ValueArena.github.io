@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   useEffect(() => {
     setDark(document.documentElement.dataset.theme === 'dark');
     const sync = (event: StorageEvent) => {
       if (event.key !== 'valuearena-theme') return;
-      const next = event.newValue === 'dark';
+      const next = event.newValue !== 'light';
       document.documentElement.dataset.theme = next ? 'dark' : 'light';
       setDark(next);
     };

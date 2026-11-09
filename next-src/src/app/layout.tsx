@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      data-theme="light"
+      data-theme="dark"
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
@@ -61,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{document.documentElement.dataset.theme=localStorage.getItem('valuearena-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}",
+              "try{document.documentElement.dataset.theme=localStorage.getItem('valuearena-theme')==='light'?'light':'dark'}catch(e){document.documentElement.dataset.theme='dark'}",
           }}
         />
       </head>
