@@ -1,18 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ModelLogo } from './ModelLogo';
 import { closestModels, matchScores, type MatchPack, type MatchPick, type MatchQuestion } from '@/lib/model-match';
 import { renderMarkdownSanitized } from '@/lib/chat-render';
 
 const STORE = 'eigenbench-model-match-v1';
 
-function ResponseText({ text }: { text: string }) {
+function ResponseText({ text, full = false }: { text: string; full?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   // Exact excerpts from the saved response; no generated summaries.
   const cut = text.indexOf('\n\n', 240);
   const preview = cut > 0 && cut < 700 ? cut : Math.min(text.length, 600);
-  const short = text.length > preview + 100;
+  const short = !full && text.length > preview + 100;
   const shown = expanded || !short ? text : `${text.slice(0, preview).trim()}…`;
   const [html, setHtml] = useState<{ text: string; html: string } | null>(null);
   useEffect(() => {
@@ -29,6 +29,46 @@ function SavedEvidence({ question }: { question: MatchQuestion }) {
   </a>)}</div>;
 }
 
+function LiveMatch({ pack, answers }: { pack: MatchPack; answers: (MatchPick | null)[] }) {
+  const list = useRef<HTMLOListElement>(null);
+  const positions = useRef(new Map<string, number>());
+  const scores = matchScores(pack, answers).filter(score => score.compared > 0).sort((a, b) => b.rate - a.rate || b.chosen - a.chosen || a.model.localeCompare(b.model));
+  const counts = pack.models.map(model => ({ model, closer: 0, further: 0 }));
+  pack.questions.forEach((question, i) => {
+    const answer = answers[i];
+    if (!answer || answer === 'skip') return;
+    counts.find(c => c.model === question[answer].model)!.closer++;
+    counts.find(c => c.model === question[answer === 'a' ? 'b' : 'a'].model)!.further++;
+  });
+  useLayoutEffect(() => {
+    const next = new Map<string, number>();
+    list.current?.querySelectorAll<HTMLElement>('[data-model]').forEach(row => {
+      const top = row.offsetTop, model = row.dataset.model!;
+      next.set(model, top);
+      const before = positions.current.get(model);
+      if (before !== undefined && before !== top && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        row.getAnimations().forEach(animation => animation.cancel());
+        row.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'translateY(0)' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      }
+    });
+    positions.current = next;
+  }, [answers]);
+  return <aside className="match-live" aria-label="Your live model ranking">
+    <header><span className="match-live-signal" aria-hidden="true" /><h2>Your match, taking shape</h2><span>{answers.filter(Boolean).length}/10</span></header>
+    <div className="match-buckets">{(['closer', 'further'] as const).map(kind => <section className={`match-bucket match-bucket-${kind}`} key={kind} aria-label={kind === 'closer' ? 'Closer to me' : 'Less like me'}>
+      <h3>{kind === 'closer' ? 'Closer to me' : 'Less like me'}</h3>
+      <div className="match-bucket-models">{counts.filter(c => c[kind] > 0).map(c => <span className="match-model-token" key={`${c.model}-${c[kind]}`} title={`${c.model}: ${c[kind]} ${kind === 'closer' ? 'chosen' : 'passed over'}`}><ModelLogo name={c.model} size={25} /><span>{c.model}</span><b>{c[kind]}</b></span>)}
+      {!counts.some(c => c[kind] > 0) && <span className="match-bucket-empty" aria-hidden="true"><i /><i /><i /></span>}</div>
+    </section>)}</div>
+    <div className="match-live-ranking"><div className="match-live-columns"><span>Current ranking</span><span>Chosen / seen</span></div>
+      {!scores.length && <p className="match-live-empty">Make a choice and watch the models find their places.</p>}
+      <ol ref={list}>{scores.map(score => <li key={score.model} data-model={score.model}><span className="match-live-rank">{scores.findIndex(s => s.rate === score.rate) + 1}</span><ModelLogo name={score.model} size={22} /><span className="match-live-name">{score.model}<span className="match-live-meter"><i style={{ width: `${score.rate * 100}%` }} /></span></span><strong>{score.chosen}<span>/{score.compared}</span></strong></li>)}</ol>
+    </div>
+    <p className="match-live-note">Updates after each choice. Early rankings can change quickly.</p>
+    <p className="sr-only" role="status" aria-live="polite">{scores.length ? `Current leading ${scores.filter(s => s.rate === scores[0].rate).length > 1 ? 'models' : 'model'}: ${scores.filter(s => s.rate === scores[0].rate).map(s => s.model).join(', ')}.` : 'Choose a response to start your ranking.'}</p>
+  </aside>;
+}
+
 export function ModelMatch() {
   const [pack, setPack] = useState<MatchPack | null>(null);
   const [error, setError] = useState(false);
@@ -36,8 +76,9 @@ export function ModelMatch() {
   const [answers, setAnswers] = useState<(MatchPick | null)[]>([]);
   const [flips, setFlips] = useState<boolean[]>([]);
   const [index, setIndex] = useState(0);
-  const [screen, setScreen] = useState<'intro' | 'quiz' | 'result'>('intro');
+  const [screen, setScreen] = useState<'quiz' | 'result'>('quiz');
   const [copied, setCopied] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusNext = useRef(false);
 
@@ -57,6 +98,8 @@ export function ModelMatch() {
         }
       } catch { /* The quiz works without browser storage. */ }
       setAnswers(picks); setFlips(order); setPack(data);
+      const next = picks.findIndex(pick => pick === null);
+      setIndex(next < 0 ? 0 : next); setScreen(next < 0 ? 'result' : 'quiz');
     }).catch(e => { if (e.name !== 'AbortError') setError(true); });
     return () => controller.abort();
   }, [attempt]);
@@ -69,17 +112,14 @@ export function ModelMatch() {
     if (!focusNext.current) return;
     focusNext.current = false;
     heading.current?.focus({ preventScroll: true });
-    heading.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    if (screen === 'result' || (heading.current?.getBoundingClientRect().top ?? 0) < 76) heading.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
   }, [screen, index]);
 
   const move = (next: number) => { focusNext.current = true; setIndex(next); };
-  const begin = () => {
-    if (!pack) return;
-    focusNext.current = true;
-    const next = answers.findIndex(answer => answer === null);
-    setIndex(next < 0 ? 0 : next); setScreen(next < 0 ? 'result' : 'quiz');
+  const choose = (pick: MatchPick) => {
+    setAnswers(previous => previous.map((answer, i) => i === index ? pick : answer));
+    setShowInfo(false);
   };
-  const choose = (pick: MatchPick) => setAnswers(previous => previous.map((answer, i) => i === index ? pick : answer));
   const finish = () => { focusNext.current = true; setScreen('result'); };
   const restart = () => {
     if (!pack) return;
@@ -87,16 +127,7 @@ export function ModelMatch() {
   };
   const completed = answers.filter(Boolean).length;
 
-  if (screen === 'intro') return <section className="model-match-intro">
-    <div><h1>Which model thinks<br />most like you?</h1><p>Ten situations. Two anonymous responses each. Choose the answer closer to what you would do, then discover your model match.</p>
-      <div className="match-intro-meta"><span>10 scenarios</span><span>5 models</span><span>No signup</span></div>
-      <div className="eigenbench-actions"><button className="eigenbench-primary" onClick={begin} disabled={!pack}>{pack ? completed === answers.length ? 'See your match' : completed ? 'Continue your match' : 'Find my model match' : error ? 'Questions unavailable' : 'Loading questions…'}</button><a href="/evaluate/">Create an evaluation</a></div>
-      {error && <p role="alert" className="match-load-error">Couldn’t load the saved responses. <button onClick={() => setAttempt(n => n + 1)}>Try again</button></p>}
-      <p className="match-saved-note">Real responses from saved EigenBench evaluations. Your choices stay in this browser tab.</p>
-    </div><img className="match-intro-art" src="/assets/art/model-conversation-values.webp" width="320" height="240" alt="Three pixel computers gathered around a table" />
-  </section>;
-
-  if (!pack) return null;
+  if (!pack) return <section className="match-loading"><h1>Which model thinks most like you?</h1>{error ? <p role="alert">Couldn’t load the saved responses. <button onClick={() => setAttempt(n => n + 1)}>Try again</button></p> : <p role="status">Opening your first scenario…</p>}</section>;
   if (screen === 'result') {
     const scores = matchScores(pack, answers), winners = closestModels(scores, answers);
     const decisive = answers.filter(answer => answer && answer !== 'skip').length;
@@ -113,16 +144,22 @@ export function ModelMatch() {
 
   const question = pack.questions[index], selected = answers[index];
   const sides: ('a' | 'b')[] = flips[index] ? ['b', 'a'] : ['a', 'b'];
-  return <section className="model-match-quiz" aria-label="Model match quiz">
-    <div className="match-progress-heading"><span>Scenario {index + 1} of {pack.questions.length}</span><button onClick={() => setScreen('intro')}>Save and exit</button></div>
+  return <section className="model-match-quiz" data-started={completed > 0 && !showInfo} aria-label="Model match quiz">
+    <div className="match-workspace-title"><h1>Which model thinks most like you?</h1><button onClick={() => setShowInfo(!showInfo)} aria-expanded={showInfo}>{showInfo ? 'Focus on quiz' : 'How it works'}</button></div>
+    {showInfo && <p className="match-help">Pick the response closer to what you would do. Each model appears four times across ten saved scenarios. Names appear after you choose; “Neither / unsure” doesn’t affect the ranking. Your progress stays in this browser tab.</p>}
+    <div className="match-workspace">
+    <div className="match-question-pane">
+    <div className="match-progress-heading"><span>Scenario {index + 1} of {pack.questions.length}</span><span>Choose what feels like you</span></div>
     <progress value={index + 1} max={pack.questions.length} aria-label="Quiz progress" />
-    <h1 ref={heading} tabIndex={-1}>What would you do?</h1><p className="match-scenario">{question.scenario}</p>
-    <p className="match-question">Which response is closer to how you would respond?</p>
+    <h2 className="match-scenario-heading" ref={heading} tabIndex={-1}>What would you do?</h2><p className="match-scenario">{question.scenario}</p>
     <div className="match-response-grid" key={question.id}>{sides.map((side, i) => <article className="match-response" data-selected={selected === side} key={side}>
-      <h2><span>{i === 0 ? 'A' : 'B'}</span>Response {i === 0 ? 'A' : 'B'}</h2><ResponseText text={question[side].response} />
+      <h3><span>{i === 0 ? 'A' : 'B'}</span>{selected ? <><ModelLogo name={question[side].model} size={18} />{question[side].model}</> : `Response ${i === 0 ? 'A' : 'B'}`}</h3>
+      <div className="match-response-scroll" tabIndex={0} role="region" aria-label={`Response ${i === 0 ? 'A' : 'B'} full text`}><ResponseText text={question[side].response} full /></div>
       <button className="match-pick" aria-pressed={selected === side} onClick={() => choose(side)}>{selected === side ? 'Selected' : `I’m closer to ${i === 0 ? 'A' : 'B'}`}</button>
     </article>)}</div>
     <div className="match-quiz-bottom"><button className="match-skip" aria-pressed={selected === 'skip'} onClick={() => choose('skip')}>Neither / unsure</button><div><button disabled={index === 0} onClick={() => move(index - 1)}>Back</button><button className="eigenbench-primary" disabled={!selected} onClick={() => index === pack.questions.length - 1 ? finish() : move(index + 1)}>{index === pack.questions.length - 1 ? 'See my match' : 'Next scenario'}</button></div></div>
-    <p className="match-saved-note">Model names are revealed at the end. These are previously recorded responses.</p>
+    </div>
+    <LiveMatch pack={pack} answers={answers} />
+    </div>
   </section>;
 }

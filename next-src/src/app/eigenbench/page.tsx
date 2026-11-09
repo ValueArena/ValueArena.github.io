@@ -10,8 +10,8 @@ export default function EigenBenchPage() {
 
       <section className="eigenbench-workflow" aria-labelledby="eigenbench-workflow-title">
         <div className="eigenbench-section-copy">
-          <h2 id="eigenbench-workflow-title">Go further with EigenBench.</h2>
-          <p>Explore the saved evaluations behind your match, or run your own with different models, scenarios, and values.</p>
+          <h2 id="eigenbench-workflow-title">A few choices. A model match.</h2>
+          <p>Ten saved scenarios. Five models. Choose the responses that feel closer to you and see your ranking take shape. No signup or API key needed.</p>
           <div className="eigenbench-resources">
             <a href="/evaluate/">Create an evaluation</a>
             <a href="https://github.com/jchang153/EigenBench">GitHub</a>
@@ -20,16 +20,16 @@ export default function EigenBenchPage() {
         </div>
         <ol className="eigenbench-steps">
           <li>
-            <h3>Define your evaluation</h3>
-            <p>Choose models, scenarios and a constitution.</p>
+            <h3>Read a scenario</h3>
+            <p>Two real model responses, with names hidden until you choose.</p>
           </li>
           <li>
-            <h3>Collect and judge</h3>
-            <p>Generate responses and evaluate them against explicit criteria.</p>
+            <h3>Pick what feels like you</h3>
+            <p>Choose A, B, or neither. Scroll inside each response to read it in full.</p>
           </li>
           <li>
-            <h3>Inspect and share</h3>
-            <p>Review coverage, scores and transcripts before publishing results.</p>
+            <h3>Watch your match change</h3>
+            <p>See the models move after each choice, then explore the evaluations behind your result.</p>
           </li>
         </ol>
       </section>
