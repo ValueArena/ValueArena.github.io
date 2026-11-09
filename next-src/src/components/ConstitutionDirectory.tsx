@@ -2,20 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
-import { CONSTITUTION_SUMMARIES, CONSTITUTION_SUMMARY_POINTS } from '@/lib/taglines';
 import { usePublishedBoards } from './usePublishedBoards';
 import { ModelLogo } from './ModelLogo';
-import { BoardIcon } from './hub/ui';
+import { ValuePortrait } from './ValuePortrait';
 import { profileURL, scoreRank } from '@/lib/arena-data';
 
 const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
 const VALUE_ORDER: Record<string, number> = { taoism_constitution: 0, mathematical: 1 };
-const PIXEL_SYMBOLS = new Set([
-  'kindness', 'conservatism', 'deep_ecology', 'goodness', 'humor', 'impulsiveness',
-  'lockean_rights_constitution', 'loving', 'marxism_constitution', 'mathematical',
-  'misalignment', 'nonchalance', 'poeticism', 'remorse', 'sarcasm', 'sycophancy',
-  'taoism_constitution',
-]);
 
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
@@ -96,24 +89,18 @@ export function ConstitutionDirectory() {
           : <div className="values-story">
             <div className="value-symbol-stage" aria-hidden="true" data-value={current?.id}>
               {shown.map((board, i) => <div key={board.id} className="value-symbol-layer" data-active={current?.id === board.id} data-tone={SYMBOL_TONES[i % SYMBOL_TONES.length]}>
-                <div className="value-symbol-mark">{PIXEL_SYMBOLS.has(board.id)
-                  ? <img className="value-symbol-image" src={`/assets/art/values/${board.id}.webp`} alt="" width="512" height="512" decoding="async" fetchPriority={i === 0 ? 'high' : 'low'} />
-                  : <BoardIcon constitution={board.id} />}</div>
-                <span className="value-symbol-name">{constLabel(board.id)}</span>
-                <span className="value-symbol-position">{String(i + 1).padStart(2, '0')} / {String(shown.length).padStart(2, '0')}</span>
+                <ValuePortrait id={board.id} priority={i === 0} />
               </div>)}
             </div>
             <div className="values-chapters">{shown.map(board => {
               const rows = data.scores[board.run.slug], date = new Date(board.run.timestamp);
-              const summary = CONSTITUTION_SUMMARY_POINTS[board.id];
               const href = `/leaderboard/?constitution=${encodeURIComponent(board.id)}&run=${encodeURIComponent(board.run.slug)}`;
               return <article className="value-chapter" id={`value-${board.id}`} data-value={board.id} data-active={current?.id === board.id} key={board.id} aria-labelledby={`value-title-${board.id}`}>
                 <div className="value-chapter-intro">
                   <h2 id={`value-title-${board.id}`}>{constLabel(board.id)}</h2>
-                  {summary ? <ul className="value-summary" aria-label={`${constLabel(board.id)} summary`}>
-                    {summary.map(point => <li key={point}>{point}</li>)}
-                  </ul> : CONSTITUTION_SUMMARIES[board.id] && <p>{CONSTITUTION_SUMMARIES[board.id]}</p>}
                 </div>
+                {/* Accessible in chapter order; also becomes the visible portrait on small screens. */}
+                <div className="value-chapter-portrait"><ValuePortrait id={board.id} /></div>
                 <div className="value-chapter-leaders">
                   <header><h3>Top models</h3><span>Elo</span></header>
                   {rows?.length ? <ol>{rows.slice(0, 3).map(row => <li key={row.model_name}><a href={profileURL(row.model_name, board.run.slug)} title={row.model_name}>

@@ -43,8 +43,8 @@ export const CONSTITUTION_SUMMARIES: Record<string, string> = {
     'Understand exploitation through class and ownership. Put human needs and workers’ development before profit, and favor collective control of production.',
 };
 
-// Brief editorial summaries of the criteria, presented beneath each value's
-// heading. The constitution detail page retains the complete published text.
+// Editorial summaries beneath each value's artwork: a lead sentence followed
+// by supporting prose. The detail page also retains the complete criteria.
 export const CONSTITUTION_SUMMARY_POINTS: Record<string, string[]> = {
   taoism_constitution: [
     'Act simply, with as little interference as possible.',

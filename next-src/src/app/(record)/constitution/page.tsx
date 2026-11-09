@@ -5,11 +5,10 @@ import { REF_ANCHOR, REF_NICKS } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary } from '@/lib/hf';
 import { constLabel, normConst } from '@/lib/nicks';
 import { CONSTITUTIONS_DATA } from '@/lib/constitutions-data';
-import { CONSTITUTION_TAGLINES } from '@/lib/taglines';
 import type { IndexRun, MetaJson, Summary } from '@/lib/types';
 import { ModelLogo } from '@/components/ModelLogo';
 import { Sparkbar } from '@/components/Sparkbar';
-import { BoardIcon } from '@/components/hub/ui';
+import { ValuePortrait } from '@/components/ValuePortrait';
 
 interface RunData {
   run: IndexRun;
@@ -75,7 +74,6 @@ export default function ConstitutionPage() {
       </div>
     );
   const label = constLabel(id);
-  const tagline = CONSTITUTION_TAGLINES[id] || 'Written criteria for evaluating model responses.';
   const criteria = CONSTITUTIONS_DATA[id] || [];
   const runs = state.status === 'ok' ? state.runs : [];
 
@@ -107,49 +105,35 @@ export default function ConstitutionPage() {
         <a href="/constitutions/">All values</a><span aria-hidden="true">/</span><span aria-current="page">{label}</span>
       </nav>
 
-      <div className="specimen-hero">
-        <div className="specimen-hero-inner">
-          <div className="specimen-sigil"><BoardIcon constitution={id} /></div>
-          <div>
-            <div className="specimen-kicker">Constitution</div>
-            <h1 className="specimen-title">{label}</h1>
-            <div className="specimen-sub">{tagline}</div>
-          </div>
-          <div className="specimen-stats">
-            <div className="specimen-stat-label">Criteria</div>
-            <div className="specimen-stat-value">{criteria.length || '—'}</div>
-            <div className="specimen-stat-sub">
-              {state.status === 'ok' ? `${runs.length} run${runs.length === 1 ? '' : 's'}` : 'Written criteria'}
-            </div>
-          </div>
-        </div>
+      <header className="constitution-heading">
+        <h1>{label}</h1>
+        <a className="results-button" href={`/leaderboard/?constitution=${encodeURIComponent(id)}`}>View leaderboard</a>
+      </header>
+
+      <div className="constitution-reading">
+        <aside className="constitution-portrait"><ValuePortrait id={id} priority /></aside>
+        <section className="constitution-criteria" aria-labelledby="constitution-criteria-heading">
+          <header className="constitution-criteria-heading">
+            <h2 id="constitution-criteria-heading">Evaluation criteria</h2>
+            <span aria-label={`${criteria.length} criteria`}>{String(criteria.length).padStart(2, '0')}</span>
+          </header>
+          {criteria.length ? (
+            <ol className="scripture">
+              {criteria.map((text, i) => (
+                <li key={i} className="criterion-article">
+                  <span className="criterion-numeral" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="criterion-text">{text.split(/(\*[^*]+\*)/g).map((part, n) => part.startsWith('*') && part.endsWith('*') ? <em key={n}>{part.slice(1, -1)}</em> : part)}</div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="hollow">No criteria text available for this constitution.</div>
+          )}
+        </section>
       </div>
 
-      <section className="card constitution-criteria" aria-labelledby="constitution-criteria-heading">
-        <h2 id="constitution-criteria-heading">Evaluation criteria</h2>
-        <div className="card-caption">
-          Each criterion is something the judge looks for in a model’s response. They are
-          numbered in order, not by importance, and the judge sees the whole list.
-        </div>
-        {criteria.length ? (
-          <ol className="scripture">
-            {criteria.map((text, i) => (
-              <li key={i} className="criterion-article">
-                <span className="criterion-numeral" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                <div className="criterion-text">{text.split(/(\*[^*]+\*)/g).map((part, n) => part.startsWith('*') && part.endsWith('*') ? <em key={n}>{part.slice(1, -1)}</em> : part)}</div>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <div className="hollow">No criteria text available for this constitution.</div>
-        )}
-      </section>
-
-      <section className="card constitution-results" aria-labelledby="constitution-results-heading">
-        <div className="constitution-results-heading"><h2 id="constitution-results-heading">Model results</h2><a className="results-button" href={`/leaderboard/?constitution=${encodeURIComponent(id)}`}>Open leaderboard</a></div>
-        <div className="card-caption">
-          Published scores for <strong>{label}</strong>. Each result links to its source evaluation.
-        </div>
+      <section className="constitution-results" aria-labelledby="constitution-results-heading">
+        <div className="constitution-results-heading"><h2 id="constitution-results-heading">Model results</h2><span>{rows.length ? `${rows.length} models` : ''}</span></div>
         {state.status === 'loading' ? <p className="results-status" role="status">Loading model results…</p> : state.status === 'error' ? <p className="results-status" role="alert">Model results could not be loaded. The criteria above are available.</p> : rows.length ? (
           <div className="results-table-scroll">
           <table className="elo-table">
