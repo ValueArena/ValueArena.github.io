@@ -59,7 +59,7 @@ jobs:
           # Delete legacy publish artefacts and stale Next output. Each path
           # listed explicitly so we never `rm -rf .` by accident.
           rm -rf _next next out methodology
-          rm -f index.html model.html constitution.html run.html methodology.html sitemap.xml robots.txt favicon.svg
+          rm -f index.html model.html constitution.html run.html methodology.html sitemap.xml robots.txt favicon.svg model-match.json
           rm -rf js css img
 
           # Copy the new export over.

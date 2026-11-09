@@ -32,6 +32,7 @@ export default function RunPage() {
         if (!cancelled) setState({ status: 'error', message: 'Invalid or missing run.' });
         return;
       }
+      if (slug.startsWith('account/')) { location.replace(`https://eigenbench.github.io/run/${location.search}${location.hash}`); return; }
       try {
         const [meta, summary, index] = await Promise.all([
           fetchMeta(slug),

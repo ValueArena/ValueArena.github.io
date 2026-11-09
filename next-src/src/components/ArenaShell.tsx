@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { SiteFooter } from './SiteFooter';
 
-export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || '/eigenbench/';
+export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || 'https://eigenbench.github.io/';
 const arenaURL = process.env.NEXT_PUBLIC_VALUEARENA_URL || 'https://valuearena.github.io/';
 
 export function ArenaShell({ children }: { children: React.ReactNode }) {
