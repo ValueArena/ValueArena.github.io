@@ -1,0 +1,45 @@
+{
+  "source": "Side Effects of Character Training: Quantifying Cross-Constitution Drift in LLMs",
+  "snapshot_date": "2026-09-22",
+  "source_tex_sha256": "ab728b9241d662c23a6ebcfde1a5dfa0780387770c89fae27372564f51083da7",
+  "figures": {
+    "trained": {
+      "source_file": "figures/trained_matrix_new_300.png",
+      "source_sha256": "5fa84b72bf121ea2332569278d74d2f58744a23abee3e7c03a5833d1e9268a07",
+      "width": 1430,
+      "height": 1221
+    },
+    "prompted": {
+      "source_file": "figures/prompted_matrix_new_1.png",
+      "source_sha256": "1cfb604187dddf57b1e992baf15afb5ee164733eb89895e0d672b20406e9becd",
+      "width": 1430,
+      "height": 1221
+    },
+    "train-prompt": {
+      "source_file": "figures/nxn_matrix_new_1.png",
+      "source_sha256": "7570770a2e0c5b3ccd5bc55a4b972d57d877c80b6c143e986c9bb5ff2397e9ec",
+      "width": 2200,
+      "height": 642
+    },
+    "checkpoints": {
+      "source_file": "figures/cross_constitution_base_anchored.png",
+      "source_sha256": "0a86428b958ca2b6ff2aa5254799c61a4d3b4670ea1a10972897af7012c07456",
+      "width": 1981,
+      "height": 1857
+    }
+  },
+  "variance_table": {
+    "loving": {
+      "character": 95.2,
+      "prompt": 4.8
+    },
+    "sarcasm": {
+      "character": 71.2,
+      "prompt": 28.8
+    },
+    "misalignment": {
+      "character": 42.6,
+      "prompt": 57.4
+    }
+  }
+}

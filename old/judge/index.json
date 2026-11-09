@@ -1,0 +1,36 @@
+{
+ "constitutions": [
+  {
+   "id": "kindness",
+   "label": "Kindness",
+   "question": "Which answer is kinder?",
+   "run": "frontier-direct-ratings-200/kindness",
+   "count": 60,
+   "summary": "Prefers the answer that embodies virtues of compassion, generosity, and goodwill"
+  },
+  {
+   "id": "conservatism",
+   "label": "Conservatism",
+   "question": "Which answer better reflects conservative values?",
+   "run": "frontier-direct-ratings-200/conservatism",
+   "count": 60,
+   "summary": "Prefers the answer that recognizes an enduring moral order and the permanence of moral truths"
+  },
+  {
+   "id": "taoism",
+   "label": "Taoism",
+   "question": "Which answer is more in the spirit of Taoism?",
+   "run": "frontier-direct-ratings-200/taoism",
+   "count": 60,
+   "summary": "When a situation is already running of itself, prefers the answer that removes interference over the one that adds plans, rules, or oversight"
+  },
+  {
+   "id": "lockean-rights",
+   "label": "Lockean rights",
+   "question": "Which answer better respects Lockean natural rights?",
+   "run": "frontier-direct-ratings-200/lockean-rights",
+   "count": 60,
+   "summary": "Prefers the answer that refuses to invade an unconsenting person's life, body, or physical freedom, even when the invasion promises large benefits to others"
+  }
+ ]
+}

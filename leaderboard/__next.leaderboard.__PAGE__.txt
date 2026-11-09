@@ -1,8 +1,6 @@
 1:"$Sreact.fragment"
-2:I[50600,["/_next/static/chunks/0o7rxuhatuien.js","/_next/static/chunks/0-6t1zg3l-4vd.js","/_next/static/chunks/02r5woef2zim9.js","/_next/static/chunks/0bu4obr~t~y0r.js","/_next/static/chunks/0i5iuckcb24.d.js"],"LeaderboardHub"]
-3:I[38193,["/_next/static/chunks/0o7rxuhatuien.js","/_next/static/chunks/0-6t1zg3l-4vd.js","/_next/static/chunks/02r5woef2zim9.js","/_next/static/chunks/0bu4obr~t~y0r.js","/_next/static/chunks/0i5iuckcb24.d.js"],"Leaderboard"]
-4:I[97367,["/_next/static/chunks/0o7rxuhatuien.js","/_next/static/chunks/0-6t1zg3l-4vd.js","/_next/static/chunks/02r5woef2zim9.js"],"OutletBoundary"]
-5:"$Sreact.suspense"
-:HL["/_next/static/chunks/0_hfg30x10euy.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"research-index","children":[["$","header",null,{"className":"research-page-head","children":[["$","h1",null,{"children":"Leaderboard"}],["$","p",null,{"children":"How models rank on each constitution, how values change over time, and how EigenBench compares with other measures."}],["$","a",null,{"className":"home-panel-link","href":"/explore/","children":"Interactive rankings & tradeoffs →"}]]}],["$","$L2",null,{}],["$","section",null,{"className":"hub-all-runs","aria-labelledby":"all-runs-title","children":[["$","h2",null,{"id":"all-runs-title","children":"All runs"}],["$","p",null,{"children":"Every constitution and run, with plot, ranking and Pareto views."}],["$","$L3",null,{}]]}]]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/0_hfg30x10euy.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/0bu4obr~t~y0r.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/0i5iuckcb24.d.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"mrxQVIpG1DpWBPSNUA-YA"}
-6:null
+2:I[67585,["5730","static/chunks/44530001-2f4e96388e27a973.js","3953","static/chunks/3953-f2ecb339ec8b6554.js","2891","static/chunks/2891-5c78929c858f8c04.js","7550","static/chunks/7550-a0b8edcdc3ca34a4.js","1410","static/chunks/app/leaderboard/page-1cd688d6026f83fc.js"],"ModelBrowser"]
+3:I[90484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"5rIetwwjDqG-7oiBsv21G"}
+5:null

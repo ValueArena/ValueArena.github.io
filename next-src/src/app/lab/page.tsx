@@ -67,7 +67,7 @@ export default function LabPage() {
 
     <section className="lab-section" aria-labelledby="lab-open">
       <h2 id="lab-open">Open</h2>
-      <p className="lab-links"><a href="/">ValueArena</a><a href="https://github.com/jchang153/EigenBench">EigenBench ↗</a><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Dataset ↗</a><a href="https://github.com/ValueArena/ValueArena.github.io">Site code ↗</a></p>
+      <p className="lab-links"><a href="/">ValueArena</a><a href="https://github.com/jchang153/EigenBench">EigenBench</a><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Dataset</a><a href="https://github.com/ValueArena/ValueArena.github.io">Site code</a></p>
     </section>
   </div>;
 }

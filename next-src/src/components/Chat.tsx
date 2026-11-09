@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLogo } from './ValueLogo';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CONSTITUTIONS, getModelLogo } from '@/lib/config';
 import { isStreamingDelta, renderMarkdown } from '@/lib/chat-render';
@@ -255,7 +256,7 @@ export function Chat({ mainContent }: ChatProps = {}) {
   return (
     <div className={`chat-shell${turns.length === 0 ? ' empty' : ''}`}>
       <div className="chat-topbar">
-        <span className="chat-topbar-label">{session.constLabel}</span>
+        <span className="chat-topbar-label"><ValueLogo id={session.constitution} /> {session.constLabel}</span>
         <span className="chat-topbar-sep">·</span>
         <span className="chat-topbar-models">
           {session.labelA} vs {session.labelB}
@@ -712,7 +713,7 @@ function ModelDropdown({
         {showLogo ? (
           <ModelLogo name={selected.value} size={16} />
         ) : null}
-        <span>{selected.label}</span>
+        {kind === 'constitution' && <ValueLogo id={selected.value} />}<span>{selected.label}</span>
       </button>
       {open ? (
         <div className="custom-select-dropdown" role="listbox">
@@ -728,7 +729,7 @@ function ModelDropdown({
                 setOpen(false);
               }}
             >
-              {showLogo ? <ModelLogo name={o.value} size={16} /> : null}
+              {showLogo ? <ModelLogo name={o.value} size={16} /> : <ValueLogo id={o.value} />}
               <span>{o.label}</span>
             </button>
           ))}

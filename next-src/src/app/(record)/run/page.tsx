@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from '@/components/ValueLogo';
 import { fetchRunAsset } from '@/lib/run-source';
 import { runSlug } from '@/lib/run-slug';
 
@@ -31,6 +32,7 @@ export default function RunPage() {
         if (!cancelled) setState({ status: 'error', message: 'Invalid or missing run.' });
         return;
       }
+      if (slug.startsWith('account/')) { location.replace(`https://eigenbench.github.io/run/${location.search}${location.hash}`); return; }
       try {
         const [meta, summary, index] = await Promise.all([
           fetchMeta(slug),
@@ -104,11 +106,11 @@ export default function RunPage() {
           <div className="specimen-stats specimen-action">
             <div className="specimen-stat-label">Transcripts</div>
             <a className="tx-btn" href={`/transcript/?run=${encodeURIComponent(slug)}`}>
-              Read the judgments →
+              Read the judgments
             </a>
             {inspectURL ? (
               <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">
-                Open in Inspect →
+                Open in Inspect
               </a>
             ) : null}
           </div>
@@ -316,7 +318,7 @@ function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
     const cid = m ? m[1].replace(/^oct_/, '') : null;
     const pathCell = cid ? (
       <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(cid)}`}>
-        {c.path}
+        <ValueLabel id={cid}>{c.path}</ValueLabel>
       </a>
     ) : (
       c.path || '—'

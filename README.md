@@ -8,11 +8,18 @@ A comparative behavioral measure of value alignment across language models, buil
 
 ValueArena lets you explore how different LLMs align with specific human values. EigenBench supports pairwise comparisons fitted with Bradley–Terry–Davidson and direct criterion ratings normalized into a trust matrix. Both protocols aggregate consensus scores with EigenTrust.
 
-The homepage highlights recent experiments and model rankings. The main sections are:
+The homepage shows Kindness over time, value rankings, comparisons, and research.
+The main sections are:
 
-- **Compare** (`/compare/`) — Pick two models and a constitution (e.g. Kindness, Humor, Sarcasm), then chat side-by-side. Vote on which model better reflects the chosen value. Uses OpenRouter for inference directly from the browser.
-- **Leaderboard** — Per-constitution Elo rankings from EigenBench experiment runs. View as a ranked table, horizontal bar plot, or cross-constitution pareto heatmap. Group by model or by lab.
+- **Leaderboard** (`/leaderboard/`) — Per-value model profiles with rankings, confidence intervals, and links to their source evaluations.
+- **Values** (`/constitutions/`) — Scroll through each value's description and top models, with a persistent symbol and a value selector.
+- **Compare** (`/compare/`) — Compare models across values using score matrices, charts, and relative rankings.
+- **Methodology** (`/methodology/`) — How scenarios, constitutions, and judgments become scores.
+- **Compare responses** (`/responses/`) — Ask two models the same question, then compare and vote on their responses. Uses OpenRouter with the visitor's own API key.
 - **Experiments** — Browse all EigenBench runs with filtering by collection type and drill-down into protocol-specific artifacts and bootstrap confidence intervals.
+- **EigenBench** (`/eigenbench/`) — Handoff to the evaluation workspace. A separate deployment can be configured with `NEXT_PUBLIC_EIGENBENCH_URL`.
+
+The original site remains available at [`/old/`](https://valuearena.github.io/old/).
 
 ## Architecture
 
@@ -52,7 +59,7 @@ npm run dev
 Open `http://localhost:3000`. To preview the production export:
 
 ```bash
-npm run build
+npm run build -- --webpack
 python3 -m http.server 8000 --directory out
 ```
 
@@ -115,7 +122,7 @@ The `/research/` tab lists LAISR Lab papers. Add entries in
 EigenBench lives at `/research/eigenbench/`; the character-training overview
 lives at `/research/character-training/`, with training/prompting figure switching,
 a variance-decomposition chart, and checkpoint figures. The full live-data
-controls remain at `/explore/`. The outdated Methodology page has been removed.
+controls remain at `/explore/`. The scoring methodology lives at `/methodology/`.
 
 Paper assets live in `next-src/public/research/character-training/`. Their
 `sources.json` records the source filenames, hashes, snapshot date, and Table 1

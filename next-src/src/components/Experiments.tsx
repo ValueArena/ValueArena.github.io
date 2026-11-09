@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import {
   useCallback,
   useEffect,
@@ -67,8 +68,8 @@ export function Experiments() {
     let cancelled = false;
     (async () => {
       try {
-        const [index, hosted] = await Promise.all([fetchIndex(), evaluationAPI ? fetch(evaluationAPI + '/experiments', { cache: 'no-store' }).then(r => r.ok ? r.json() as Promise<EvaluationJob[]> : []).catch(() => []) : Promise.resolve([])]);
-        const hostedRuns: RunRow[] = hosted.filter((r: EvaluationJob) => !index.runs.some(existing => existing.slug === 'community/' + r.id)).map((r: EvaluationJob) => ({ slug: 'hosted/' + r.id, hosted_id: r.id, name: r.name, group: 'Community evaluations', constitution: r.constitution, scenario: `${r.scenario_count} scenarios`, models_count: r.models_count, timestamp: new Date(r.created_at * 1000).toISOString(), evaluation_mode: 'direct_rating' }));
+        const hostedRequest = evaluationAPI ? fetch(evaluationAPI + '/experiments', { cache: 'no-store', signal: AbortSignal.timeout(15000) }).then(r => r.ok ? r.json() as Promise<EvaluationJob[]> : []).catch(() => []) : Promise.resolve([]);
+        const index = await fetchIndex();
         if (cancelled) return;
         const normalized: RunRow[] = (index.runs || []).map((r) => ({
           ...r,
@@ -76,6 +77,10 @@ export function Experiments() {
           scenario: (((r as RunRow).scenario as string | undefined) || '').replace(/^oct_/, ''),
           evaluation_mode: normalizeEvaluationMode(r.evaluation_mode),
         }));
+        setRuns(normalized);
+        const hosted = await hostedRequest;
+        if (cancelled) return;
+        const hostedRuns: RunRow[] = hosted.filter((r: EvaluationJob) => !normalized.some(existing => existing.slug === 'community/' + r.id)).map((r: EvaluationJob) => ({ slug: 'hosted/' + r.id, hosted_id: r.id, name: r.name, group: 'Community evaluations', constitution: r.constitution, scenario: `${r.scenario_count} scenarios`, models_count: r.models_count, timestamp: new Date(r.created_at * 1000).toISOString(), evaluation_mode: 'direct_rating' }));
         setRuns([...hostedRuns, ...normalized]);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -221,7 +226,7 @@ export function Experiments() {
                     setOpenSelect(open ? null : f.col);
                   }}
                 >
-                  {current ? filterValueLabel(f.col, current) : `${f.label}: All`}
+                  {current ? f.col === 'constitution' ? <ValueLabel id={current} /> : filterValueLabel(f.col, current) : `${f.label}: All`}
                 </button>
                 {open ? (
                   <div className="custom-select-dropdown" role="listbox">
@@ -245,7 +250,7 @@ export function Experiments() {
                           setOpenSelect(null);
                         }}
                       >
-                        {filterValueLabel(f.col, v)}
+                        {f.col === 'constitution' ? <ValueLabel id={v} /> : filterValueLabel(f.col, v)}
                       </button>
                     ))}
                   </div>
@@ -326,7 +331,7 @@ export function Experiments() {
                   const open = expanded.has(item.name);
                   const first = item.children[0];
                   const uniqConst = [
-                    ...new Set(item.children.map((r) => r.constitution).filter(Boolean)),
+                    ...new Set(item.children.map((r) => r.constitution).filter((id): id is string => !!id)),
                   ];
                   const uniqSc = [...new Set(item.children.map((r) => r.scenario).filter(Boolean))];
                   const uniqModes = [
@@ -352,7 +357,7 @@ export function Experiments() {
                       <td className="note-cell" title={first.note || undefined}>{first.note}</td>
                       <td>
                         {uniqConst.length === 1 ? (
-                          uniqConst[0]
+                          <ValueLabel id={uniqConst[0]} />
                         ) : (
                           <span className="group-summary">{uniqConst.length} constitutions</span>
                         )}
@@ -481,7 +486,7 @@ function RunRowEl({ r, child }: { r: RunRow; child: boolean }) {
       <td>
         {r.constitution ? (
           <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(r.constitution)}`}>
-            {r.constitution}
+            <ValueLabel id={r.constitution} />
           </a>
         ) : (
           '—'

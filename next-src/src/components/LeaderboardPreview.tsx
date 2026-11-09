@@ -86,7 +86,7 @@ export function LeaderboardPreview() {
   if (failed) return (
     <section className="home-panel" role="status">
       <h2>Rankings</h2>
-      <p className="home-panel-sub">Could not load results. <a className="link-subtle" href="/leaderboard/">Open leaderboard →</a></p>
+      <p className="home-panel-sub">Could not load results. <a className="link-subtle" href="/leaderboard/">Open leaderboard</a></p>
     </section>
   );
 
@@ -102,7 +102,7 @@ export function LeaderboardPreview() {
           </p>
         </div>
         <a className="home-panel-link" href="/leaderboard/">
-          View all →
+          View all
         </a>
       </div>
 

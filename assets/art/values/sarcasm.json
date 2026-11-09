@@ -1,0 +1,47 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Use case: illustration-story\nAsset type: Sarcasm value logo for ValueArena and EigenBench.\nThe input image is a style reference only: match its crafted muted 16-bit pixel-art technique, isometric scale and restrained palette, but replace its subject.\nPrimary request: a compact Shoggoth creature wearing a little cheerful yellow smiley-face mask. The creature is a dark forest-green amorphous mound with a few curling tentacles and several tiny strange eyes peeking around the mask. Its small warm-yellow theatrical smiley mask is held slightly askew in front of it by one tentacle, suggesting an exaggerated friendly surface over a knowing, sardonic creature underneath. A crooked smile and one slightly raised eye on the mask convey dry sarcasm. It should be recognizable as the Shoggoth-with-a-smiley-mask motif, playful and witty, a little uncanny rather than gruesome. Exactly one creature and one smiley mask. No computer needed.\nStyle: deliberate square pixel clusters, crisp stepped dark outlines, only a few shading tones, compact three-quarter isometric vignette. Deep forest green, muted sage, charcoal and warm ochre mask; subtle cream highlights. Match the existing value logos in finish and visual density. No blood, gore, slime gloss, photorealism, smooth vector curves, blur, glow or gradients.\nSquare centered composition with the full creature, all tentacle tips and mask visible, clear generous margins. Perfectly uniform flat cream #F2EBDF backdrop for clean removal. No floor shadow, frame, text, speech bubbles, labels, letters, watermarks or extra props.",
+  "references": [
+    "output/imagegen/value-symbols/sarcasm.png"
+  ],
+  "parameters": {
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "n": 1,
+    "output_format": "png"
+  },
+  "created": 1794228502,
+  "usage": {
+    "prompt_tokens": 1357,
+    "completion_tokens": 1756,
+    "total_tokens": 3113,
+    "cost": 0.062537,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.062537,
+      "upstream_inference_prompt_cost": 0.009857,
+      "upstream_inference_completions_cost": 0.05268
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1756
+    }
+  },
+  "elapsed_seconds": 62.6,
+  "processing": {
+    "source": "output/imagegen/misalignment-v2/sarcasm-shoggoth-v2.png",
+    "background": "Removed connected cream backdrop and enclosed paper gaps; protected reflective mirror areas.",
+    "protected_regions": [],
+    "canvas": [
+      512,
+      512
+    ],
+    "format": "lossless WebP",
+    "palette_colors": 256,
+    "bytes": 26130
+  }
+}

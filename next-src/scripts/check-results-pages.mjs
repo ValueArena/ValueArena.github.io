@@ -1,0 +1,110 @@
+import assert from 'node:assert/strict';
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_EXECUTABLE || undefined, headless: true });
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errors = [];
+  const requests = [];
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('request', r => { if (r.url().includes('huggingface.co')) requests.push(r.url()); });
+  const base = 'http://127.0.0.1:4173';
+  const overflow = async () => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow on ${page.url()}`);
+  const capture = async name => {
+    await overflow();
+    await page.screenshot({ path: `/private/tmp/results-${name}-desktop.png`, fullPage: !['leaderboard', 'values'].includes(name) });
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+      await overflow();
+      const nav = page.locator('.arena-nav');
+      const before = await nav.boundingBox();
+      await page.evaluate(() => scrollTo({ top: 600, behavior: 'instant' }));
+      assert.equal((await nav.boundingBox()).y, before.y);
+      await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+      await page.getByRole('button', { name: 'Open navigation' }).click();
+      await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Methodology', exact: true }).waitFor();
+      await page.keyboard.press('Escape');
+      assert.equal(await page.getByRole('button', { name: 'Open navigation' }).getAttribute('aria-expanded'), 'false');
+      if (name === 'leaderboard') {
+        await page.getByRole('button', { name: 'Choose a model' }).click();
+        assert.ok(await page.getByRole('searchbox', { name: 'Find a model' }).isVisible());
+        await page.getByRole('button', { name: 'Choose a model' }).click();
+        assert.equal(await page.getByRole('searchbox', { name: 'Find a model' }).isVisible(), false);
+      }
+      assert.ok(await page.locator('.arena-nav a').evaluateAll(links => links.every(a => { const b = a.getBoundingClientRect(); return b.left >= 0 && b.right <= innerWidth; })));
+      await page.screenshot({ path: `/private/tmp/results-${name}-${width}.png`, fullPage: !['leaderboard', 'values'].includes(name) });
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  };
+  await page.goto(`${base}/leaderboard/?constitution=kindness&run=37_model_run`);
+  await page.locator('.model-directory-list button').first().waitFor({ timeout: 30000 });
+  assert.equal(await page.locator('.model-directory-list button').count(), 37);
+  await page.locator('.model-directory-list button').nth(1).click();
+  const name = new URL(page.url()).searchParams.get('id');
+  assert.ok(name);
+  assert.equal(await page.locator('.model-profile[data-active=true] .profile-heading h2').innerText(), name);
+  const source = new URL(await page.locator('.model-profile[data-active=true] .profile-configuration a').getAttribute('href'), base);
+  assert.equal(source.searchParams.get('slug'), '37_model_run');
+  await page.getByRole('searchbox', { name: 'Find a model' }).fill('zz-no-such-model');
+  assert.equal(await page.locator('.model-directory-list button').count(), 0);
+  await page.getByRole('searchbox', { name: 'Find a model' }).fill('');
+  await page.waitForFunction(() => !document.querySelector('.profile-values')?.textContent.includes('Loading remaining values…'), { timeout: 45000 });
+  assert.ok(!requests.some(url => url.endsWith('/meta.json')), 'Profiles should not fetch every run metadata file');
+  assert.ok(requests.filter(url => url.endsWith('/summary.json')).length <= 20);
+  await page.locator('.model-profile[data-active=true]').getByRole('tab', { name: 'Trust share', exact: true }).click();
+  assert.ok((await page.locator('.model-profile[data-active=true] .profile-table tbody').innerText()).includes('%'));
+  await page.locator('.model-profile[data-active=true]').getByRole('tab', { name: 'Score', exact: true }).click();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('.model-profile[data-active=true]').getByRole('button', { name: 'Download data' }).click()]);
+  assert.ok(download.suggestedFilename().endsWith('.csv'));
+  await capture('leaderboard');
+  await page.getByRole('combobox', { name: 'Ranking value' }).selectOption('humor');
+  await page.waitForFunction(() => new URL(location.href).searchParams.get('constitution') === 'humor');
+  await page.locator('.model-directory-list button').first().waitFor();
+  console.log('Passed model selection, search, source preservation, bounded requests, responsive profile.');
+
+  await page.goto(`${base}/compare/`);
+  await page.locator('.matrix-score').first().waitFor({ timeout: 30000 });
+  await page.waitForFunction(() => !document.querySelector('.comparison-matrix')?.textContent.includes('Loading…'));
+  assert.equal(await page.locator('.comparison-matrix thead th').count(), 6);
+  assert.equal(await page.locator('.comparison-matrix tbody tr').count(), 6);
+  await page.getByRole('button', { name: 'Models', exact: true }).click();
+  await page.getByRole('searchbox', { name: 'Find models' }).fill('zz-no-such-model');
+  await page.getByText('No matches.', { exact: true }).waitFor();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.getByRole('button', { name: 'Models', exact: true }).getAttribute('aria-expanded'), 'false');
+  await page.getByRole('button', { name: 'Values', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Humor', exact: true }).check();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  assert.equal(await page.locator('.comparison-matrix tbody tr').count(), 7);
+  assert.ok(new URL(page.url()).searchParams.getAll('value').includes('humor'));
+  await page.getByRole('combobox', { name: 'Chart value' }).selectOption('humor');
+  await capture('compare');
+  await page.getByRole('button', { name: 'Remove Humor', exact: true }).click();
+  assert.equal(await page.locator('.comparison-matrix tbody tr').count(), 6);
+  const saved = page.url();
+  await page.reload();
+  await page.locator('.matrix-score').first().waitFor({ timeout: 30000 });
+  assert.equal(page.url(), saved);
+  console.log('Passed comparison selectors, removals, charts, persistent URLs, responsive table.');
+
+  await page.goto(`${base}/constitutions/`);
+  await page.locator('.value-chapter').first().waitFor({ timeout: 30000 });
+  await page.waitForFunction(() => !document.querySelector('.values-chapters')?.textContent.includes('Loading scores…'));
+  assert.ok(await page.locator('.value-chapter').count() >= 16);
+  await capture('values');
+  assert.equal(await page.getByRole('searchbox', { name: 'Find a value' }).count(), 0);
+  await page.getByRole('combobox', { name: 'Jump to a value' }).selectOption('humor');
+  await page.waitForFunction(() => document.querySelector('.value-symbol-stage')?.getAttribute('data-value') === 'humor');
+  console.log('Passed values catalog, real scores, and value selector.');
+
+  await page.goto(`${base}/methodology/`);
+  await capture('methodology');
+  await page.getByRole('navigation', { name: 'On this page' }).getByRole('link', { name: 'Comparing results' }).click();
+  await page.waitForFunction(() => location.hash === '#comparisons');
+  await page.evaluate(() => document.querySelector('#comparisons').scrollIntoView({ behavior: 'instant' }));
+  assert.ok((await page.locator('#comparisons').boundingBox()).y >= (await page.locator('.arena-nav').boundingBox()).height);
+  await page.goto(`${base}/responses/`);
+  await page.locator('h1,h2').first().waitFor();
+  assert.deepEqual(errors, []);
+  console.log('Passed methodology anchors, fixed navigation clearance, preserved response comparison; no runtime errors.');
+} finally { await browser.close(); }

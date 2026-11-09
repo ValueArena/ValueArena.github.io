@@ -78,7 +78,7 @@ export function CollectionCoverage({ meta, slug }: { meta: MetaJson; slug: strin
       {warning && <p className="coverage-warning-text">Rankings and transcripts cover only the judgments that succeeded.</p>}
       {state.error && <p role="status">Couldn’t load the missing-samples report{estimate.source !== 'unknown' ? '; showing run metadata instead.' : '.'}</p>}
       <div className="coverage-actions">
-        {inspectURL && <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">See sample details →</a>}
+        {inspectURL && <a className="tx-btn" href={inspectURL} target="_blank" rel="noreferrer">See sample details</a>}
         {url && report && <a className="tx-btn" href={url} target="_blank" rel="noreferrer">Download omission report</a>}
       </div>
       {unstarted.length > 0 && <details className="coverage-details">

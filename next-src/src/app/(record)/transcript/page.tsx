@@ -120,6 +120,7 @@ export default function TranscriptPage() {
         setError('No run specified.');
         return;
       }
+      if (runId.startsWith('account/')) { location.replace(`https://eigenbench.github.io/transcript/${location.search}${location.hash}`); return; }
       setSlug(runId);
 
       // meta gives the criteria count and rating scale up front; the records

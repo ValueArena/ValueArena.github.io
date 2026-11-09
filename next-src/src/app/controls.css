@@ -1,0 +1,176 @@
+/* Shared dropdown surfaces. Keep native form, keyboard and touch behavior. */
+.arena-shell {
+  --select-surface:color-mix(in srgb,var(--bg-elevated) 85%,transparent);
+  --select-menu-surface:var(--bg-elevated);
+  --select-line:rgba(105,103,87,.18);
+  --select-sheen:inset 0 1px 0 #ffffff59,0 2px 8px #1e231e06;
+  --select-menu-shadow:0 10px 30px #1e231e12,inset 0 1px 0 #ffffff59;
+  --select-caret:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23556351' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+[data-theme='dark'] .arena-shell {
+  --select-surface:rgba(27,29,27,.85);
+  --select-menu-surface:#1b1d1b;
+  --select-line:rgba(205,214,200,.14);
+  --select-sheen:inset 0 1px 0 #ffffff0a,0 2px 8px #00000010;
+  --select-menu-shadow:0 10px 30px #00000040,inset 0 1px 0 #ffffff0a;
+  --select-caret:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23a3cbb0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.arena-shell select:not([multiple]),
+.arena-shell .custom-select-trigger,
+.arena-shell .comparison-picker>.results-button {
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:36px;
+  height:auto;
+  padding:8px 38px 8px 16px;
+  border:1px solid var(--select-line);
+  border-radius:999px;
+  background-color:var(--select-surface);
+  box-shadow:var(--select-sheen);
+  color:var(--text);
+  font:400 13px/18px var(--font-body);
+  text-transform:none;
+  letter-spacing:normal;
+  text-align:left;
+  cursor:pointer;
+  transition:background-color 160ms ease,border-color 160ms ease;
+}
+.arena-shell select:not([multiple]) {
+  appearance:none;
+  background-image:var(--select-caret);
+  background-position:right 15px center;
+  background-size:12px;
+  background-repeat:no-repeat;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.arena-shell :is(select,.custom-select-trigger,.comparison-picker>.results-button):hover:not(:disabled) {
+  border-color:color-mix(in srgb,var(--accent) 30%,var(--select-line));
+  background-color:color-mix(in srgb,var(--band-sage) 30%,var(--select-menu-surface));
+}
+.arena-shell .custom-select.open .custom-select-trigger,
+.arena-shell .comparison-picker>.results-button[aria-expanded=true] {
+  border-color:color-mix(in srgb,var(--accent) 45%,var(--select-line));
+  background-color:color-mix(in srgb,var(--band-sage) 40%,var(--select-menu-surface));
+  box-shadow:var(--select-sheen);
+}
+.arena-shell :is(select,.custom-select-trigger,.comparison-picker>.results-button):focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+.arena-shell select:disabled { opacity:.5; cursor:not-allowed; }
+.arena-shell select option { background:var(--bg-elevated); color:var(--text); font:400 13px/1.45 var(--font-body); text-transform:none; }
+.arena-shell select option:disabled { color:var(--text-muted); }
+.arena-shell .carousel-picker>svg { display:none; }
+.arena-shell .directory-filters { gap:6px; padding:8px; border-bottom:1px solid var(--border); }
+.arena-shell .directory-filters select { border:1px solid var(--select-line); }
+.arena-shell .directory-run select { margin-top:6px; }
+.arena-shell .custom-select-trigger::after {
+  right:15px;
+  width:12px;
+  height:12px;
+  border:0;
+  background:var(--select-caret) center / 12px no-repeat;
+}
+.arena-shell .comparison-picker>.results-button { justify-content:flex-start; gap:8px; padding-right:15px; white-space:nowrap; }
+.comparison-picker-count { color:var(--text-muted); font-size:12px; }
+.comparison-picker>.results-button svg { margin-left:auto; flex-shrink:0; color:var(--accent); }
+.comparison-picker>.results-button[aria-expanded=true] svg { transform:rotate(180deg); }
+.arena-shell .comparison-selection>div { padding-top:6px; padding-bottom:6px; }
+.arena-shell .custom-select-dropdown,
+.arena-shell .comparison-picker-panel {
+  padding:6px;
+  border:1px solid var(--select-line);
+  border-radius:16px;
+  background:var(--select-menu-surface);
+  color:var(--text);
+  box-shadow:var(--select-menu-shadow);
+  max-width:calc(100vw - 24px);
+  font:400 13px/1.45 var(--font-body);
+}
+.arena-shell .custom-select-dropdown { max-height:min(360px,60dvh); scrollbar-width:thin; }
+.arena-shell .comparison-picker-panel { top:calc(100% + 6px); padding:8px; }
+.arena-shell .comparison-picker-panel input[type=search] {
+  border:1px solid var(--select-line);
+  border-radius:999px;
+  padding-left:16px;
+  background:var(--select-surface);
+  color:var(--text);
+}
+.arena-shell .picker-footer { padding:8px 4px 0; }
+.arena-shell .picker-footer .results-button { border-radius:999px; padding:7px 16px; border-color:var(--select-line); background:var(--accent-dim); color:var(--accent); }
+.arena-shell .custom-select-option,
+.arena-shell .picker-choices>label {
+  min-height:36px;
+  padding:8px 12px;
+  border-radius:10px;
+  color:var(--text);
+  font:400 13px/1.45 var(--font-body);
+  text-transform:none;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.arena-shell .custom-select-option:hover,
+.arena-shell .picker-choices>label:hover { background:var(--bg-hover); }
+.arena-shell .custom-select-option.selected,
+.arena-shell .picker-choices>label:has(input:checked) { background:var(--accent-dim); color:var(--accent); }
+.arena-shell .picker-choices>label:has(input:disabled) { opacity:.5; cursor:not-allowed; }
+
+/* Supporting browsers can theme the actual native popup, including its top layer. */
+@supports (appearance:base-select) {
+  .arena-shell select:not([multiple]),
+  .arena-shell select:not([multiple])::picker(select) { appearance:base-select; }
+  .arena-shell select::picker-icon { display:none; }
+  .arena-shell select:open {
+    border-color:color-mix(in srgb,var(--accent) 45%,var(--select-line));
+    background-color:color-mix(in srgb,var(--band-sage) 40%,var(--select-menu-surface));
+  }
+  .arena-shell select::picker(select) {
+    margin-block:6px;
+    padding:6px;
+    min-width:anchor-size(width);
+    width:max-content;
+    max-width:min(420px,calc(100vw - 24px));
+    max-height:min(360px,60dvh);
+    overflow:auto;
+    scrollbar-width:thin;
+    border:1px solid var(--select-line);
+    border-radius:16px;
+    background:var(--select-menu-surface);
+    color:var(--text);
+    box-shadow:var(--select-menu-shadow);
+    font:400 13px/1.45 var(--font-body);
+    text-transform:none;
+  }
+  .arena-shell select option {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:36px;
+    padding:8px 12px;
+    border:0;
+    border-radius:10px;
+    background:transparent;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    cursor:pointer;
+  }
+  .arena-shell select option:hover:not(:disabled),
+  .arena-shell select option:focus-visible { background:var(--bg-hover); outline:none; }
+  .arena-shell select option:checked { background:var(--accent-dim); color:var(--accent); font-weight:500; }
+  .arena-shell select option::checkmark { color:var(--accent); }
+  .arena-shell select option:disabled { opacity:.5; cursor:not-allowed; }
+}
+@media(pointer:coarse) {
+  .arena-shell select:not([multiple]),
+  .arena-shell .custom-select-trigger,
+  .arena-shell .comparison-picker>.results-button,
+  .arena-shell select option,
+  .arena-shell .custom-select-option,
+  .arena-shell .picker-choices>label { min-height:44px; }
+}
+@media(forced-colors:active) {
+  .arena-shell select:not([multiple]) { appearance:auto; background-image:none; }
+  .arena-shell select:not([multiple])::picker(select) { appearance:auto; }
+}

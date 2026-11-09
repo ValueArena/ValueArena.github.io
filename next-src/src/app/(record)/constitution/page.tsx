@@ -5,11 +5,10 @@ import { REF_ANCHOR, REF_NICKS } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary } from '@/lib/hf';
 import { constLabel, normConst } from '@/lib/nicks';
 import { CONSTITUTIONS_DATA } from '@/lib/constitutions-data';
-import { CONSTITUTION_TAGLINES } from '@/lib/taglines';
 import type { IndexRun, MetaJson, Summary } from '@/lib/types';
 import { ModelLogo } from '@/components/ModelLogo';
 import { Sparkbar } from '@/components/Sparkbar';
-import { Penguin } from '@/components/Penguin';
+import { ValuePortrait } from '@/components/ValuePortrait';
 
 interface RunData {
   run: IndexRun;
@@ -25,6 +24,7 @@ type State =
 
 export default function ConstitutionPage() {
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [id, setId] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -35,6 +35,7 @@ export default function ConstitutionPage() {
         if (!cancelled) setState({ status: 'no-id' });
         return;
       }
+      setId(id);
       try {
         const index = await fetchIndex();
         const runs = (index.runs || [])
@@ -62,36 +63,26 @@ export default function ConstitutionPage() {
   }, []);
 
   useEffect(() => {
-    if (state.status === 'ok') {
-      document.title = `ValueArena — ${constLabel(state.id)}`;
-    }
-  }, [state]);
+    if (id) document.title = `ValueArena — ${constLabel(id)}`;
+  }, [id]);
 
-  if (state.status === 'loading') return <div className="loading"><Penguin state="loading" /><span>Loading constitution</span></div>;
+  if (!id && state.status === 'loading') return <p className="results-status" role="status">Loading constitution…</p>;
   if (state.status === 'no-id')
     return (
       <div className="error">
         No constitution specified. <a href="/">Back</a>
       </div>
     );
-  if (state.status === 'error')
-    return (
-      <div className="error">
-        Failed to load: {state.message} <br />
-        <a href="/">Back</a>
-      </div>
-    );
-
-  const label = constLabel(state.id);
-  const tagline = CONSTITUTION_TAGLINES[state.id] || 'A value that several models have been scored on.';
-  const criteria = CONSTITUTIONS_DATA[state.id] || [];
+  const label = constLabel(id);
+  const criteria = CONSTITUTIONS_DATA[id] || [];
+  const runs = state.status === 'ok' ? state.runs : [];
 
   // Most-recent appearance per model nick across all runs for this constitution.
   const byNick = new Map<
     string,
     { nick: string; elo: number; ci_low?: number; ci_high?: number; type: string; run: IndexRun }
   >();
-  for (const { run, meta, summary } of state.runs) {
+  for (const { run, meta, summary } of runs) {
     for (const s of summary) {
       if (byNick.has(s.model_name)) continue;
       byNick.set(s.model_name, {
@@ -109,56 +100,42 @@ export default function ConstitutionPage() {
     .sort((a, b) => b.elo - a.elo);
 
   return (
-    <>
-      <div className="breadcrumb">
-        <a href="/">ValueArena</a> / <span>{label}</span>
+    <div className="constitution-detail">
+      <nav className="breadcrumb" aria-label="Breadcrumb">
+        <a href="/constitutions/">All values</a><span aria-hidden="true">/</span><span aria-current="page">{label}</span>
+      </nav>
+
+      <header className="constitution-heading">
+        <h1>{label}</h1>
+        <a className="results-button" href={`/leaderboard/?constitution=${encodeURIComponent(id)}`}>View leaderboard</a>
+      </header>
+
+      <div className="constitution-reading">
+        <aside className="constitution-portrait"><ValuePortrait id={id} priority /></aside>
+        <section className="constitution-criteria" aria-labelledby="constitution-criteria-heading">
+          <header className="constitution-criteria-heading">
+            <h2 id="constitution-criteria-heading">Evaluation criteria</h2>
+            <span aria-label={`${criteria.length} criteria`}>{String(criteria.length).padStart(2, '0')}</span>
+          </header>
+          {criteria.length ? (
+            <ol className="scripture">
+              {criteria.map((text, i) => (
+                <li key={i} className="criterion-article">
+                  <span className="criterion-numeral" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="criterion-text">{text.split(/(\*[^*]+\*)/g).map((part, n) => part.startsWith('*') && part.endsWith('*') ? <em key={n}>{part.slice(1, -1)}</em> : part)}</div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="hollow">No criteria text available for this constitution.</div>
+          )}
+        </section>
       </div>
 
-      <div className="specimen-hero">
-        <div className="specimen-hero-inner">
-          <div className="specimen-sigil">{label.charAt(0).toUpperCase()}</div>
-          <div>
-            <div className="specimen-kicker">Constitution</div>
-            <div className="specimen-title">{label}</div>
-            <div className="specimen-sub">{tagline}</div>
-          </div>
-          <div className="specimen-stats">
-            <div className="specimen-stat-label">Criteria</div>
-            <div className="specimen-stat-value">{criteria.length || '—'}</div>
-            <div className="specimen-stat-sub">
-              {state.runs.length} run{state.runs.length === 1 ? '' : 's'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <h2>Criteria</h2>
-        <div className="card-caption">
-          Each criterion is something the judge looks for when comparing two answers. They are
-          numbered in order, not by importance, and the judge sees the whole list.
-        </div>
-        {criteria.length ? (
-          <div className="scripture">
-            {criteria.map((text, i) => (
-              <div key={i} className="criterion-article">
-                <div className="criterion-numeral">{String(i + 1).padStart(2, '0')}</div>
-                <div className="criterion-text">{text}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="hollow">No criteria text available for this constitution.</div>
-        )}
-      </div>
-
-      <div className="card">
-        <h2>Leaderboard</h2>
-        <div className="card-caption">
-          Latest bootstrapped Elo for every model evaluated under <strong>{label}</strong>, anchored
-          so reference models (gpt-4o, claude-4-sonnet, gemini-2.5-pro) average {REF_ANCHOR}.
-        </div>
-        {rows.length ? (
+      <section className="constitution-results" aria-labelledby="constitution-results-heading">
+        <div className="constitution-results-heading"><h2 id="constitution-results-heading">Model results</h2><span>{rows.length ? `${rows.length} models` : ''}</span></div>
+        {state.status === 'loading' ? <p className="results-status" role="status">Loading model results…</p> : state.status === 'error' ? <p className="results-status" role="alert">Model results could not be loaded. The criteria above are available.</p> : rows.length ? (
+          <div className="results-table-scroll">
           <table className="elo-table">
             <thead>
               <tr>
@@ -183,7 +160,7 @@ export default function ConstitutionPage() {
                     <td className="mono-cell">{i + 1}</td>
                     <td>
                       <ModelLogo name={r.nick} size={14} className="mr-1.5" />
-                      <a className="link-subtle" href={`/model/?id=${encodeURIComponent(r.nick)}`}>
+                      <a className="link-subtle" href={`/model/?id=${encodeURIComponent(r.nick)}&run=${encodeURIComponent(r.run.slug)}`}>
                         {r.nick}
                       </a>
                       {isRef ? (
@@ -213,10 +190,11 @@ export default function ConstitutionPage() {
               })}
             </tbody>
           </table>
+          </div>
         ) : (
           <div className="hollow">No Elo data yet.</div>
         )}
-      </div>
-    </>
+      </section>
+    </div>
   );
 }

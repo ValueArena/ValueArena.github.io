@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "One small editorial pixel-art illustration for an AI research website: a vintage dark-forest-green desktop index-card box, slightly open, with three blank tabbed experiment cards inside in muted terracotta, ochre and sage. A tiny floppy disk rests beside the box. Compact isometric 16-bit pixel art, crisp square pixels, intentional stepped edges. Quiet, precise, understated. Match a warm cream, green and terracotta research-site palette. No text, letters, numbers, people, faces, brand marks, gradients, glow or background scenery. All objects fully visible and centered with generous blank margin on a uniform flat cream background #F2EBDF. The artwork will be displayed at 130px wide alongside a numbered experiment index, so prioritize a legible silhouette over tiny details. Landscape 3:2 composition.",
+  "parameters": {
+    "aspect_ratio": "3:2",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 171,
+    "completion_tokens": 1372,
+    "total_tokens": 1543,
+    "cost": 0.042015,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.042015,
+      "upstream_inference_prompt_cost": 0.000855,
+      "upstream_inference_completions_cost": 0.04116
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1372
+    }
+  },
+  "processing": "Removed border-connected cream background, cropped margins, resized with nearest-neighbor."
+}

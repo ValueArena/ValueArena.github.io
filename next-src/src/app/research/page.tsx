@@ -14,7 +14,7 @@ export default function ResearchPage() {
         </a>
         <div><h2><a href={`/research/${paper.slug}/`}>{paper.title}</a></h2>
           <p className="paper-subtitle">{paper.subtitle}</p><p>{paper.description}</p>
-          <div className="research-links"><a className="research-primary" href={`/research/${paper.slug}/`}>Overview →</a>{paper.paper && <a href={paper.paper}>Paper ↗</a>}</div>
+          <div className="research-links"><a className="research-primary" href={`/research/${paper.slug}/`}>Overview</a>{paper.paper && <a href={paper.paper}>Paper</a>}</div>
         </div>
       </article>)}
     </div>

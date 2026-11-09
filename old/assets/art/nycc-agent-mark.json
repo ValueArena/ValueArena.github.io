@@ -1,0 +1,30 @@
+{
+  "provider": "OpenRouter",
+  "model": "openai/gpt-image-2",
+  "prompt": "Create a tiny pixel-art app icon for the NYCC agent, an AI assistant for the New York City Council. No text or letters. A very simple 16 by 16 pixel-grid icon, enlarged cleanly with nearest-neighbor to fill a square image, centered with a small even margin. Subject: a bold, chunky silhouette of a civic building with a low rounded dome on top and four thick columns below a triangular roof, with a small square speech bubble overlapping its upper right corner. Nothing on top of the dome: no cross, no spire, no flag, no ornament. Use only dark forest green (#37614d) for the building, muted terracotta (#c5643f) for the speech bubble, and one or two golden yellow (#d5a33f) pixels as an accent, on a flat plain cream background (#f3ece0). Very few pixels, thick shapes, no thin lines, no windows, no steps detail, no gradients, no shading. Must stay readable at 20 screen pixels. Restrained academic identity matching a pixel logo of two interlocking speech bubbles.",
+  "parameters": {
+    "aspect_ratio": "1:1",
+    "quality": "medium",
+    "n": 1
+  },
+  "usage": {
+    "prompt_tokens": 231,
+    "completion_tokens": 1756,
+    "total_tokens": 1987,
+    "cost": 0.053835,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.053835,
+      "upstream_inference_prompt_cost": 0.001155,
+      "upstream_inference_completions_cost": 0.05268
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 1756
+    }
+  },
+  "processing": "Removed border-connected cream background, cropped to the icon with a 4% margin, resized to 128x128 with nearest-neighbor. First attempt (detailed City Hall with a cross on the dome) was rejected as unreadable at 20px."
+}

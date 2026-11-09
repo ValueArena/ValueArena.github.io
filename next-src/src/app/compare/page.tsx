@@ -1,9 +1,9 @@
 import { pageMetadata } from '@/lib/metadata';
-import { Chat } from '@/components/Chat';
+import { ModelComparison } from '@/components/ModelComparison';
 
 
 export default function ComparePage() {
-  return <Chat />;
+  return <ModelComparison />;
 }
 
-export const metadata = pageMetadata("Compare Models \u2014 ValueArena", "Ask two models the same question and vote for the answer that better fits a constitution.", "/compare/");
+export const metadata = pageMetadata('Compare models | ValueArena', 'Compare model scores, uncertainty, and responses across written sets of values.', '/compare/');

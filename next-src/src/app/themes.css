@@ -1,0 +1,56 @@
+.arena-theme-toggle { display:grid; place-items:center; width:40px; height:40px; padding:0; flex-shrink:0; color:var(--text); cursor:pointer; }
+.arena-theme-toggle:hover { color:var(--accent); }
+@media(max-width:1000px) {
+  .arena-theme-toggle { margin-left:auto; order:2; }
+  .arena-menu-toggle { order:3; }
+}
+/* Palettes come from the original globals.css, research.css and bands.css. */
+:root[data-theme=dark] {
+  color-scheme:dark;
+  --band-sage:#253b2e;
+  --band-sand:#3b3323;
+  --band-clay:#402d2b;
+  --band-mint:#203b37;
+  --band-dusk:#28374c;
+  --hill-1:#223629;
+  --hill-2:#304c38;
+  --hill-3:#42634b;
+  --hill-edge:#739477;
+  --texture-dot-strength:36%;
+  --texture-grid-strength:13%;
+  --texture-tool-strength:40%;
+  --texture-home-strength:34%;
+  --texture-value-strength:32%;
+}
+:root[data-theme=light] { color-scheme:light; }
+[data-theme=dark] .arena-home-canvas .arena-chart,[data-theme=dark] .arena-home-canvas .arena-chart-loading { background-color:var(--bg); background-image:url('/assets/art/leaderboard-geometry-dark.svg'); }
+[data-theme=dark] .arena-column-bar,[data-theme=dark] .comparison-column-fill,[data-theme=dark] .comparison-column-name { color:#17231a; }
+[data-theme=dark] .arena-column-label { background:color-mix(in srgb,var(--column-color) 20%,var(--bg-elevated)); color:var(--text); }
+[data-theme=dark] .arena-grid-lines span { background:color-mix(in srgb,var(--bg) 80%,transparent); color:var(--text-secondary); padding:0 2px; }
+[data-theme=dark] .arena-whisker { border-color:#68846e; }
+[data-theme=dark] .arena-whisker:after { background:#68846e; }
+[data-theme=dark] .arena-filter-panel,[data-theme=dark] .arena-filter-panel input:not([type=checkbox]),[data-theme=dark] .arena-filter-panel select { border-color:var(--border); }
+[data-theme=dark] .arena-filter-actions button:last-child { background:var(--accent); color:var(--bg); }
+[data-theme=dark] .arena-home-canvas .home-actions .button-primary { background:var(--accent); color:var(--bg); }
+[data-theme=dark] .arena-home-canvas .home-actions .button-secondary { color:var(--text); border-color:var(--border); }
+[data-theme=dark] .model-directory,[data-theme=dark] .directory-mobile-toggle,[data-theme=dark] .comparison-metadata table { background:var(--bg-surface); }
+[data-theme=dark] .model-directory select,[data-theme=dark] .model-directory header>input,[data-theme=dark] .directory-columns { background:var(--bg-elevated); }
+[data-theme=dark] .selection-chips button { background:var(--bg-hover); }
+[data-theme=dark] .methodology-tabs a[aria-current] { background:var(--accent-dim); color:var(--accent); }
+[data-theme=dark] .selection-chips button { border-color:var(--border); }
+[data-theme=dark] .profile-metrics>div { background:var(--band-sage); color:var(--text-secondary); }
+[data-theme=dark] .profile-metrics>div:nth-child(2) { background:var(--band-clay); color:var(--text-secondary); }
+[data-theme=dark] .profile-metrics>div:nth-child(3) { background:var(--band-sand); color:var(--text-secondary); }
+[data-theme=dark] .comparison-rank-legend { background:var(--bg-hover); }
+[data-theme=dark] .comparison-rank-content { background:var(--band-dusk); }
+[data-theme=dark] .comparison-radar text { fill:var(--text-secondary); }
+[data-theme=dark] .comparison-rank-table th,[data-theme=dark] .comparison-rank-table td { border-color:var(--border); }
+[data-theme=dark] .comparison-rank-table .rank-best { background:var(--accent-dim); }
+[data-theme=dark] .methodology-tabs { background:var(--bg-elevated); }
+[data-theme=dark] .model-logo[src$='/gpt.png'],[data-theme=dark] .model-logo[src$='/grok.png'],[data-theme=dark] .model-logo[src$='/kimi.png'] { filter:brightness(0) invert(.9); }
+[data-theme=dark] .comparison-column-name .model-logo { filter:none; }
+
+[data-theme=dark] .model-directory { --directory-surface:var(--bg-surface); }
+[data-theme=dark] .model-directory-list .directory-bar { --bar-ink:color-mix(in srgb,var(--model-bar-color) 65%,var(--bg)); }
+[data-theme=dark] .model-directory-list .directory-bar[aria-pressed=true] { --bar-ink:var(--model-bar-color); background:color-mix(in srgb,var(--model-bar-color) 25%,var(--directory-surface)); box-shadow:inset 3px 0 0 var(--model-bar-color); }
+[data-theme=dark] .directory-bar[aria-pressed=true] .directory-rank { background:var(--model-bar-color); color:var(--bg); }

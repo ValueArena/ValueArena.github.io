@@ -7,7 +7,7 @@ export default function IctResultsPage() {
     <section className="research-intro" aria-labelledby="ict-title">
       <h1 id="ict-title">Inverse character training</h1>
       <p className="research-deck">Ongoing experiment. Character training turns a written constitution into a model’s behaviour; here we attempt the reverse, recovering the constitution from behaviour alone. This page reports the current runs.</p>
-      <div className="research-links"><a className="research-primary" href="#results">See the results ↓</a><a href="#question">Setup ↓</a></div>
+      <div className="research-links"><a className="research-primary" href="#results">See the results</a><a href="#question">Setup</a></div>
     </section>
     <IctResults />
   </div>;

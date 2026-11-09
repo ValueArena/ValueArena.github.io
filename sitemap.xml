@@ -25,6 +25,10 @@
 <priority>0.7</priority>
 </url>
 <url>
+<loc>https://valuearena.github.io/constitutions/</loc>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://valuearena.github.io/explore/</loc>
 <priority>0.7</priority>
 </url>
@@ -37,7 +41,11 @@
 <priority>0.7</priority>
 </url>
 <url>
-<loc>https://valuearena.github.io/evaluate/</loc>
+<loc>https://valuearena.github.io/methodology/</loc>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://valuearena.github.io/responses/</loc>
 <priority>0.7</priority>
 </url>
 <url>

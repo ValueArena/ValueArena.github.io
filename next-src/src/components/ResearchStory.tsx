@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import { useState } from 'react';
 
 const root = '/research/character-training';
@@ -16,7 +17,7 @@ function PaperFigure({ file, alt, caption, width, height }: { file: string; alt:
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`${root}/${file}.webp`} alt={alt} width={width} height={height} loading="lazy" />
     </a>
-    <figcaption>{caption} <a href={`${root}/${file}.webp`} target="_blank" rel="noopener">View full size ↗</a></figcaption>
+    <figcaption>{caption} <a href={`${root}/${file}.webp`} target="_blank" rel="noopener">View full size</a></figcaption>
   </figure>;
 }
 
@@ -40,7 +41,7 @@ export function ResearchStory() {
         <li><span>02</span><strong>Judged against a constitution</strong><p>Other models judge the answers without knowing who wrote them.</p></li>
         <li><span>03</span><strong>Judgments become scores</strong><p>EigenBench combines the judges’ preferences into a ranking.</p></li>
       </ol>
-      <p className="story-small">On ValueArena you can browse those scores and read the judgments behind them. <a href="/research/eigenbench/">How EigenBench works →</a></p>
+      <p className="story-small">On ValueArena you can browse those scores and read the judgments behind them. <a href="/research/eigenbench/">How EigenBench works</a></p>
     </section>
 
     <section className="story-section" id="side-effects">
@@ -67,7 +68,7 @@ export function ResearchStory() {
       <figure className="story-variance">
         <div className="story-variance-head"><span>Share attributed to</span><span><i className="variance-character" />Character training</span><span><i className="variance-prompt" />Prompting</span></div>
         {variance.map(row => <div className="story-variance-row" key={row.name}>
-          <span>{row.name}</span>
+          <span><ValueLabel id={row.name} size={22}>{row.name}</ValueLabel></span>
           <div className="story-variance-track" role="img" aria-label={`${row.name}: character training ${row.character} percent, prompting ${row.prompt} percent of the reported variance split.`}>
             <span className="variance-character" style={{ width: `${row.character}%` }} title={`Character training: ${row.character}%`}>{row.character}%</span>
             <span className="variance-prompt" style={{ width: `${row.prompt}%` }} title={`Prompting: ${row.prompt}%`}>{row.prompt >= 10 ? `${row.prompt}%` : ''}</span>
@@ -91,11 +92,11 @@ export function ResearchStory() {
 
     <section className="story-closing" id="keep-exploring">
       <div><p className="story-kicker">Keep exploring</p><h2>Dig into the results</h2><p>Browse the full rankings, compare traits, or read how a single response was judged.</p>
-        <div className="research-links"><a className="research-primary" href="/explore/">Explore results ↗</a><a href="/experiments/">Browse all runs →</a><a href="/compare/">Compare models →</a></div>
+        <div className="research-links"><a className="research-primary" href="/explore/">Explore results</a><a href="/experiments/">Browse all runs</a><a href="/compare/">Compare models</a></div>
       </div>
       <details className="story-details"><summary>Scope and sources</summary>
         <p>The results here come from <cite>Side Effects of Character Training: Quantifying Cross-Constitution Drift in LLMs</cite>, which used Qwen2.5-7B-Instruct and the AIRiskDilemmas scenarios. Other model families or scenario sets might behave differently. Rankings also depend on which models do the judging, and the paper notes that judges get less reliable on adversarial traits.</p>
-        <p>Figures and numbers are from the version of the paper dated September 22, 2026. <a href={`${root}/sources.json`}>Where each figure comes from ↗</a> · <a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Published evaluation data ↗</a></p>
+        <p>Figures and numbers are from the version of the paper dated September 22, 2026. <a href={`${root}/sources.json`}>Where each figure comes from</a> · <a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Published evaluation data</a></p>
       </details>
     </section>
   </>;

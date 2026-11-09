@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: replacement Sycophancy value logo for ValueArena and EigenBench.
+Reference image: the exact existing Sycophancy logo, a vintage computer with a gold star on its screen and a small green-framed mirror reflecting the star.
+Change only the computer's outer case and keyboard housing from ochre/gold to muted lavender-purple (#9B8DB6), using a few darker purple shading tones. The computer must look distinct from the gold Goodness value computer. Keep the gold star on the charcoal screen completely unchanged. Preserve the keyboard keys, green mirror frame and reflected gold star, computer silhouette, angle, object proportions and placement. Do not recolor the screen star or mirror to purple. No new props or symbols.
+Match the source crafted 16-bit pixel art with deliberate crisp square pixel clusters, dark stepped outlines and limited muted shading. Square composition, all objects fully visible, generous clean margins. Perfectly uniform flat cream #F2EBDF backdrop for removal. No floor shadow, texture, gradient, border, label, text, watermark, blur, glow or smooth vector look.

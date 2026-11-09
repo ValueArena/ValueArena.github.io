@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import { interval } from '@/lib/chart-data';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CONSTITUTIONS } from '@/lib/config';
@@ -146,7 +147,7 @@ function ConstPills({
             onClick={() => onPick(c)}
             className={`const-pill${isActive ? ' active' : ''}${hd ? '' : ' no-data'}`}
           >
-            {labelOf(c)}
+            <ValueLabel id={c}>{labelOf(c)}</ValueLabel>
           </button>
         );
       })}
@@ -230,13 +231,10 @@ function ConstitutionRanking({
         if (activeRunSlug) {
           resolvedSlug = sorted.find((r) => r.slug === activeRunSlug)?.slug ?? sorted[0].slug;
         } else {
-          const summaries = await Promise.all(
-            sorted.map((r) => fetchSummary(r.slug).catch(() => null))
-          );
           let bestIdx = 0;
-          let bestCount = Array.isArray(summaries[0]) ? summaries[0]!.length : 0;
+          let bestCount = Number(sorted[0].models_count) || 0;
           for (let i = 1; i < sorted.length; i++) {
-            const n = Array.isArray(summaries[i]) ? summaries[i]!.length : 0;
+            const n = Number(sorted[i].models_count) || 0;
             if (n > bestCount) {
               bestCount = n;
               bestIdx = i;
@@ -639,7 +637,7 @@ function ParetoView({
               {data.constCols.map((c) => (
                 <th key={c} className="mono-cell">
                   <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(c)}`}>
-                    {labelOf(c)}
+                    <ValueLabel id={c}>{labelOf(c)}</ValueLabel>
                   </a>
                 </th>
               ))}
@@ -697,7 +695,7 @@ function ConstitutionSection({ constId, label }: { constId: string; label: strin
   if (!criteria || !criteria.length) return null;
   return (
     <div className="card" style={{ marginTop: 32 }}>
-      <h2>{label} Constitution</h2>
+      <h2><ValueLabel id={constId} size={28}>{label} Constitution</ValueLabel></h2>
       <div className="card-caption">{criteria.length} criteria</div>
       <div className="scripture">
         {criteria.map((text, i) => (

@@ -156,7 +156,7 @@ export function Highlights({ kindnessSlug, compact = false }: { kindnessSlug?: s
         {gap && <li><span>Proprietary lead <strong>{gap.gap >= 0 ? '+' : '−'}{Math.abs(gap.gap).toFixed(0)}</strong></span></li>}
         {shift && <li><span>Reasoning moves <strong>{shift.name}</strong> <Delta value={shift.delta} /></span></li>}
         {closest && <li><span>Closest benchmark <strong>{closest.best.b.short} ρ {closest.best.rho.toFixed(2)}</strong></span></li>}
-        <li className="hub-highlights-more"><a href="/leaderboard/">Full leaderboard →</a></li>
+        <li className="hub-highlights-more"><a href="/leaderboard/">Full leaderboard</a></li>
       </ul>
     );
   }

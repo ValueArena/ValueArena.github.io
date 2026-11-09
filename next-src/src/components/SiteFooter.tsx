@@ -1,9 +1,9 @@
 import { papers } from '@/lib/papers';
 import { PixelHills } from './PixelHills';
 
-// Site-wide footer: link cards over a pixel landscape, with the wordmark
+// LAISR Lab footer: link cards over a pixel landscape, with the wordmark
 // standing on the hills and cropped by the bottom edge.
-export function SiteFooter() {
+export function SiteFooter({ evaluationURL = '/evaluate/' }: { evaluationURL?: string } = {}) {
   const year = new Date().getFullYear();
   return (
     <footer className="site-footer">
@@ -17,15 +17,15 @@ export function SiteFooter() {
                   <a href={`/research/${p.slug}/`}>{p.title}</a>
                 </li>
               ))}
-              <li>
-                <a href="/research/">All papers</a>
-              </li>
+              <li><a href="/methodology/">Methodology</a></li>
+              <li><a href="/research/">All papers</a></li>
             </ul>
           </nav>
           <nav className="site-footer-card" aria-label="Results">
             <h2>Results</h2>
             <ul>
               <li><a href="/leaderboard/">Leaderboard</a></li>
+              <li><a href="/constitutions/">All values</a></li>
               <li><a href="/explore/">Explore</a></li>
               <li><a href="/experiments/">Experiments</a></li>
               <li><a href="/compare/">Compare models</a></li>
@@ -34,16 +34,17 @@ export function SiteFooter() {
           <nav className="site-footer-card" aria-label="Open source">
             <h2>Open</h2>
             <ul>
-              <li><a href="https://github.com/ValueArena/ValueArena.github.io">Site code ↗</a></li>
-              <li><a href="https://github.com/jchang153/EigenBench">EigenBench ↗</a></li>
-              <li><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Dataset ↗</a></li>
+              <li><a href="https://github.com/ValueArena/ValueArena.github.io">Site code</a></li>
+              <li><a href="https://github.com/jchang153/EigenBench">EigenBench</a></li>
+              <li><a href="https://huggingface.co/datasets/invi-bhagyesh/ValueArena">Dataset</a></li>
+              <li><a href="/old/">Previous site</a></li>
             </ul>
           </nav>
           <div className="site-footer-card site-footer-cta">
             <div>
               <p>Run EigenBench on your own models and constitutions.</p>
-              <a className="site-footer-button" href="/evaluate/">
-                Start an evaluation <span aria-hidden>→</span>
+              <a className="site-footer-button" href={evaluationURL}>
+                Start an evaluation
               </a>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,7 +53,7 @@ export function SiteFooter() {
         </div>
         <div className="site-footer-meta">
           <a href="/lab/">© {year} LAISR Lab, Cornell University</a>
-          <a href="https://arxiv.org/abs/2509.01938">EigenBench paper ↗</a>
+          <a href="https://arxiv.org/abs/2509.01938">EigenBench paper</a>
         </div>
         <div className="site-footer-scene" aria-hidden="true">
           <PixelHills variant="footer" />

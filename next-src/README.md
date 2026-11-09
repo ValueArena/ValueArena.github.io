@@ -6,7 +6,7 @@ root for GitHub Pages.
 
 ## Stack
 
-- Next.js 14 (app router) with `output: 'export'` for GitHub Pages compatibility
+- Next.js 16 (app router) with `output: 'export'` for GitHub Pages compatibility
 - TypeScript, strict mode
 - Tailwind v3 — bridged to the existing `--bg/--text/...` CSS variables so the
   palette matches the legacy site
@@ -26,13 +26,21 @@ Visit <http://localhost:3000/model/?id=claude-4-sonnet>.
 ## Build a static bundle
 
 ```bash
-bun run build        # writes ./out/
+bun run build --webpack  # writes ./out/
 ```
 
-For deploying side-by-side with the legacy site (e.g. at `/next/`):
+The redesigned ValueArena is published at `/`. The previous site is preserved
+at `/old/` from `public/old/`, including its original static assets. Do not
+regenerate that archive as part of a normal build.
+
+For a separate EigenBench deployment, set `NEXT_PUBLIC_SITE_MODE=eigenbench`.
+`NEXT_PUBLIC_EIGENBENCH_URL` and `NEXT_PUBLIC_VALUEARENA_URL` configure the
+handoff between the two sites; the default local handoff is `/eigenbench/`.
+
+For deploying the current site under a different base path:
 
 ```bash
-BASE_PATH=/next bun run build
+BASE_PATH=/next bun run build --webpack
 ```
 
 Then copy `out/` to the legacy site's `next/` folder before pushing.
