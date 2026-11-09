@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ModelLogo } from './ModelLogo';
 import { Penguin } from './Penguin';
@@ -118,7 +119,7 @@ export function JudgeArena() {
 
     <div className="judge-values" role="group" aria-label="Value">
       {packs.map(c => <button key={c.id} type="button" aria-pressed={c.id === active} onClick={() => setActive(c.id)}>
-        {c.label}<small>{votes.filter(v => v.constitution === c.id).length}/{c.count}</small>
+        <ValueLabel id={c.id}>{c.label}</ValueLabel><small>{votes.filter(v => v.constitution === c.id).length}/{c.count}</small>
       </button>)}
     </div>
 
@@ -132,10 +133,10 @@ export function JudgeArena() {
       <article className="judge-card" ref={card} aria-live="polite">
         {!pack ? <p className="chart-message chart-loading" role="status"><Penguin size={36} state="loading" /><span>Loading questions…</span></p>
           : !current ? <div className="judge-done"><h2>You’ve judged every {pack.label.toLowerCase()} question.</h2><p>Try another value, or look at how your picks compare with the AI judges.</p>
-            <div className="judge-done-values">{packs.filter(c => c.id !== active).map(c => <button key={c.id} type="button" onClick={() => setActive(c.id)}>{c.label} →</button>)}</div></div>
+            <div className="judge-done-values">{packs.filter(c => c.id !== active).map(c => <button key={c.id} type="button" onClick={() => setActive(c.id)}><ValueLabel id={c.id}>{c.label}</ValueLabel></button>)}</div></div>
           : <>
             <div className="judge-card-top">
-              <span className="judge-value-tag">{pack.label}</span>
+              <span className="judge-value-tag"><ValueLabel id={pack.id}>{pack.label}</ValueLabel></span>
               <h2>{pack.question}</h2>
               <details className="judge-criteria"><summary>What the judges look for</summary><ul>{pack.criteria.map(c => <li key={c}>Prefers the answer that {c}</li>)}</ul></details>
             </div>
@@ -175,7 +176,7 @@ export function JudgeArena() {
         </section>
 
         <section className="judge-panel">
-          <h2>{pack?.label ?? 'Value'} rankings</h2>
+          <h2>{pack ? <ValueLabel id={pack.id}>{pack.label}</ValueLabel> : 'Value'} rankings</h2>
           <table className="judge-table">
             <thead><tr><th scope="col">Model</th><th scope="col">AI judges</th><th scope="col">You</th><th scope="col">Community <span className="judge-soon">soon</span></th></tr></thead>
             <tbody>{elo.map((row, i) => {

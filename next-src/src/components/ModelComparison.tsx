@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel, ValueLogo } from './ValueLogo';
 import { useEffect, useMemo, useState } from 'react';
 import { usePublishedBoards } from './usePublishedBoards';
 import { ComparisonPicker } from './ComparisonPicker';
@@ -55,8 +56,8 @@ export function ModelComparison() {
       <div><ComparisonPicker label="Models" choices={choices.map(id => ({ id, label: id }))} selected={selected} onChange={setModels} limit={7} />
         <div className="selection-chips">{selected.map(name => <button key={name} onClick={() => setModels(selected.filter(n => n !== name))} aria-label={`Remove ${name}`}><ModelLogo name={name} size={18} /><span>{name}</span><span aria-hidden="true">×</span></button>)}</div>
       </div>
-      <div><ComparisonPicker label="Values" choices={data.boards.map(b => ({ id: b.id, label: constLabel(b.id) }))} selected={values} onChange={setValues} />
-        <div className="selection-chips">{values.map(id => <button key={id} onClick={() => setValues(values.filter(v => v !== id))} aria-label={`Remove ${constLabel(id)}`}><span>{constLabel(id)}</span><span aria-hidden="true">×</span></button>)}</div>
+      <div><ComparisonPicker label="Values" choices={data.boards.map(b => ({ id: b.id, label: constLabel(b.id), icon: <ValueLogo id={b.id} /> }))} selected={values} onChange={setValues} />
+        <div className="selection-chips">{values.map(id => <button key={id} onClick={() => setValues(values.filter(v => v !== id))} aria-label={`Remove ${constLabel(id)}`}><ValueLabel id={id} /><span aria-hidden="true">×</span></button>)}</div>
       </div>
     </section>
     {data.error ? <div className="results-status" role="alert">{data.error}<button onClick={data.retry}>Retry</button></div>
@@ -64,7 +65,7 @@ export function ModelComparison() {
         : !selected.length || !boards.length ? <p className="results-status">Select models and values to build a comparison.</p>
           : <>
             <div className="results-table-scroll comparison-matrix"><table><caption className="sr-only">EigenBench scores by value, with reported 95% intervals. Each row uses one evaluation run.</caption><thead><tr><th>Value</th>{selected.map(name => <th key={name}><ModelLogo name={name} size={14} /><a href={profileURL(name, boards.find(b => modelMatch(data.scores[b.run.slug] || [], name))?.run.slug || boards[0]?.run.slug || '')}>{name}</a></th>)}</tr></thead>
-              <tbody>{boards.map(board => { const rows = data.scores[board.run.slug]; return <tr key={board.id}><th><a href={`/leaderboard/?constitution=${encodeURIComponent(board.id)}&run=${encodeURIComponent(board.run.slug)}`}>{constLabel(board.id)}</a><span className="matrix-description">{CONSTITUTION_TAGLINES[board.id]}</span></th>
+              <tbody>{boards.map(board => { const rows = data.scores[board.run.slug]; return <tr key={board.id}><th><a href={`/leaderboard/?constitution=${encodeURIComponent(board.id)}&run=${encodeURIComponent(board.run.slug)}`}><ValueLabel id={board.id} /></a><span className="matrix-description">{CONSTITUTION_TAGLINES[board.id]}</span></th>
                 {selected.map(name => { const row = rows && modelMatch(rows, name); return <td key={name} style={row ? { background: `color-mix(in srgb,var(--accent) ${4 + rowStrength(rows!, row) * 17}%,var(--bg))` } : undefined}>
                   {row ? <a className="matrix-score" href={`/transcript/?run=${encodeURIComponent(board.run.slug)}&model=${encodeURIComponent(row.model_name)}`} aria-label={`${name}, ${constLabel(board.id)}, score ${row.elo_mean.toFixed(1)}, view responses`}><strong>{row.elo_mean.toFixed(1)}</strong><span>{scoreInterval(row) || 'Interval not reported'}</span></a>
                     : data.failures[board.run.slug] ? <button className="results-retry" onClick={data.retry}>Retry</button> : <span className="matrix-empty">{rows ? 'Not evaluated' : 'Loading…'}</span>}</td>; })}</tr>; })}</tbody>

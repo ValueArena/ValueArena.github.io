@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ValueLabel } from './ValueLogo';
 
 import data from '@/lib/ict-results.json';
 
@@ -139,7 +140,7 @@ export function IctResults() {
         {signal.rows.map(r => {
           const rate = r.compared ? r.flips / r.compared : 0;
           return <div className="ict-bar-row" key={r.name}>
-            <span className="ict-bar-name">{r.name.charAt(0).toUpperCase() + r.name.slice(1)}</span>
+            <span className="ict-bar-name"><ValueLabel id={r.name} size={22} /></span>
             <div className="ict-bar-track">
               <div className="ict-bar ict-bar-accent" style={{ width: `${Math.max(rate * 100, 0.8)}%` }} role="img" tabIndex={0}
                 aria-label={`${r.name}: changed the choice on ${r.flips} of ${r.compared} dilemmas`} />

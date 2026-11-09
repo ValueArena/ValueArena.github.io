@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueSelect, ValueLabel } from './ValueLogo';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { evaluationAPI, evaluationAuth, evaluationRequest as request, type EvaluationJob as Job } from '@/lib/evaluation';
@@ -359,7 +360,7 @@ export function EvaluationRunner() {
             <button type="button" className="button-secondary" onClick={addModel}>+ Add model</button>
           </div>
         </section>
-        <section className="eval-section"><header><span>02</span><h2>Constitution</h2></header><label>What should the judges evaluate?<select value={constitution} onChange={e => { setConstitution(e.target.value); setCriteria(e.target.value === 'custom' ? '' : CONSTITUTIONS_DATA[e.target.value].join('\n')); }}>{presetNames.map(c => <option key={c} value={c}>{label(c)}</option>)}<option value="custom">Write your own</option></select></label>
+        <section className="eval-section"><header><span>02</span><h2>Constitution</h2></header><label>What should the judges evaluate?<ValueSelect value={constitution} onChange={e => { setConstitution(e.target.value); setCriteria(e.target.value === 'custom' ? '' : CONSTITUTIONS_DATA[e.target.value].join('\n')); }}>{presetNames.map(c => <option key={c} value={c}>{label(c)}</option>)}<option value="custom">Write your own</option></ValueSelect></label>
           <label>Criteria<textarea required rows={6} value={criteria} onChange={e => { setCriteria(e.target.value); setConstitution('custom'); }} /><small>One criterion per line · {criteria.split('\n').filter(s => s.trim()).length} criteria</small></label>
         </section>
         <section className="eval-section"><header><span>03</span><h2>Scenarios</h2></header><div className="eval-fields"><label>Dataset<select value={source} onChange={e => setSource(e.target.value)}><option value="airiskdilemmas">AIRiskDilemmas</option><option value="custom">Upload or paste JSONL</option></select></label>{source === 'airiskdilemmas' && <label>Scenario count<input type="number" min={1} max={Math.min(limits.max_scenarios ?? 3000,3000)} required value={count} onChange={e => setCount(Number(e.target.value))} /><button type="button" onClick={()=>setCount(Math.min(limits.max_scenarios ?? 3000,3000))}>Max available</button></label>}</div>
@@ -401,7 +402,7 @@ export function EvaluationRunner() {
         <dl className="eval-summary-list">
           <div><dt>Name</dt><dd>{name.trim() || '—'}</dd></div>
           <div><dt>Models</dt><dd>{selected.length}</dd></div>
-          <div><dt>Constitution</dt><dd>{constitution === 'custom' ? 'Custom' : label(constitution)} · {criteria.split('\n').filter(s => s.trim()).length} criteria</dd></div>
+          <div><dt>Constitution</dt><dd>{constitution === 'custom' ? 'Custom' : <ValueLabel id={constitution}>{label(constitution)}</ValueLabel>} · {criteria.split('\n').filter(s => s.trim()).length} criteria</dd></div>
           <div><dt>Scenarios</dt><dd>{typeof advancedCount === 'number' ? advancedCount : source === 'airiskdilemmas' ? count : 'Custom'}</dd></div>
           <div><dt>Engine</dt><dd>{engine === 'inspect' ? 'Inspect' : 'Native EigenBench'}</dd></div>
           <div><dt>Compute</dt><dd>{ownKeys ? 'Your keys' : 'LAISR Lab compute'}</dd></div>

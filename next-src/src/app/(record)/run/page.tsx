@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from '@/components/ValueLogo';
 import { fetchRunAsset } from '@/lib/run-source';
 import { runSlug } from '@/lib/run-slug';
 
@@ -316,7 +317,7 @@ function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
     const cid = m ? m[1].replace(/^oct_/, '') : null;
     const pathCell = cid ? (
       <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(cid)}`}>
-        {c.path}
+        <ValueLabel id={cid}>{c.path}</ValueLabel>
       </a>
     ) : (
       c.path || '—'

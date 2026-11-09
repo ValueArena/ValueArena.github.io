@@ -1,5 +1,7 @@
 'use client';
 
+import { ValueSelect, ValueLabel } from './ValueLogo';
+import { valueLogoURL } from '@/lib/value-logos';
 import type { CSSProperties } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
@@ -21,7 +23,7 @@ export function ComparisonValueChart({ models, boards, scores, value, onValueCha
   const pos = (n: number) => Math.max(0, Math.min(100, (n - low) / (high - low) * 100));
   return <section className="comparison-chart" aria-labelledby="comparison-chart-title">
     <header className="comparison-section-heading"><h2 id="comparison-chart-title">Value performance</h2><p>Scores on {board ? constLabel(board.id).toLowerCase() : 'the selected value'} from the same evaluation.</p></header>
-    <div className="comparison-chart-toolbar"><label>Value<select aria-label="Chart value" value={value} onChange={e => onValueChange(e.target.value)}>{boards.map(b => <option key={b.id} value={b.id}>{constLabel(b.id)}</option>)}</select></label>{board && <a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}>Evaluation details</a>}</div>
+    <div className="comparison-chart-toolbar"><label>Value<ValueSelect aria-label="Chart value" value={value} onChange={e => onValueChange(e.target.value)}>{boards.map(b => <option key={b.id} value={b.id}>{constLabel(b.id)}</option>)}</ValueSelect></label>{board && <a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}>Evaluation details</a>}</div>
     <div className="comparison-column-scroll"><div className="comparison-columns" style={{ minWidth: Math.max(560, models.length * 140) }}>
       <div className="comparison-grid-lines" aria-hidden="true">{[0, 25, 50, 75, 100].map(p => <div key={p} style={{ bottom: `${p}%` }}><span>{Math.round(low + (high - low) * p / 100)}</span></div>)}</div>
       {models.map((name, i) => { const row = rows[i]; return <div className="comparison-column" key={name} style={{ '--model-color': COLORS[i % COLORS.length] } as CSSProperties}>
@@ -48,10 +50,10 @@ export function ComparisonRanks({ models, boards, scores }: Props) {
     <div className="comparison-rank-content">
       <div className="comparison-radar">{plotted.length >= 3 && plotted.length <= 8 ? <svg viewBox="0 0 500 390" role="img" aria-label="Relative rank across selected values. Higher ranks extend toward the perimeter. Models missing a value are omitted from the polygon.">
         {[.25, .5, .75, 1].map(r => <polygon key={r} points={plotted.map((_, i) => point(i, 125 * r).join(',')).join(' ')} fill="none" stroke="#8dabc3" strokeDasharray="2 3" />)}
-        {plotted.map((board, i) => { const edge = point(i, 125), label = point(i, 159); return <g key={board.id}><line x1="250" y1="190" x2={edge[0]} y2={edge[1]} stroke="#b5c7d6" strokeWidth=".6" /><text x={label[0]} y={label[1]} textAnchor="middle" dominantBaseline="middle">{constLabel(board.id)}</text></g>; })}
+        {plotted.map((board, i) => { const edge = point(i, 125), label = point(i, 159), logo = valueLogoURL(board.id); return <g key={board.id}><line x1="250" y1="190" x2={edge[0]} y2={edge[1]} stroke="#b5c7d6" strokeWidth=".6" />{logo && <image className="value-radar-logo" href={logo} x={label[0] - 12} y={label[1] - 32} width="24" height="24" />}<text x={label[0]} y={label[1]} textAnchor="middle" dominantBaseline="middle">{constLabel(board.id)}</text></g>; })}
         {series.map((values, i) => values.every(v => v !== null) && <polygon key={models[i]} points={values.map((v, j) => point(j, (v ?? 0) * 125).join(',')).join(' ')} fill={COLORS[i % COLORS.length]} fillOpacity=".035" stroke={COLORS[i % COLORS.length]} strokeWidth="1.5"><title>{models[i]}</title></polygon>)}
       </svg> : <p>{plotted.length < 3 ? 'Select at least three values for the rank chart.' : 'Select up to eight values for the rank chart. All selected values appear in the table.'}</p>}</div>
-      <div className="results-table-scroll comparison-rank-table"><table><caption className="sr-only">Ranks within each source evaluation</caption><thead><tr><th>Value</th>{models.map(name => <th key={name}><ModelLogo name={name} size={16} /><span className="sr-only">{name}</span></th>)}</tr></thead><tbody>{plotted.map(board => { const cohort = scores[board.run.slug]; return <tr key={board.id}><th><a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}>{constLabel(board.id)}</a></th>{models.map(name => { const row = modelMatch(cohort || [], name), rank = row && scoreRank(cohort!, row); return <td key={name} className={rank === 1 ? 'rank-best' : ''}>{row ? `${rank} / ${cohort!.length}` : '—'}</td>; })}</tr>; })}</tbody></table></div>
+      <div className="results-table-scroll comparison-rank-table"><table><caption className="sr-only">Ranks within each source evaluation</caption><thead><tr><th>Value</th>{models.map(name => <th key={name}><ModelLogo name={name} size={16} /><span className="sr-only">{name}</span></th>)}</tr></thead><tbody>{plotted.map(board => { const cohort = scores[board.run.slug]; return <tr key={board.id}><th><a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}><ValueLabel id={board.id} /></a></th>{models.map(name => { const row = modelMatch(cohort || [], name), rank = row && scoreRank(cohort!, row); return <td key={name} className={rank === 1 ? 'rank-best' : ''}>{row ? `${rank} / ${cohort!.length}` : '—'}</td>; })}</tr>; })}</tbody></table></div>
     </div>
   </section>;
 }

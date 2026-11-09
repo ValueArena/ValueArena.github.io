@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import { useState } from 'react';
 
 const root = '/research/character-training';
@@ -67,7 +68,7 @@ export function ResearchStory() {
       <figure className="story-variance">
         <div className="story-variance-head"><span>Share attributed to</span><span><i className="variance-character" />Character training</span><span><i className="variance-prompt" />Prompting</span></div>
         {variance.map(row => <div className="story-variance-row" key={row.name}>
-          <span>{row.name}</span>
+          <span><ValueLabel id={row.name} size={22}>{row.name}</ValueLabel></span>
           <div className="story-variance-track" role="img" aria-label={`${row.name}: character training ${row.character} percent, prompting ${row.prompt} percent of the reported variance split.`}>
             <span className="variance-character" style={{ width: `${row.character}%` }} title={`Character training: ${row.character}%`}>{row.character}%</span>
             <span className="variance-prompt" style={{ width: `${row.prompt}%` }} title={`Prompting: ${row.prompt}%`}>{row.prompt >= 10 ? `${row.prompt}%` : ''}</span>

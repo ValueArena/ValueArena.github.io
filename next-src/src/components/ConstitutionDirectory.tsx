@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueSelect } from './ValueLogo';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { usePublishedBoards } from './usePublishedBoards';
@@ -77,10 +78,10 @@ export function ConstitutionDirectory() {
     <header className="values-heading" id="values-top">
       <div><h1>Model performance across values</h1><p>Different values, different rankings.</p></div>
       <nav className="values-controls" aria-label="Value index">
-        <select aria-label="Jump to a value" disabled={!shown.length} value={current?.id || ''} onChange={e => jumpToValue(e.target.value)}>
+        <ValueSelect aria-label="Jump to a value" disabled={!shown.length} value={current?.id || ''} onChange={e => jumpToValue(e.target.value)}>
           {!shown.length && <option value="">{data.loading ? 'Loading values…' : 'No values'}</option>}
           {shown.map(board => <option key={board.id} value={board.id}>{constLabel(board.id)}</option>)}
-        </select>
+        </ValueSelect>
       </nav>
     </header>
     {data.error ? <div className="results-status" role="alert">{data.error}<button onClick={data.retry}>Retry</button></div>

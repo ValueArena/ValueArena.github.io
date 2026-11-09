@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueSelect, ValueLabel } from './ValueLogo';
 import { useEffect, useRef, useState } from 'react';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
@@ -62,9 +63,9 @@ export function HomeInsights() {
       <header className="home-section-heading"><h2 id="home-compare-heading">Value leaderboards</h2></header>
         <div id="featured-value-chart">
           <div className="value-plot-toolbar">
-            <select aria-label="Featured value" value={xValue} disabled={data.loading} onChange={e => chooseValue(e.target.value)}>{values.map(id => <option key={id} value={id}>{constLabel(id)}</option>)}</select>
+            <ValueSelect aria-label="Featured value" value={xValue} disabled={data.loading} onChange={e => chooseValue(e.target.value)}>{values.map(id => <option key={id} value={id}>{constLabel(id)}</option>)}</ValueSelect>
             <span>vs</span>
-            <select aria-label="Comparison value" value={yValue} disabled={data.loading} onChange={e => { setYValue(e.target.value); setSelected(''); }}>{values.filter(id => id !== xValue).map(id => <option key={id} value={id}>{constLabel(id)}</option>)}</select>
+            <ValueSelect aria-label="Comparison value" value={yValue} disabled={data.loading} onChange={e => { setYValue(e.target.value); setSelected(''); }}>{values.filter(id => id !== xValue).map(id => <option key={id} value={id}>{constLabel(id)}</option>)}</ValueSelect>
             <a href={`/compare/?value=${encodeURIComponent(xValue)}&value=${encodeURIComponent(yValue)}`}>Full comparison</a>
           </div>
           <div className="value-plot-legend" aria-label="Developers">{labs.map(lab => <span key={lab}><i style={{ background: LAB_COLORS[lab] || '#afbdac' }} />{lab}</span>)}</div>
@@ -79,7 +80,7 @@ export function HomeInsights() {
                       {points.map((point, i) => { const logo = getModelLogo(point.name); return <g key={point.name} className="scatter-point" role="button" tabIndex={0} aria-pressed={selected === point.name} aria-label={`${point.name}: ${constLabel(xValue)} ${point.x.elo_mean.toFixed(1)}, ${constLabel(yValue)} ${point.y.elo_mean.toFixed(1)}`} onClick={() => setSelected(point.name)} onFocus={() => setSelected(point.name)} onMouseEnter={() => setSelected(point.name)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(point.name); } }} transform={`translate(${left + (point.y.elo_mean - yMin) / (yMax - yMin) * plotWidth} ${358 - (point.x.elo_mean - xMin) / (xMax - xMin) * 318})`}><rect className="scatter-hit" x="-18" y="-18" width="36" height="36" /><rect className="scatter-tile" x="-12" y="-12" width="24" height="24" fill={colorOf(point.name)} />{logo ? <image href={logo} x="-8" y="-8" width="16" height="16" /> : <circle r="4" fill="currentColor" />}{(width >= 700 && (i < 3 || selected === point.name)) && <text className="scatter-model-name" x={point.y.elo_mean > yMin + .78 * (yMax - yMin) ? -18 : 18} y={i % 2 ? 18 : -16} textAnchor={point.y.elo_mean > yMin + .78 * (yMax - yMin) ? 'end' : 'start'}>{point.name}</text>}</g>; })}
                     </svg>}
             </div>
-            {active && <div className="value-plot-tooltip" aria-live="polite"><button type="button" aria-label="Close model details" onClick={() => setSelected('')}>×</button><a href={profileURL(active.name, xBoard!.run.slug)}><ModelLogo name={active.name} size={16} />{active.name}</a><dl>{[{ board:xBoard, row:active.x }, { board:yBoard, row:active.y }].map(({ board, row }) => <div key={board!.id}><dt>{constLabel(board!.id)}</dt><dd>{row.elo_mean.toFixed(1)}<span>{scoreInterval(row) || 'Interval not reported'}</span></dd></div>)}</dl></div>}
+            {active && <div className="value-plot-tooltip" aria-live="polite"><button type="button" aria-label="Close model details" onClick={() => setSelected('')}>×</button><a href={profileURL(active.name, xBoard!.run.slug)}><ModelLogo name={active.name} size={16} />{active.name}</a><dl>{[{ board:xBoard, row:active.x }, { board:yBoard, row:active.y }].map(({ board, row }) => <div key={board!.id}><dt><ValueLabel id={board!.id} size={20} /></dt><dd>{row.elo_mean.toFixed(1)}<span>{scoreInterval(row) || 'Interval not reported'}</span></dd></div>)}</dl></div>}
           </div>
         </div>
     </section>

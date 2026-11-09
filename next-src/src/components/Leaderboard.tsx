@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import { interval } from '@/lib/chart-data';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CONSTITUTIONS } from '@/lib/config';
@@ -146,7 +147,7 @@ function ConstPills({
             onClick={() => onPick(c)}
             className={`const-pill${isActive ? ' active' : ''}${hd ? '' : ' no-data'}`}
           >
-            {labelOf(c)}
+            <ValueLabel id={c}>{labelOf(c)}</ValueLabel>
           </button>
         );
       })}
@@ -636,7 +637,7 @@ function ParetoView({
               {data.constCols.map((c) => (
                 <th key={c} className="mono-cell">
                   <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(c)}`}>
-                    {labelOf(c)}
+                    <ValueLabel id={c}>{labelOf(c)}</ValueLabel>
                   </a>
                 </th>
               ))}
@@ -694,7 +695,7 @@ function ConstitutionSection({ constId, label }: { constId: string; label: strin
   if (!criteria || !criteria.length) return null;
   return (
     <div className="card" style={{ marginTop: 32 }}>
-      <h2>{label} Constitution</h2>
+      <h2><ValueLabel id={constId} size={28}>{label} Constitution</ValueLabel></h2>
       <div className="card-caption">{criteria.length} criteria</div>
       <div className="scripture">
         {criteria.map((text, i) => (

@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel, ValueLogo } from './ValueLogo';
 import { useMemo, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
@@ -38,10 +39,10 @@ export function ModelProfile({ name, active, board, rows, data }: Props) {
             <div><dt>Weights</dt><dd>{info ? info.open ? 'Open' : 'Proprietary' : 'Not recorded'}</dd></div>
             <div><dt>Model ID</dt><dd title={info?.id}>{info?.id || name}</dd></div>
             <div><dt>Judging</dt><dd>{board?.run.evaluation_mode === 'direct_rating' ? 'Direct rating' : board?.run.evaluation_mode === 'pairwise_btd' ? 'Pairwise' : 'See run details'}</dd></div>
-            <div><dt>Constitution</dt><dd>{board ? constLabel(board.id) : '—'}</dd></div>
+            <div><dt>Constitution</dt><dd>{board ? <ValueLabel id={board.id} size={22} /> : '—'}</dd></div>
           </dl>
           <div className="profile-metrics">
-            <div><span>{board ? constLabel(board.id) : 'Selected value'} score</span><strong>{current ? current.elo_mean.toFixed(1) : '—'}</strong><small>{current && scoreInterval(current) ? scoreInterval(current) : 'EigenBench Elo'}</small><i className="metric-gauge" aria-hidden="true"><b style={{ left: `${position}%` }} /></i></div>
+            <div><span>{board && <ValueLogo id={board.id} size={22} />}{board ? constLabel(board.id) : 'Selected value'} score</span><strong>{current ? current.elo_mean.toFixed(1) : '—'}</strong><small>{current && scoreInterval(current) ? scoreInterval(current) : 'EigenBench Elo'}</small><i className="metric-gauge" aria-hidden="true"><b style={{ left: `${position}%` }} /></i></div>
             <div><span>Rank in this run</span><strong>{current && rows ? scoreRank(rows, current) : '—'}{current && rows && <small> / {rows.length}</small>}</strong><small>Models judged together</small><i className="metric-gauge" aria-hidden="true"><b style={{ left: `${current && rows ? 100 * (rows.length - scoreRank(rows, current)) / Math.max(1, rows.length - 1) : 0}%` }} /></i></div>
             <div><span>Values evaluated</span><strong>{appearances.length}</strong><small>Across selected runs</small><i className="metric-gauge" aria-hidden="true"><b style={{ left: `${appearances.length / Math.max(1, data.boards.length) * 100}%` }} /></i></div>
           </div>
@@ -50,7 +51,7 @@ export function ModelProfile({ name, active, board, rows, data }: Props) {
             <div className="results-table-scroll"><table className="profile-table"><thead><tr><th>Value</th><th><span className="sr-only">Relative position</span></th><th>{metric === 'score' ? 'Score / 95% interval' : metric === 'rank' ? 'Rank' : 'Trust share'}</th><th>Ranking</th></tr></thead>
               <tbody>{appearances.map(({ board: b, cohort, row }) => {
                 const rank = scoreRank(cohort, row), share = trustShare(row.elo_mean, cohort.length);
-                return <tr key={b.id}><th><a href={`/leaderboard/?constitution=${encodeURIComponent(b.id)}&run=${encodeURIComponent(b.run.slug)}&id=${encodeURIComponent(name)}`}>{constLabel(b.id)}</a></th>
+                return <tr key={b.id}><th><a href={`/leaderboard/?constitution=${encodeURIComponent(b.id)}&run=${encodeURIComponent(b.run.slug)}&id=${encodeURIComponent(name)}`}><ValueLabel id={b.id} size={22} /></a></th>
                   <td><span className="profile-rank-track" aria-hidden="true"><i style={{ width: `${metric === 'trust' ? share * 100 : metric === 'rank' ? 100 * (cohort.length - rank) / Math.max(1, cohort.length - 1) : rowStrength(cohort, row) * 100}%` }} /></span></td>
                   <td><a href={`/transcript/?run=${encodeURIComponent(b.run.slug)}&model=${encodeURIComponent(row.model_name)}`} title="View responses"><strong>{metric === 'score' ? row.elo_mean.toFixed(1) : metric === 'rank' ? rank : `${(share * 100).toFixed(1)}%`}</strong>{metric === 'score' && <small>{scoreInterval(row) || 'Interval not reported'}</small>}</a></td><td>{rank} / {cohort.length}</td></tr>;
               })}</tbody></table></div>

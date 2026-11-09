@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLabel } from './ValueLogo';
 import {
   useCallback,
   useEffect,
@@ -225,7 +226,7 @@ export function Experiments() {
                     setOpenSelect(open ? null : f.col);
                   }}
                 >
-                  {current ? filterValueLabel(f.col, current) : `${f.label}: All`}
+                  {current ? f.col === 'constitution' ? <ValueLabel id={current} /> : filterValueLabel(f.col, current) : `${f.label}: All`}
                 </button>
                 {open ? (
                   <div className="custom-select-dropdown" role="listbox">
@@ -249,7 +250,7 @@ export function Experiments() {
                           setOpenSelect(null);
                         }}
                       >
-                        {filterValueLabel(f.col, v)}
+                        {f.col === 'constitution' ? <ValueLabel id={v} /> : filterValueLabel(f.col, v)}
                       </button>
                     ))}
                   </div>
@@ -330,7 +331,7 @@ export function Experiments() {
                   const open = expanded.has(item.name);
                   const first = item.children[0];
                   const uniqConst = [
-                    ...new Set(item.children.map((r) => r.constitution).filter(Boolean)),
+                    ...new Set(item.children.map((r) => r.constitution).filter((id): id is string => !!id)),
                   ];
                   const uniqSc = [...new Set(item.children.map((r) => r.scenario).filter(Boolean))];
                   const uniqModes = [
@@ -356,7 +357,7 @@ export function Experiments() {
                       <td className="note-cell" title={first.note || undefined}>{first.note}</td>
                       <td>
                         {uniqConst.length === 1 ? (
-                          uniqConst[0]
+                          <ValueLabel id={uniqConst[0]} />
                         ) : (
                           <span className="group-summary">{uniqConst.length} constitutions</span>
                         )}
@@ -485,7 +486,7 @@ function RunRowEl({ r, child }: { r: RunRow; child: boolean }) {
       <td>
         {r.constitution ? (
           <a className="link-subtle" href={`/constitution/?id=${encodeURIComponent(r.constitution)}`}>
-            {r.constitution}
+            <ValueLabel id={r.constitution} />
           </a>
         ) : (
           '—'

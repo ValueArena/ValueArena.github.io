@@ -4,6 +4,8 @@ import { fetchIndex, fetchSummary } from '@/lib/hf';
 import { experimentGroup, validRows, interval } from '@/lib/chart-data';
 import { CONSTITUTIONS_DATA } from '@/lib/constitutions-data';
 import { BoardIcon, Delta, LogoTile } from './hub/ui';
+import { ValueLabel, ValueSelect } from './ValueLogo';
+import { valueLogoURL } from '@/lib/value-logos';
 import type { IndexRun, Summary } from '@/lib/types';
 
 type Run = { run: IndexRun; rows: Summary };
@@ -36,8 +38,8 @@ const label = (r: Run) => r.run.constitution?.replace(/^oct_/, '') ?? r.run.slug
 const title = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** A styled native select, so every card keeps keyboard and screen-reader support. */
-function Picker({ label: aria, value, onChange, children }: { label: string; value: string | number; onChange: (v: string) => void; children: React.ReactNode }) {
-  return <label className="carousel-picker"><select aria-label={aria} value={value} onChange={e => onChange(e.target.value)}>{children}</select>
+function Picker({ label: aria, value, valueId, onChange, children }: { label: string; value: string | number; valueId?: string; onChange: (v: string) => void; children: React.ReactNode }) {
+  return <label className="carousel-picker"><ValueSelect aria-label={aria} value={value} logoId={valueId} onChange={e => onChange(e.target.value)}>{children}</ValueSelect>
     <svg viewBox="0 0 12 12" width={12} height={12} aria-hidden="true"><path d="m3 4.5 3 3 3-3" /></svg></label>;
 }
 
@@ -62,8 +64,9 @@ export function RadarChart({ runs }: { runs: Run[] }) {
     <svg className="carousel-radar" viewBox="0 0 440 280" aria-label={`Within-run rank profile of ${model}. Focus or tap a point for its score.`} role="group">
       <defs><radialGradient id={gradient}><stop offset="0" stopColor="var(--s1)" stopOpacity=".08" /><stop offset="1" stopColor="var(--s1)" stopOpacity=".26" /></radialGradient></defs>
       {[.25, .5, .75, 1].map(v => <polygon key={v} points={runs.map((_, i) => point(i, v).join(',')).join(' ')} className={v === 1 ? 'radar-ring radar-ring-outer' : 'radar-ring'} />)}
-      {runs.map((r, i) => { const p = point(i, 1), t = point(i, 1.2), dx = t[0] - 220; return <g key={r.run.slug}>
+      {runs.map((r, i) => { const p = point(i, 1), t = point(i, 1.2), dx = t[0] - 220, logo = valueLogoURL(label(r)); return <g key={r.run.slug}>
         <line x1="220" y1="140" x2={p[0]} y2={p[1]} className="radar-ring" />
+        {logo && <image className="value-radar-logo" href={logo} x={t[0] - (Math.abs(dx) < 1 ? 10 : dx > 0 ? 0 : 20)} y={t[1] - 28} width="20" height="20" />}
         <text className="radar-trait" x={t[0]} y={t[1]} textAnchor={Math.abs(dx) < 1 ? 'middle' : dx > 0 ? 'start' : 'end'} dominantBaseline="middle" data-on={i === shown || undefined}>{title(label(r))}</text>
       </g>; })}
       <polygon points={scores.map((sc, i) => point(i, sc.rank).join(',')).join(' ')} fill={`url(#${gradient})`} className="radar-area" />
@@ -108,7 +111,7 @@ export function RankingChart({ runs }: { runs: Run[] }) {
   const ends = rows.flatMap(r => interval(r) ?? [r.elo_mean]);
   const lo = Math.min(...ends), hi = Math.max(...ends), x = (v: number) => ((v - lo) / (hi - lo || 1)) * 100;
   return <>
-    <Picker label="Ranking constitution" value={selected} onChange={v => setSelected(Number(v))}>{runs.map((r, i) => <option key={r.run.slug} value={i}>{title(label(r))}</option>)}</Picker>
+    <Picker label="Ranking constitution" value={selected} valueId={label(run)} onChange={v => setSelected(Number(v))}>{runs.map((r, i) => <option key={r.run.slug} value={i}>{title(label(r))}</option>)}</Picker>
     <ol className="carousel-ranking">{rows.map((r, i) => { const ci = interval(r); return <li key={r.model_name}>
       <span className="carousel-rank">{i + 1}</span>
       <LogoTile name={r.model_name} size={28} />
@@ -131,7 +134,7 @@ export function RankShiftChart({ runs }: { runs: Run[] }) {
   const max = Math.max(a.rows.length, b.rows.length), y = (n: number) => 34 + (n - 1) / (max - 1) * 150;
   const curve = (p: { a: number; b: number }) => `M70 ${y(p.a)} C160 ${y(p.a)},200 ${y(p.b)},290 ${y(p.b)}`;
   return <>
-    <Picker label="Compare ranking with constitution" value={selected} onChange={v => setSelected(Number(v))}>{runs.slice(1).map((r, i) => <option key={r.run.slug} value={i + 1}>{title(label(a))} vs. {title(label(r))}</option>)}</Picker>
+    <Picker label="Compare ranking with constitution" value={selected} valueId={label(b)} onChange={v => setSelected(Number(v))}>{runs.slice(1).map((r, i) => <option key={r.run.slug} value={i + 1}>{title(label(a))} vs. {title(label(r))}</option>)}</Picker>
     <svg className="carousel-bump" viewBox="0 0 360 206" role="img" aria-label="Five models with the largest rank changes between selected runs">
       <text x="70" y="14" textAnchor="middle" className="bump-head">{title(label(a))}</text><text x="290" y="14" textAnchor="middle" className="bump-head">{title(label(b))}</text>
       {[1, max].map(n => <g key={n}><line x1="70" x2="290" y1={y(n)} y2={y(n)} className="bump-grid" /><text x="30" y={y(n) + 4} textAnchor="middle" className="bump-axis">#{n}</text></g>)}
@@ -161,7 +164,7 @@ export function ConstitutionCard() {
   const [criterion, setCriterion] = useState(0);
   const criteria = CONSTITUTIONS_DATA[selected] ?? [];
   return <>
-    <div className="hub-tabs carousel-tabs" role="tablist" aria-label="Constitution">{choices.map(c => <button key={c} role="tab" aria-selected={c === selected} onClick={() => { setSelected(c); setCriterion(0); }}>{title(c)}</button>)}</div>
+    <div className="hub-tabs carousel-tabs" role="tablist" aria-label="Constitution">{choices.map(c => <button key={c} role="tab" aria-selected={c === selected} onClick={() => { setSelected(c); setCriterion(0); }}><ValueLabel id={c} size={20}>{title(c)}</ValueLabel></button>)}</div>
     <div className="carousel-constitution">
       <span className="carousel-constitution-n"><BoardIcon constitution={selected} />Criterion {criterion + 1} of {criteria.length}</span>
       <blockquote>{criteria[criterion]}</blockquote>

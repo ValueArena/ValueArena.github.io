@@ -10,6 +10,7 @@ import './home-insights.css';
 import './eigenbench.css';
 import './themes.css';
 import './controls.css';
+import './value-logos.css';
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { ArenaShell } from '@/components/ArenaShell';

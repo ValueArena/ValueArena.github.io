@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueSelect } from './ValueLogo';
 import { useEffect, useMemo, useState } from 'react';
 import { Penguin } from './Penguin';
 import { ModelLogo } from './ModelLogo';
@@ -126,9 +127,9 @@ export function ResultsExplorer({ embedded = false }: { embedded?: boolean }) {
       <span role="status" className="chart-share-status">{shareStatus}</span>
     </div>
     <div className="explorer-controls">
-      <label><span>{view === 'tradeoff' ? 'Horizontal axis' : 'Constitution'}</span><select value={normConst(xRun?.constitution)} onChange={e => { const match = runs.find(r => normConst(r.constitution) === e.target.value && !/deprecated/i.test(`${r.name} ${r.note}`)) || runs.find(r => normConst(r.constitution) === e.target.value); if (match) chooseX(match.slug); }}>{constitutions.map(c => <option key={c} value={c}>{constLabel(normConst(c))}</option>)}</select></label>
+      <label><span>{view === 'tradeoff' ? 'Horizontal axis' : 'Constitution'}</span><ValueSelect value={normConst(xRun?.constitution)} onChange={e => { const match = runs.find(r => normConst(r.constitution) === e.target.value && !/deprecated/i.test(`${r.name} ${r.note}`)) || runs.find(r => normConst(r.constitution) === e.target.value); if (match) chooseX(match.slug); }}>{constitutions.map(c => <option key={c} value={c}>{constLabel(normConst(c))}</option>)}</ValueSelect></label>
       <label className="explorer-run-select"><span>Experiment run</span><select value={xSlug} onChange={e => chooseX(e.target.value)}>{runs.filter(r => normConst(r.constitution) === normConst(xRun?.constitution)).map(r => <option key={r.slug} value={r.slug}>{r.name || r.slug}</option>)}</select></label>
-      {view === 'tradeoff' && <><label><span>Vertical axis</span><select value={normConst(yRun?.constitution) || yConstitution} onChange={e => { setYConstitution(e.target.value); setYSlug(yOptions.find(r => normConst(r.constitution) === e.target.value)?.slug || ''); setHovered(''); }}>{!yOptions.length && <option value="">No paired constitution</option>}{[...new Set(yOptions.map(r => normConst(r.constitution)))].map(c => <option key={c} value={c}>{constLabel(normConst(c))}</option>)}</select></label><label className="explorer-run-select"><span>Paired run</span><select value={ySlug} onChange={e => { setYSlug(e.target.value); setHovered(''); }}>{!yOptions.length && <option value="">No paired run</option>}{yOptions.filter(r => normConst(r.constitution) === normConst(yRun?.constitution)).map(r => <option key={r.slug} value={r.slug}>{r.name || r.slug}</option>)}</select></label></>}
+      {view === 'tradeoff' && <><label><span>Vertical axis</span><ValueSelect value={normConst(yRun?.constitution) || yConstitution} onChange={e => { setYConstitution(e.target.value); setYSlug(yOptions.find(r => normConst(r.constitution) === e.target.value)?.slug || ''); setHovered(''); }}>{!yOptions.length && <option value="">No paired constitution</option>}{[...new Set(yOptions.map(r => normConst(r.constitution)))].map(c => <option key={c} value={c}>{constLabel(normConst(c))}</option>)}</ValueSelect></label><label className="explorer-run-select"><span>Paired run</span><select value={ySlug} onChange={e => { setYSlug(e.target.value); setHovered(''); }}>{!yOptions.length && <option value="">No paired run</option>}{yOptions.filter(r => normConst(r.constitution) === normConst(yRun?.constitution)).map(r => <option key={r.slug} value={r.slug}>{r.name || r.slug}</option>)}</select></label></>}
     </div>
     </>}
     <div className="chart-tools">

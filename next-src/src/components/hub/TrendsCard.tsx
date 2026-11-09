@@ -1,5 +1,6 @@
 'use client';
 
+import { ValueLogo } from '../ValueLogo';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
@@ -234,10 +235,10 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
   useEffect(() => () => sparks.current?.stop(), []);
 
   if (rows === null || failed || points.length < 3 || !span) return home ? <section ref={sectionRef} className="hub-card hub-card-flat hub-card-compact hub-home-loading" aria-label="Kindness over time">
-    <header className="hub-trends-head"><div><h2 className="hub-title">Kindness over time</h2></div><div className="hub-tabs" aria-hidden="true">{LENSES.map(l => <button key={l.id} disabled>{l.label}</button>)}</div></header>
+    <header className="hub-trends-head"><div><h2 className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time</h2></div><div className="hub-tabs" aria-hidden="true">{LENSES.map(l => <button key={l.id} disabled>{l.label}</button>)}</div></header>
     <div className="hub-chart home-trend-loading-chart" style={{ height }}>{failed ? <div role="alert">Model history couldn’t be loaded.<button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div> : <p role="status">{rows === null ? 'Loading model history…' : 'No model history is available for this run.'}</p>}</div>
   </section> : <section className={`hub-card hub-trend-status${flat ? ' hub-card-flat' : ''}`} aria-label="Kindness over time">
-    <h2 className="hub-title">Kindness over time</h2>
+    <h2 className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time</h2>
     {failed ? <div role="alert"><p>Model history couldn’t be loaded.</p><button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div>
       : rows === null ? <p role="status">Loading model history…</p>
         : <p>No model history is available for this run.</p>}
@@ -363,7 +364,7 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
       <header className="hub-card-head hub-trends-head">
         <div>
           <p className="hub-eyebrow">Trends</p>
-          <h2 id="hub-trends-title" className="hub-title">Kindness over time <span className="hub-chip">{points.length} models</span></h2>
+          <h2 id="hub-trends-title" className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time <span className="hub-chip">{points.length} models</span></h2>
         </div>
         {!compact && <p className="hub-sub hub-trends-note">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
         <div className="hub-tabs hub-tabs-timed" role="tablist" aria-label="Group models by">
