@@ -32,6 +32,16 @@ export const CONSTITUTIONS: ConstitutionDef[] = [
   { id: 'openai', label: 'OpenAI' },
   { id: 'conservatism', label: 'Conservatism' },
   { id: 'deep_ecology', label: 'Deep Ecology' },
+  { id: 'kantian-deontology', label: "Kantian Deontology" },
+  { id: 'utilitarianism', label: "Utilitarianism" },
+  { id: 'care-ethics', label: "Care Ethics" },
+  { id: 'lockean-rights', label: "Lockean Rights" },
+  { id: 'marxism', label: "Marxism" },
+  { id: 'environmental-ethics', label: "Environmental Ethics" },
+  { id: 'christianity', label: "Christianity" },
+  { id: 'islam', label: "Islam" },
+  { id: 'buddhism', label: "Buddhism" },
+  { id: 'power-seeking', label: "Power Seeking" },
 ];
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
