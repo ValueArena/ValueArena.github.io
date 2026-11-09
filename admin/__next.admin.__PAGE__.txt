@@ -2,5 +2,5 @@
 2:I[787,["3698","static/chunks/app/admin/page-f0262368c4080b8f.js"],"SiteRedirect"]
 3:I[90484,[],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"to":"https://eigenbench.github.io/admin/","label":"EigenBench"}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"KUdiG5WkNsS4vjDW-Wdod"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"to":"https://eigenbench.github.io/admin/","label":"EigenBench"}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"MfYtYVGeIJfvo4d4pAFo7"}
 5:null
