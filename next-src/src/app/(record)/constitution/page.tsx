@@ -128,7 +128,7 @@ export default function ConstitutionPage() {
       <section className="card constitution-criteria" aria-labelledby="constitution-criteria-heading">
         <h2 id="constitution-criteria-heading">Evaluation criteria</h2>
         <div className="card-caption">
-          Each criterion is something the judge looks for when comparing two answers. They are
+          Each criterion is something the judge looks for in a model’s response. They are
           numbered in order, not by importance, and the judge sees the whole list.
         </div>
         {criteria.length ? (

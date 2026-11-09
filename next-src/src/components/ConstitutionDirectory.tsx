@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
-import { CONSTITUTION_SUMMARIES } from '@/lib/taglines';
+import { CONSTITUTION_SUMMARIES, CONSTITUTION_SUMMARY_POINTS } from '@/lib/taglines';
 import { usePublishedBoards } from './usePublishedBoards';
 import { ModelLogo } from './ModelLogo';
 import { BoardIcon } from './hub/ui';
@@ -105,11 +105,14 @@ export function ConstitutionDirectory() {
             </div>
             <div className="values-chapters">{shown.map(board => {
               const rows = data.scores[board.run.slug], date = new Date(board.run.timestamp);
+              const summary = CONSTITUTION_SUMMARY_POINTS[board.id];
               const href = `/leaderboard/?constitution=${encodeURIComponent(board.id)}&run=${encodeURIComponent(board.run.slug)}`;
               return <article className="value-chapter" id={`value-${board.id}`} data-value={board.id} data-active={current?.id === board.id} key={board.id} aria-labelledby={`value-title-${board.id}`}>
                 <div className="value-chapter-intro">
                   <h2 id={`value-title-${board.id}`}>{constLabel(board.id)}</h2>
-                  <p>{CONSTITUTION_SUMMARIES[board.id] || 'Explore the written criteria and model results for this constitution.'}</p>
+                  {summary ? <ul className="value-summary" aria-label={`${constLabel(board.id)} summary`}>
+                    {summary.map(point => <li key={point}>{point}</li>)}
+                  </ul> : CONSTITUTION_SUMMARIES[board.id] && <p>{CONSTITUTION_SUMMARIES[board.id]}</p>}
                 </div>
                 <div className="value-chapter-leaders">
                   <header><h3>Top models</h3><span>Elo</span></header>

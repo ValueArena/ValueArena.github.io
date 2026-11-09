@@ -184,6 +184,9 @@ html:has(.values-directory) { scroll-padding-top:0; }
 .value-chapter+.value-chapter { border-top:1px solid var(--border); }
 .value-chapter-intro h2 { margin:0 0 20px; font:500 clamp(32px,3.5vw,48px)/1.12 var(--font-body); letter-spacing:-1.4px; }
 .value-chapter-intro>p { margin:0; max-width:520px; color:var(--text-secondary); font-size:18px; line-height:1.7; text-wrap:pretty; }
+.value-summary { display:grid; gap:12px; max-width:520px; margin:0; padding:0; list-style:none; color:var(--text-secondary); font-size:17px; line-height:27px; }
+.value-summary li { position:relative; padding-left:18px; text-wrap:pretty; }
+.value-summary li::before { content:''; position:absolute; left:0; top:12px; width:4px; height:4px; border-radius:50%; background:var(--accent); }
 .value-chapter-leaders { margin-top:36px; min-height:166px; }
 .value-chapter-leaders header { display:flex; justify-content:space-between; align-items:baseline; padding-bottom:10px; border-bottom:1px solid var(--border); }
 .value-chapter-leaders h3 { margin:0; font:500 13px/20px var(--font-body); }
@@ -349,6 +352,9 @@ html:has(.values-directory) { scroll-padding-top:0; }
   .value-chapter:first-child { min-height:calc(100svh - 220px); padding-top:24px; }
   .value-chapter-intro h2 { font-size:30px; letter-spacing:-.8px; margin-bottom:16px; overflow-wrap:anywhere; }
   .value-chapter-intro>p { font-size:15px; line-height:1.65; }
+  .value-summary { gap:9px; font-size:15px; line-height:24px; }
+  .value-summary li { padding-left:14px; }
+  .value-summary li::before { top:10px; width:3px; height:3px; }
   .value-chapter-leaders { margin-top:28px; }
   .value-chapter-leaders li a { grid-template-columns:12px 16px minmax(0,1fr) auto; gap:6px; font-size:12px; }
   .value-chapter-leaders .model-logo { width:16px; height:16px; }
