@@ -132,6 +132,18 @@
 .home-footer-art-link { display:block; margin-top:16px; }
 .home-footer-art { display:block; width:72px; height:72px; object-fit:contain; image-rendering:pixelated; }
 .home-footer a:hover { color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+.arena-column-tooltip { display:none; position:absolute; z-index:5; top:12px; left:12px; width:224px; padding:16px; background:var(--bg-elevated); border:1px solid var(--border); box-shadow:0 4px 16px #00000014; color:var(--text); pointer-events:none; text-align:left; }
+.arena-column-tooltip[data-align=end] { left:auto; right:12px; }
+.arena-column-tooltip-name { display:flex; align-items:center; gap:8px; font:500 13px/20px var(--font-body); }
+.arena-column-tooltip-score { display:block; margin-top:12px; font:22px/28px var(--font-mono); }
+.arena-column-tooltip-score>span { font:11px/18px var(--font-mono); color:var(--text-secondary); }
+.arena-column-tooltip-interval { display:block; margin-top:5px; font:10px/16px var(--font-mono); color:var(--text-secondary); }
+.arena-column:focus-visible { z-index:2; }
+.arena-column:focus-visible .arena-column-tooltip { display:block; }
+@media(hover:hover) {
+  .arena-column:hover { z-index:2; }
+  .arena-column:hover .arena-column-tooltip { display:block; }
+}
 @media(max-width:480px) {
   .home-footer nav { gap:0 18px; }
   .home-footer nav a { font-size:11px; }

@@ -36,5 +36,5 @@
 
 [data-theme=dark] .model-directory { --directory-surface:var(--bg-surface); }
 [data-theme=dark] .model-directory-list .directory-bar { --bar-ink:color-mix(in srgb,var(--model-bar-color) 65%,var(--bg)); }
-[data-theme=dark] .model-directory-list .directory-bar[aria-pressed=true] { --bar-ink:var(--model-bar-color); }
+[data-theme=dark] .model-directory-list .directory-bar[aria-pressed=true] { --bar-ink:var(--model-bar-color); background:color-mix(in srgb,var(--model-bar-color) 25%,var(--directory-surface)); box-shadow:inset 3px 0 0 var(--model-bar-color); }
 [data-theme=dark] .directory-bar[aria-pressed=true] .directory-rank { background:var(--model-bar-color); color:var(--bg); }

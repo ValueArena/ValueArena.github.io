@@ -342,13 +342,13 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
   const ends = lines.map(l => ({ l, lineY: l.headY, y: l.headY })).sort((a, b) => a.lineY - b.lineY);
   for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 30);
 
-  // Hover, once the chart is complete: the nearest model within 18px, otherwise a crosshair over the date.
-  const hovering = pointer && !live ? pointer : null;
+  // Inspect models and dates during playback as well as after it finishes.
+  const hovering = pointer;
   const shown = points.filter(p => Date.parse(p.date) <= tNow);
   const nearest = hovering ? shown.map(p => ({ p, d: Math.hypot(px(Date.parse(p.date)) - hovering.x, py(p.score) - hovering.y) }))
     .sort((a, b) => a.d - b.d)[0] : null;
   const hoverPoint = nearest && nearest.d < 18 ? nearest.p : null;
-  const hoverT = hovering && !hoverPoint && hovering.x >= m.left && hovering.x <= endX ? va + ((hovering.x - m.left) / (endX - m.left)) * (vb - va) : null;
+  const hoverT = hovering && !hoverPoint && hovering.x >= m.left && hovering.x <= Math.min(endX, px(tNow)) ? va + ((hovering.x - m.left) / (endX - m.left)) * (vb - va) : null;
   const atDate = hoverT == null ? [] : lines.map(({ g }) => {
     const reached = g.steps.filter(s => Date.parse(s.date) <= hoverT);
     return { g, best: reached[reached.length - 1] };

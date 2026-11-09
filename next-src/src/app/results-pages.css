@@ -32,7 +32,7 @@
 .directory-bar-track { position:absolute; z-index:0; height:8px; bottom:10px; left:48px; right:12px; background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--text) 12%,transparent) 0 1px,transparent 1px 4px); }
 .directory-bar-fill { position:absolute; bottom:0; left:0; width:var(--model-bar-width); height:12px; background:repeating-linear-gradient(90deg,var(--bar-ink) 0 2px,transparent 2px 4px); mask-image:linear-gradient(0deg,#000 0 8px,transparent 8px),repeating-linear-gradient(90deg,#000 0 1px,transparent 1px 20px); transition:height 180ms ease,width 240ms ease; }
 .model-directory-list .directory-bar:hover { background:color-mix(in srgb,var(--model-bar-color) 8%,transparent); }
-.model-directory-list .directory-bar[aria-pressed=true] { --bar-ink:color-mix(in srgb,var(--model-bar-color) 38%,var(--accent)); background:linear-gradient(90deg,color-mix(in srgb,var(--model-bar-color) 16%,transparent),transparent); }
+.model-directory-list .directory-bar[aria-pressed=true] { --bar-ink:color-mix(in srgb,var(--model-bar-color) 38%,var(--accent)); background:color-mix(in srgb,var(--model-bar-color) 32%,var(--directory-surface)); box-shadow:inset 3px 0 0 var(--accent); }
 .directory-bar[aria-pressed=true] .directory-bar-fill { height:16px; mask-image:linear-gradient(0deg,#000 0 11px,transparent 11px),repeating-linear-gradient(90deg,#000 0 1px,transparent 1px 20px); }
 .directory-rank { display:grid; place-items:center; width:24px; height:24px; border-radius:2px; font:11px/18px var(--font-mono); color:var(--text-muted); transition:color 180ms ease,background-color 180ms ease; }
 .directory-bar[aria-pressed=true] .directory-rank { background:var(--accent); color:var(--bg); }

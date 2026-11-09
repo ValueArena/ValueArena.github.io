@@ -180,7 +180,12 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
         return <a className="arena-column" key={row.model_name} style={{ '--column-color': COLORS[lab(row.model_name)] || ['#c0c9b4', '#d8c5b4', '#b4c6cf'][i % 3] } as React.CSSProperties}
             href={`/model/?run=${encodeURIComponent(run.slug)}&id=${encodeURIComponent(row.model_name)}`}
             aria-label={`Rank ${rows.indexOf(row) + 1}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}
-            title={`${row.elo_mean.toFixed(1)} Elo · ${interval}`}>
+            aria-describedby={`ranking-tooltip-${i}`}>
+            <span className="arena-column-tooltip" id={`ranking-tooltip-${i}`} role="tooltip" data-align={i >= shown.length / 2 ? 'end' : 'start'}>
+              <span className="arena-column-tooltip-name"><ModelLogo name={row.model_name} size={20} />{row.model_name}</span>
+              <span className="arena-column-tooltip-score">{row.elo_mean.toFixed(1)} <span>Elo</span></span>
+              <span className="arena-column-tooltip-interval">{interval}</span>
+            </span>
             <div className="arena-column-stage">
               <div className="arena-column-bar" style={{ height: `${pos(row.elo_mean)}%` }}><strong>{row.elo_mean.toFixed(0)}</strong><span className="arena-bar-rank">#{rows.indexOf(row) + 1}</span></div>
               {typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number' && <span className="arena-whisker" aria-hidden="true" style={{ bottom: `${pos(row.elo_ci_lower)}%`, height: `${pos(row.elo_ci_upper) - pos(row.elo_ci_lower)}%` }} />}
