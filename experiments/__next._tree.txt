@@ -3,6 +3,6 @@
 :HL["/_next/static/css/dd5fb88164ed4099.css","style"]
 :HL["/_next/static/css/bcb57133ac70482d.css","style"]
 :HL["/_next/static/css/b2aea1d897046292.css","style"]
-:HL["/_next/static/css/ee66cc81eea174dc.css","style"]
+:HL["/_next/static/css/674c91012efaf4ef.css","style"]
 :HL["/assets/art/experiment-archive.webp","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"experiments","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"9j557QKc-Yyuwmzs_H-7X"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"experiments","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"J0A5k6oQg9Ky8TE8WK3yI"}
