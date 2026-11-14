@@ -92,7 +92,7 @@ export function ResearchStory() {
 
     <section className="story-closing" id="keep-exploring">
       <div><p className="story-kicker">Keep exploring</p><h2>Dig into the results</h2><p>Browse the full rankings, compare traits, or read how a single response was judged.</p>
-        <div className="research-links"><a className="research-primary" href="/explore/">Explore results</a><a href="/experiments/">Browse all runs</a><a href="/compare/">Compare models</a></div>
+        <div className="research-links"><a className="research-primary" href="/constitutions/">Explore results</a><a href="/experiments/">Browse all runs</a><a href="/compare/">Compare models</a></div>
       </div>
       <details className="story-details"><summary>Scope and sources</summary>
         <p>The results here come from <cite>Side Effects of Character Training: Quantifying Cross-Constitution Drift in LLMs</cite>, which used Qwen2.5-7B-Instruct and the AIRiskDilemmas scenarios. Other model families or scenario sets might behave differently. Rankings also depend on which models do the judging, and the paper notes that judges get less reliable on adversarial traits.</p>
