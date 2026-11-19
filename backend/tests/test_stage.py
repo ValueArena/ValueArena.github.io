@@ -37,16 +37,20 @@ def upstream(monkeypatch, tmp_path):
             'b': log('eigenbench_responses_gemini', 'gemini', [sample()] * 5),
             'c': log('eigenbench_judge_gemini', 'gemini', [sample('Cannot send a request, as the client has been closed.')]),
             'd': log('eigenbench_judge_grok', 'grok', [sample()])}
+    direct_rating = NS(
+        collect_direct_ratings_inspect=collect,
+        eval_kwargs=lambda cfg, log_dir: {'log_dir': str(log_dir), 'fail_on_error': False},
+        records_from_logs=lambda logs, strict=True, **kwargs: ('records', strict, kwargs),
+        export_log=lambda log, **kwargs: ('export', kwargs.get('strict', True)),
+    )
     modules = {
         'inspect_pipeline': types.ModuleType('inspect_pipeline'),
-        'inspect_pipeline.collect': NS(collect_direct_ratings_inspect=collect,
-                                       eval_kwargs=lambda cfg, log_dir: {'log_dir': str(log_dir), 'fail_on_error': False},
-                                       records_from_logs=lambda logs, strict=True, **kwargs: ('records', strict, kwargs),
-                                       export_log=lambda log, **kwargs: ('export', kwargs.get('strict', True))),
+        'inspect_pipeline.collection': NS(direct_rating=direct_rating),
+        'inspect_pipeline.collection.direct_rating': direct_rating,
         'inspect_ai._util': types.ModuleType('inspect_ai._util'),
         'inspect_ai._util.local_server': NS(kill_process_tree=None),
-        'pipeline': types.ModuleType('pipeline'),
-        'pipeline.config': NS(load_run_spec=lambda spec: ({'collection': {'evaluations_path': str(tmp_path/'evaluations.jsonl'), **seen.get('collection', {})}}, tmp_path)),
+        'eigenbench': types.ModuleType('eigenbench'),
+        'eigenbench.config': NS(load_run_spec=lambda spec: ({'collection': {'evaluations_path': str(tmp_path/'evaluations.jsonl'), **seen.get('collection', {})}}, tmp_path)),
         'inspect_ai': types.ModuleType('inspect_ai'),
         'inspect_ai.log': NS(list_eval_logs=lambda d: (seen.setdefault('log_dir', d), list(logs))[1], read_eval_log=logs.__getitem__),
     }
@@ -108,7 +112,7 @@ def test_kill_process_tree_stops_children():
 
 def test_retries_are_bounded_and_the_failure_policy_reaches_the_inspect_export(upstream, capsys):
     seen, _ = upstream
-    collect = sys.modules['inspect_pipeline.collect']
+    collect = sys.modules['inspect_pipeline.collection.direct_rating']
     # strict (the upstream default): exports stay strict, retries are still bounded
     with pytest.raises(SystemExit):
         stage.collect_inspect('spec.py')
@@ -141,9 +145,8 @@ def test_bootstrap_chart_cannot_fail_the_analysis(monkeypatch, capsys):
         drawn.append(rows)
         if path == 'broken.png': raise RuntimeError('no display')
     module = NS(_save_bootstrap_plot=plot)
-    monkeypatch.setitem(sys.modules, 'pipeline', types.ModuleType('pipeline'))
-    monkeypatch.setitem(sys.modules, 'pipeline.train', NS(direct_analysis=module))
-    monkeypatch.setitem(sys.modules, 'pipeline.train.direct_analysis', module)
+    monkeypatch.setitem(sys.modules, 'eigenbench', types.ModuleType('eigenbench'))
+    monkeypatch.setitem(sys.modules, 'eigenbench.analysis', NS(direct_rating=module))
     stage.patch_analysis()
     # Two ratings: every bootstrap sample equal, the mean a rounding error outside its interval.
     rows = [{'model_name': 'a', 'elo_mean': 1500.0000000000002, 'elo_ci_lower': 1500.0000000000005, 'elo_ci_upper': 1500.0000000000005}]
