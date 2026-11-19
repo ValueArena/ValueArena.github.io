@@ -63,7 +63,7 @@ With credits enabled, submission reserves available time (bounded by any runtime
 and cleanup returns unused time. Resource and model/provider constraints still apply.
 
 The runner is pinned to upstream `jchang153/EigenBench`, commit
-`07a6772207658d06d5c04decc4367b259b8f12b6`. Both Dockerfiles verify the checkout and
+`bfca7891f088d4dc804a792c1f6ea5c7b0f38b89`. Both Dockerfiles verify the checkout and
 its generation defaults at build time. Each artifact bundle includes `runner.json`.
 ValueArena omits generation settings unless explicitly supplied; upstream therefore
 resolves response/reflection/rating budgets to 4096/2048/512. These are finite defaults,
@@ -123,7 +123,7 @@ dependency build; rebuild it and update the base digest when refreshing GPU
 dependencies. GPU operation still requires a smoke test on an NVIDIA worker.
 
 The worker runs `app.stage` in separate processes for collection and analysis.
-Collection invokes `inspect_pipeline.collect.collect_direct_ratings_inspect`; analysis
+Collection invokes `inspect_pipeline.collection.direct_rating.collect_direct_ratings_inspect`; analysis
 invokes `scripts.run_train.main`. It never evaluates user-provided Python or shell commands.
 
 ## 3. Railway: API and scheduler

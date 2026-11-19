@@ -43,7 +43,7 @@ def write_spec(config, directory):
     if request.scenario_source == 'airiskdilemmas':
         import sys, os
         sys.path.insert(0, os.environ.get('EIGENBENCH_ROOT', '/opt/eigenbench'))
-        from pipeline.config.airisk import load_airisk_scenarios
+        from eigenbench.config.airisk import load_airisk_scenarios
         scenarios = load_airisk_scenarios()
     (root/'scenarios.json').write_text(json.dumps(scenarios))
     (root/'constitution.json').write_text(json.dumps(request.criteria))

@@ -24,7 +24,7 @@ def test_spec_runs_through_actual_pinned_upstream(tmp_path):
     if not root: pytest.skip('Pinned upstream checkout required')
     resolve=verify_source(root)
     path=write_spec(config(),tmp_path)
-    module_spec=importlib.util.spec_from_file_location('upstream_run_spec',Path(root)/'pipeline/config/run_spec.py')
+    module_spec=importlib.util.spec_from_file_location('upstream_run_spec',Path(root)/'eigenbench/config/run_spec.py')
     module=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(module)
     spec,_=module.load_run_spec(str(path))
     actual=resolve(spec['collection'])

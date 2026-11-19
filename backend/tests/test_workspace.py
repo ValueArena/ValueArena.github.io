@@ -98,9 +98,9 @@ def test_redaction_happens_before_live_log_tail(tmp_path, monkeypatch):
 def test_default_airisk_is_loaded_at_worker_once(service, monkeypatch, tmp_path):
     import sys, types
     _, db, client = service
-    fake = types.ModuleType('pipeline.config.airisk')
+    fake = types.ModuleType('eigenbench.config.airisk')
     fake.load_airisk_scenarios = lambda: ['question one', 'question two', 'question three']
-    monkeypatch.setitem(sys.modules, 'pipeline.config.airisk', fake)
+    monkeypatch.setitem(sys.modules, 'eigenbench.config.airisk', fake)
     body = payload(); del body['scenarios']; body['scenario_count'] = 2
     response = submit(client, body)
     assert response.status_code == 202

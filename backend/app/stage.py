@@ -72,7 +72,7 @@ def kill_process_tree(pid):
 def patch_runtime(failure_policy='omit_invalid_judgments'):
     """Fixes to the pinned Inspect and EigenBench applied in the collection process."""
     from inspect_ai._util import local_server
-    import inspect_pipeline.collect as collect
+    from inspect_pipeline.collection import direct_rating as collect
     local_server.kill_process_tree = kill_process_tree
 
     eval_kwargs = collect.eval_kwargs
@@ -111,7 +111,7 @@ def patch_analysis():
     own percentile interval, and matplotlib rejects the negative error bar ("'yerr' must not
     contain negative values") after the rankings were already written.
     """
-    from pipeline.train import direct_analysis
+    from eigenbench.analysis import direct_rating as direct_analysis
     plot = direct_analysis._save_bootstrap_plot
     def safe_plot(rows, path):
         rows = [{**row, 'elo_ci_lower': min(row['elo_ci_lower'], row['elo_mean']),
@@ -142,8 +142,8 @@ def collection_failures(log_dir: Path) -> list[str]:
 
 
 def collect_inspect(spec):
-    from inspect_pipeline.collect import collect_direct_ratings_inspect
-    from pipeline.config import load_run_spec
+    from inspect_pipeline.collection.direct_rating import collect_direct_ratings_inspect
+    from eigenbench.config import load_run_spec
     os.environ.setdefault('VLLM_DEFAULT_SERVER_ARGS', json.dumps(VLLM_SERVER_ARGS))
     show_vllm_output()
     loaded, _ = load_run_spec(spec)

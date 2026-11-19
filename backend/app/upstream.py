@@ -1,6 +1,6 @@
 """Pinned runner contract. Defaults are checked against upstream source in CI."""
 REPOSITORY = 'https://github.com/jchang153/EigenBench'
-REVISION = 'a513fbfa2f8520ec6d8f470143d7052c76c31147'
+REVISION = 'bfca7891f088d4dc804a792c1f6ea5c7b0f38b89'
 MAX_LORA_RANK = 512
 # Used for preview and limit validation only; omitted settings are resolved by EigenBench.
 GENERATION_DEFAULTS = {
@@ -21,7 +21,7 @@ def verify_source(root):
     remote = subprocess.check_output(['git', '-C', str(root), 'remote', 'get-url', 'origin'], text=True).strip().removesuffix('.git')
     if revision != REVISION or remote != REPOSITORY:
         raise RuntimeError('EigenBench checkout does not match the upstream runner pin')
-    source = root/'pipeline/protocol/direct_rating.py'
+    source = root/'eigenbench/protocol/direct_rating.py'
     tree = ast.parse(source.read_text())
     function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'resolve_direct_generation_settings')
     scope = {'math': math}
