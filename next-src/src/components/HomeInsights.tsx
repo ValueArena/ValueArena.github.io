@@ -4,15 +4,13 @@ import { ValueSelect, ValueLabel } from './ValueLogo';
 import { useEffect, useRef, useState } from 'react';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
-import { COMPARISON_VALUES, modelMatch, profileURL, scoreInterval } from '@/lib/arena-data';
+import { modelMatch, profileURL, scoreInterval } from '@/lib/arena-data';
 import { getModelLogo } from '@/lib/config';
 import { papers } from '@/lib/papers';
 import { modelInfo } from '@/lib/registry';
 import { ModelLogo } from './ModelLogo';
 import { useWidth } from './hub/useWidth';
-import { ComparisonRanks } from './ComparisonVisuals';
-
-const RANK_VALUES = COMPARISON_VALUES;
+import { PanelSection } from './panel/PanelExplorer';
 
 const LAB_COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Moonshot: '#9abbb6', Zhipu: '#a9b3be', Nvidia: '#bed69d', xAI: '#c4c6bc' };
 const labOf = (name: string) => modelInfo(name)?.lab || 'Other';
@@ -47,16 +45,6 @@ export function HomeInsights() {
   const [xMin, xMax] = domain(points.length ? points.map(p => p.x.elo_mean) : [1400, 1600]);
   const [yMin, yMax] = domain(points.length ? points.map(p => p.y.elo_mean) : [1400, 1600]);
   const failed = data.error || data.failures[xBoard?.run.slug || ''] || data.failures[yBoard?.run.slug || ''];
-  const rankBoards = data.boards.filter(b => RANK_VALUES.includes(b.id));
-  const rankCohort = data.scores[rankBoards.find(b => b.id === RANK_VALUES[0])?.run.slug || ''] || [];
-  const rankLabs = new Set<string>();
-  const rankModels = rankCohort.filter(row => {
-    const lab = modelInfo(row.model_name)?.lab || row.model_name;
-    if (rankLabs.has(lab)) return false;
-    rankLabs.add(lab); return true;
-  }).slice(0, 5).map(row => row.model_name);
-  const ranksFailed = data.error || rankBoards.some(b => data.failures[b.run.slug]);
-  const ranksReady = rankModels.length > 0 && rankBoards.length >= 3 && rankBoards.every(b => data.scores[b.run.slug]);
 
   return <div className="home-insights" ref={section}>
     <section className="home-value-comparison" aria-labelledby="home-compare-heading">
@@ -84,12 +72,7 @@ export function HomeInsights() {
           </div>
         </div>
     </section>
-    <div className="home-ranks">
-      {ranksReady ? <ComparisonRanks models={rankModels} boards={rankBoards} scores={data.scores} /> : <section>
-        <header className="comparison-section-heading"><h2>Comparison by value</h2><p>Relative standing within each evaluation.</p></header>
-        {ranksFailed ? <div className="insight-status" role="alert">Value comparisons couldn’t be loaded.<button onClick={data.retry}>Retry</button></div> : <p className="insight-status" role="status">Loading value comparisons…</p>}
-      </section>}
-    </div>
+    <PanelSection tab="sampling" title="Sampling" id="sampling" />
     <section className="home-research-strip" aria-labelledby="home-research-title">
       <header className="home-section-heading"><h2 id="home-research-title">Research behind ValueArena</h2><p>The methods and experiments behind the rankings.</p><a className="home-text-action" href="/research/">All research</a></header>
       <div className="home-research-cards">{papers.map(paper => <a href={`/research/${paper.slug}/`} key={paper.slug}><img src={paper.image} alt="" loading="lazy" width="160" height="160" /><div><h3>{paper.subtitle}</h3><span>{paper.title}</span></div></a>)}<a href="/methodology/"><img src="/assets/art/constitution-notebook.webp" alt="" loading="lazy" width="160" height="160" /><div><h3>How scenarios, constitutions, and judgments become scores</h3><span>Methodology</span></div></a></div>

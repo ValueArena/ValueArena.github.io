@@ -7,6 +7,7 @@ import { PixelHills } from './PixelHills';
 import { ModelLogo } from './ModelLogo';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
+import { PanelSection } from './panel/PanelExplorer';
 import { detectLab } from '@/lib/labs';
 import { DEFAULT_VALUE, HEADLINE_GROUP, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
 import { TrendsCard } from './hub/TrendsCard';
@@ -211,6 +212,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
           </section>
         </div>
       <section className="arena-trends" id="trends" aria-label="Model release history"><div className="hub hub-embed"><ValueTrends /></div></section>
+      <PanelSection tab="relationships" title="Scenarios" id="scenarios" />
       {ranking}
       <HomeInsights />
     </div>}

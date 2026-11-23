@@ -73,7 +73,7 @@ export function Relationships() {
 }
 
 function MapView({ atlas }: { atlas: Atlas }) {
-  const { data, go } = useNav();
+  const { data, go, href } = useNav();
   const [image, setImage] = useState('');
   const [hover, setHover] = useState('');
   const [theme, setTheme] = useState(0);
@@ -125,7 +125,7 @@ function MapView({ atlas }: { atlas: Atlas }) {
         {blocks.flatMap(row => blocks.map(col => {
           const to = { tab: 'relationships' as const, relationship: `block/${row.c.id}/${col.c.id}` };
           const name = `${row.c.label} × ${col.c.label}`;
-          return <a key={`${row.c.id}:${col.c.id}`} href={`#scenarios/relationships/block/${row.c.id}/${col.c.id}`} aria-label={name}
+          return <a key={`${row.c.id}:${col.c.id}`} href={href(to)} aria-label={name}
             onClick={e => { e.preventDefault(); go(to); }} onMouseEnter={() => setHover(name)} onFocus={() => setHover(name)} onMouseLeave={() => setHover('')}>
             <title>{name}</title>
             <rect className="panel-block" x={col.start} y={row.start} width={col.length} height={row.length} />
