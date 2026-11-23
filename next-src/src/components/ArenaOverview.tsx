@@ -8,7 +8,9 @@ import { ModelLogo } from './ModelLogo';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
 import { detectLab } from '@/lib/labs';
-import { DEFAULT_VALUE, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
+import { DEFAULT_VALUE, HEADLINE_GROUP, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
+import { TrendsCard } from './hub/TrendsCard';
+import { ValueSelect } from './ValueLogo';
 import type { IndexRun, SummaryRow } from '@/lib/types';
 
 const COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Kimi: '#9abbb6', GLM: '#a9b3be', Microsoft: '#b4c89a', xAI: '#c4c6bc', Nvidia: '#bed69d', Baidu: '#bacbc9' };
@@ -209,7 +211,17 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
           </section>
         </div>
       {ranking}
+      <section className="arena-trends" id="trends" aria-label="Values over time"><div className="hub hub-embed"><ValueTrends /></div></section>
       <HomeInsights />
     </div>}
   </>;
+}
+
+/** Each value's best score by model release date, from the site's results. */
+function ValueTrends() {
+  const [value, setValue] = useState(DEFAULT_VALUE);
+  const picker = <ValueSelect aria-label="Value" className="trend-value-select" value={value} onChange={e => setValue(e.target.value)}>
+    {HEADLINE_VALUES.map(id => <option key={id} value={id}>{constLabel(id)}</option>)}
+  </ValueSelect>;
+  return <TrendsCard compact flat showNotes={false} home run={`${HEADLINE_GROUP}/${value.replace(/-/g, '_')}`} value={value} picker={picker} />;
 }

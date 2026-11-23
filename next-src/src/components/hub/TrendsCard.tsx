@@ -1,7 +1,8 @@
 'use client';
 
 import { ValueLogo } from '../ValueLogo';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { constLabel } from '@/lib/nicks';
 import { fetchSummary } from '@/lib/hf';
 import { getModelLogo } from '@/lib/config';
 import { LENSES, groupOf, runningTop, topLabs, type Lens, type ModelInfo, type TrendPoint } from '@/lib/hub';
@@ -69,8 +70,17 @@ function wave(fromX: number, y: number, headX: number, amp: number, phase: numbe
  * `compact` is for the top of the home page: a one-row header, no legend or table on wide screens
  * (end labels name the lines), and a chart sized so the whole card fits on the first screen.
  */
-export function TrendsCard({ compact = false, flat = false, showNotes = true, home = false }: { compact?: boolean; flat?: boolean; showNotes?: boolean; home?: boolean }) {
-  const [rows, setRows] = useState<SummaryRow[] | null>(() => home && homeHistory.run === TREND_RUN ? homeHistory.rows : null);
+export function TrendsCard({ compact = false, flat = false, showNotes = true, home = false, run = TREND_RUN, value = 'kindness', picker }: {
+  compact?: boolean; flat?: boolean; showNotes?: boolean; home?: boolean;
+  /** The run whose scores are plotted against release dates, and the value it measures. */
+  run?: string; value?: string;
+  /** Replaces the title's value name, e.g. with a value picker. */
+  picker?: ReactNode;
+}) {
+  const valueName = constLabel(value);
+  const heading = picker ? <>{picker} over time</> : <><ValueLogo id={value} size={28} />{valueName} over time</>;
+  const shipped = home && homeHistory.run === run;
+  const [rows, setRows] = useState<SummaryRow[] | null>(() => shipped ? homeHistory.rows : null);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   const [lens, setLens] = useState<Lens>('license');
@@ -95,20 +105,20 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
   useEffect(() => {
     let active = true;
     setFailed(false);
-    if (!home) setRows(null);
-    fetchSummary(TREND_RUN).then(data => {
+    if (!shipped) setRows(null);
+    fetchSummary(run).then(data => {
       if (!active) return;
       // Keep the shipped chart visible if a refresh has no usable history.
-      if (home && data.filter(row => Number.isFinite(row.elo_mean) && modelInfo(row.model_name)).length < 3) return;
+      if (shipped && data.filter(row => Number.isFinite(row.elo_mean) && modelInfo(row.model_name)).length < 3) return;
       setRows(previous => previous?.length === data.length && previous.every((row, i) =>
         row.model_name === data[i].model_name && row.elo_mean === data[i].elo_mean &&
         row.elo_ci_lower === data[i].elo_ci_lower && row.elo_ci_upper === data[i].elo_ci_upper
       ) ? previous : data);
     }).catch(() => {
-      if (active && !home) { setFailed(true); setRows([]); }
+      if (active && !shipped) { setFailed(true); setRows([]); }
     });
     return () => { active = false; };
-  }, [retry, home]);
+  }, [retry, home, run, shipped]);
 
   const points = useMemo<Point[]>(() => (rows || []).flatMap(row => {
     const info = modelInfo(row.model_name);
@@ -227,7 +237,7 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
       const top = section.getBoundingClientRect().top + scrollY;
       const header = section.querySelector('.hub-trends-head')?.getBoundingClientRect().height || 0;
       const legend = section.querySelector('.hub-legend')?.getBoundingClientRect().height || 0;
-      setHomeChartHeight(Math.max(180, Math.min(360, innerHeight - top - header - legend - 12)));
+      setHomeChartHeight(Math.max(260, Math.min(360, innerHeight - top - header - legend - 12)));
     };
     const observer = new ResizeObserver(measure);
     observer.observe(section);
@@ -243,11 +253,11 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
   }, [width, height, rows]);
   useEffect(() => () => sparks.current?.stop(), []);
 
-  if (rows === null || failed || points.length < 3 || !span) return home ? <section ref={sectionRef} className="hub-card hub-card-flat hub-card-compact hub-home-loading" aria-label="Kindness over time">
-    <header className="hub-trends-head"><div><h2 className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time</h2></div><div className="hub-tabs" aria-hidden="true">{LENSES.map(l => <button key={l.id} disabled>{l.label}</button>)}</div></header>
+  if (rows === null || failed || points.length < 3 || !span) return home ? <section ref={sectionRef} className="hub-card hub-card-flat hub-card-compact hub-home-loading" aria-label={`${valueName} over time`}>
+    <header className="hub-trends-head"><div><h2 className="hub-title">{heading}</h2></div><div className="hub-tabs" aria-hidden="true">{LENSES.map(l => <button key={l.id} disabled>{l.label}</button>)}</div></header>
     <div className="hub-chart home-trend-loading-chart" style={{ height }}>{failed ? <div role="alert">Model history couldn’t be loaded.<button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div> : <p role="status">{rows === null ? 'Loading model history…' : 'No model history is available for this run.'}</p>}</div>
-  </section> : <section className={`hub-card hub-trend-status${flat ? ' hub-card-flat' : ''}`} aria-label="Kindness over time">
-    <h2 className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time</h2>
+  </section> : <section className={`hub-card hub-trend-status${flat ? ' hub-card-flat' : ''}`} aria-label={`${valueName} over time`}>
+    <h2 className="hub-title">{heading}</h2>
     {failed ? <div role="alert"><p>Model history couldn’t be loaded.</p><button className="hub-retry" onClick={() => setRetry(n => n + 1)}>Retry</button></div>
       : rows === null ? <p role="status">Loading model history…</p>
         : <p>No model history is available for this run.</p>}
@@ -373,7 +383,7 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
       <header className="hub-card-head hub-trends-head">
         <div>
           <p className="hub-eyebrow">Trends</p>
-          <h2 id="hub-trends-title" className="hub-title"><ValueLogo id="kindness" size={28} />Kindness over time <span className="hub-chip">{points.length} models</span></h2>
+          <h2 id="hub-trends-title" className="hub-title">{heading} <span className="hub-chip">{points.length} models</span></h2>
         </div>
         {!compact && <p className="hub-sub hub-trends-note">{month(span.first)} – {month(span.last)} · {LENS_NOTE[lens]}</p>}
         <div className="hub-tabs hub-tabs-timed" role="tablist" aria-label="Group models by">
@@ -400,7 +410,7 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
           ) : <span className="hub-clock-date">{month(span.first)} – {month(span.last)}</span>}
         </div>
         <svg width={width} height={height} role="img"
-          aria-label={`Kindness of the best available model by release date, ${LENSES.find(l => l.id === lens)!.label}`}
+          aria-label={`${valueName} of the best available model by release date, ${LENSES.find(l => l.id === lens)!.label}`}
           onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); setPointer({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
           onPointerLeave={() => setPointer(null)}>
           <defs>
@@ -543,7 +553,7 @@ export function TrendsCard({ compact = false, flat = false, showNotes = true, ho
       {!compact && <details className="hub-details">
         <summary>Show as a table</summary>
         <table className="hub-table hub-table-compact">
-          <thead><tr><th scope="col">Model</th><th scope="col">Lab</th><th scope="col">Weights</th><th scope="col">Released</th><th scope="col" className="num">Kindness</th></tr></thead>
+          <thead><tr><th scope="col">Model</th><th scope="col">Lab</th><th scope="col">Weights</th><th scope="col">Released</th><th scope="col" className="num">{valueName}</th></tr></thead>
           <tbody>
             {[...points].sort((a, b) => a.date.localeCompare(b.date)).map(p => (
               <tr key={p.name}><td>{p.name}</td><td>{p.info.lab}</td><td>{p.info.open ? 'Open' : 'Proprietary'}</td><td>{p.date}</td><td className="num">{p.score.toFixed(0)}</td></tr>

@@ -141,3 +141,6 @@
   .panel-index ol { display:none; }
   .panel-picker { display:block; margin-top:6px; }
 }
+
+/* Value picker in the home "over time" title. */
+.hub-title .trend-value-select { font-size:inherit; font-weight:inherit; margin-right:.3em; vertical-align:middle; }

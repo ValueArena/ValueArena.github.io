@@ -417,6 +417,69 @@
    "open": false,
    "released": "2026-05-07",
    "mode": "reasoning"
+  },
+  "Astra": {
+   "id": "openai/gpt-6.2-astra",
+   "lab": "OpenAI",
+   "country": "US",
+   "open": false,
+   "released": "2026-11-17"
+  },
+  "Sol": {
+   "id": "openai/gpt-6.2-sol",
+   "lab": "OpenAI",
+   "country": "US",
+   "open": false,
+   "released": "2026-11-17"
+  },
+  "Opus": {
+   "id": "anthropic/claude-opus-5.5",
+   "lab": "Anthropic",
+   "country": "US",
+   "open": false,
+   "released": "2026-09-22"
+  },
+  "Gemini": {
+   "id": "google/gemini-4-argon",
+   "lab": "Google",
+   "country": "US",
+   "open": false,
+   "released": "2026-10-13"
+  },
+  "Grok": {
+   "id": "x-ai/grok-4.7",
+   "lab": "xAI",
+   "country": "US",
+   "open": false,
+   "released": "2026-09-21"
+  },
+  "Kimi": {
+   "id": "moonshotai/kimi-k3.1-pro",
+   "lab": "Moonshot",
+   "country": "CN",
+   "open": true,
+   "released": "2026-10-23"
+  },
+  "DeepSeek": {
+   "id": "deepseek/deepseek-v4.1-flash-1017",
+   "lab": "DeepSeek",
+   "country": "CN",
+   "open": true,
+   "released": "2026-10-17"
+  },
+  "Muse": {
+   "id": "meta/muse-wonder",
+   "lab": "Meta",
+   "country": "US",
+   "open": false,
+   "released": "2026-10-12"
+  },
+  "GLM": {
+   "id": "z-ai/glm-5.3",
+   "lab": "Zhipu",
+   "country": "CN",
+   "open": true,
+   "released": "2026-08-18"
   }
  }
 }
