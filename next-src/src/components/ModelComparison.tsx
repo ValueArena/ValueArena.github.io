@@ -9,14 +9,14 @@ import { constLabel } from '@/lib/nicks';
 import { CONSTITUTION_TAGLINES } from '@/lib/taglines';
 import { ComparisonValueChart, ComparisonRanks, ComparisonMetadata } from './ComparisonVisuals';
 import { modelInfo } from '@/lib/registry';
-import { modelMatch, profileURL, rowStrength, scoreInterval } from '@/lib/arena-data';
+import { DEFAULT_VALUE, HEADLINE_VALUES, modelMatch, profileURL, rowStrength, scoreInterval } from '@/lib/arena-data';
 
 export function ModelComparison() {
   const [ready, setReady] = useState(false);
   const [models, setModels] = useState<string[] | null>(null);
-  const [values, setValues] = useState(['kindness', 'conservatism', 'deep_ecology', 'lockean_rights_constitution', 'marxism_constitution', 'taoism_constitution']);
+  const [values, setValues] = useState(HEADLINE_VALUES);
   const [preferred, setPreferred] = useState('');
-  const [chartValue, setChartValue] = useState('kindness');
+  const [chartValue, setChartValue] = useState(DEFAULT_VALUE);
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const names = [...new Set(params.getAll('model'))].slice(0, 7);
@@ -26,7 +26,7 @@ export function ModelComparison() {
     setPreferred(params.get('run') || ''); setReady(true);
   }, []);
   const data = usePublishedBoards(ready ? preferred : null);
-  const first = data.boards.find(b => b.id === 'kindness') || data.boards[0];
+  const first = data.boards.find(b => b.id === DEFAULT_VALUE) || data.boards[0];
   const firstRows = data.scores[first?.run.slug || ''];
   useEffect(() => {
     if (models !== null || !firstRows) return;

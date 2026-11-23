@@ -22,8 +22,7 @@ export function usePublishedBoards(preferredRun: string | null = '') {
       if (!active) return;
       const chosen = publishedBoards(index.runs, preferredRun);
       setRuns(index.runs); setBoards(chosen); setLoading(false);
-      const queue = [...chosen].sort((a, b) => Number(b.run.slug === preferredRun) - Number(a.run.slug === preferredRun)
-        || Number(b.run.group === 'frontier-direct-ratings-200') - Number(a.run.group === 'frontier-direct-ratings-200'));
+      const queue = [...chosen].sort((a, b) => Number(b.run.slug === preferredRun) - Number(a.run.slug === preferredRun));
       let cursor = 0;
       // Only one summary per value, with three concurrent requests. Render each as it arrives.
       await Promise.all(Array.from({ length: 3 }, async () => {

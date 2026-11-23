@@ -1,24 +1,21 @@
 'use client';
 
 import { ValueSelect } from './ValueLogo';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { usePublishedBoards } from './usePublishedBoards';
 import { ModelLogo } from './ModelLogo';
 import { ValuePortrait } from './ValuePortrait';
-import { profileURL, scoreRank } from '@/lib/arena-data';
+import { DEFAULT_VALUE, profileURL, scoreRank } from '@/lib/arena-data';
 
 const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
-const VALUE_ORDER: Record<string, number> = { sarcasm: 0, taoism_constitution: 1, mathematical: 2 };
 
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
-  const [active, setActive] = useState('sarcasm');
+  const [active, setActive] = useState(DEFAULT_VALUE);
   const directory = useRef<HTMLElement>(null);
   const initialHashHandled = useRef(false);
-  const shown = useMemo(() => [...data.boards].sort((a, b) =>
-    (VALUE_ORDER[a.id] ?? 3) - (VALUE_ORDER[b.id] ?? 3)
-  ), [data.boards]);
+  const shown = data.boards;
   const current = shown.find(board => board.id === active) || shown[0];
 
   useEffect(() => {

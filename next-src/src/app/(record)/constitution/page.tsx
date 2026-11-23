@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { boardId, headlineRuns, runLabel, valueId } from '@/lib/arena-data';
 import { REF_ANCHOR, REF_NICKS } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary } from '@/lib/hf';
 import { constLabel, normConst } from '@/lib/nicks';
@@ -30,7 +31,7 @@ export default function ConstitutionPage() {
     let cancelled = false;
     (async () => {
       const params = new URLSearchParams(window.location.search);
-      const id = normConst((params.get('id') || '').replace(/ /g, '+'));
+      const id = boardId(normConst((params.get('id') || '').replace(/ /g, '+')));
       if (!id) {
         if (!cancelled) setState({ status: 'no-id' });
         return;
@@ -38,8 +39,8 @@ export default function ConstitutionPage() {
       setId(id);
       try {
         const index = await fetchIndex();
-        const runs = (index.runs || [])
-          .filter((r) => normConst(r.constitution) === id)
+        const runs = headlineRuns(index.runs || [])
+          .filter((r) => valueId(r) === id)
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         const fetched = await Promise.all(
           runs.map(async (r) => {
@@ -177,7 +178,7 @@ export default function ConstitutionPage() {
                     </td>
                     <td>
                       <a className="link-subtle" href={`/run/?slug=${encodeURIComponent(r.run.slug)}`}>
-                        {r.run.name || r.run.slug}
+                        {runLabel(r.run, constLabel)}
                       </a>
                     </td>
                     <td className="mono-cell">{r.elo.toFixed(0)}</td>

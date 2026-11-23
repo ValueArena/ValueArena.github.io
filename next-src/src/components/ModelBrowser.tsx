@@ -6,7 +6,7 @@ import { ModelLogo } from './ModelLogo';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
-import { modelMatch, scoreRank } from '@/lib/arena-data';
+import { DEFAULT_VALUE, modelMatch, scoreRank } from '@/lib/arena-data';
 import { ModelProfile } from './ModelProfile';
 
 const BAR_COLORS: Record<string, string> = {
@@ -22,7 +22,7 @@ function jumpToProfile(article: HTMLElement) {
 
 export function ModelBrowser() {
   const [preferred, setPreferred] = useState('');
-  const [value, setValue] = useState('kindness');
+  const [value, setValue] = useState(DEFAULT_VALUE);
   const [model, setModel] = useState('');
   const [query, setQuery] = useState('');
   const [developer, setDeveloper] = useState('');
@@ -34,7 +34,7 @@ export function ModelBrowser() {
   const directory = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    setPreferred(params.get('run') || ''); setValue(params.get('constitution') || 'kindness');
+    setPreferred(params.get('run') || ''); setValue(params.get('constitution') || DEFAULT_VALUE);
     setModel(params.get('id') || params.get('model') || ''); setReady(true);
   }, []);
   const data = usePublishedBoards(ready ? preferred : null);
@@ -135,7 +135,7 @@ export function ModelBrowser() {
                 <span className="directory-bar-track" aria-hidden="true"><span className="directory-bar-fill" /></span>
               </button>;
             }) : <p className="results-status">No matching models.</p>}</div>}
-      {board && <label className="directory-run">Evaluation run<select aria-label="Evaluation run" value={board.run.slug} onChange={e => { setPreferred(e.target.value); setModel(''); }}>{board.runs.map(run => <option key={run.slug} value={run.slug}>{run.name || run.slug}</option>)}</select></label>}
+      {board && board.runs.length > 1 && <label className="directory-run">Evaluation run<select aria-label="Evaluation run" value={board.run.slug} onChange={e => { setPreferred(e.target.value); setModel(''); }}>{board.runs.map(run => <option key={run.slug} value={run.slug}>{run.name || run.slug}</option>)}</select></label>}
     </aside>
     <p className="sr-only" role="status" aria-live="polite">{name && `Selected model: ${name}`}</p>
     <div className="model-profile-list" ref={profiles}>

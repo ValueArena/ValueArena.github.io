@@ -5,19 +5,19 @@ import { modelMatch, profileURL, publishedBoards, rankedRows, rowStrength, score
 const run = (slug, constitution, extra = {}) => ({ slug, constitution, timestamp: '2026-01-01', ...extra });
 const row = (model_name, elo_mean, extra = {}) => ({ model_name, elo_mean, model_index: 0, ...extra });
 
-test('defaults prefer a shared frontier panel, while explicit runs take precedence', () => {
-  const runs = [run('wide', 'kindness', { models_count: 37 }), run('featured', 'kindness', { models_count: 8, group: 'frontier-direct-ratings-200' }), run('humor', 'oct_humor')];
-  assert.equal(publishedBoards(runs)[0].run.slug, 'featured');
-  assert.equal(publishedBoards(runs, 'wide')[0].run.slug, 'wide');
-  assert.equal(publishedBoards(runs)[1].id, 'humor');
-  assert.deepEqual(runs.map(r => r.slug), ['wide', 'featured', 'humor']);
+test('boards come only from the results runs, ordered and named like the site', () => {
+  const runs = [run('frontier/kindness', 'kindness', { models_count: 8 }), run('nov22-50x9-primary/utilitarianism', 'utilitarianism', { models_count: 9 }),
+    run('nov22-50x9-primary/care_ethics', 'care_ethics', { models_count: 9 }), run('oct26/marxism', 'marxism')];
+  const boards = publishedBoards(runs);
+  assert.deepEqual(boards.map(b => [b.id, b.run.slug]), [['care-ethics', 'nov22-50x9-primary/care_ethics'], ['utilitarianism', 'nov22-50x9-primary/utilitarianism']]);
+  assert.deepEqual(runs.map(r => r.slug), ['frontier/kindness', 'nov22-50x9-primary/utilitarianism', 'nov22-50x9-primary/care_ethics', 'oct26/marxism']);
 });
 
-test('fallback selection uses model coverage, then recency, without dropping run history', () => {
-  const boards = publishedBoards([run('old', 'humor', { models_count: 8 }), run('new', 'oct_humor', { models_count: 8, timestamp: '2026-02-01' }), run('small', 'humor', { models_count: 3, timestamp: '2026-03-01' })]);
-  assert.equal(boards.length, 1);
-  assert.equal(boards[0].run.slug, 'new');
-  assert.equal(boards[0].runs.length, 3);
+test('an explicit results run takes precedence over coverage and recency', () => {
+  const runs = [run('nov22-50x9-primary/islam', 'islam', { models_count: 9 }), run('nov22-50x9-primary/islam-rerun', 'islam', { models_count: 8, timestamp: '2026-12-01' })];
+  assert.equal(publishedBoards(runs)[0].run.slug, 'nov22-50x9-primary/islam');
+  assert.equal(publishedBoards(runs, 'nov22-50x9-primary/islam-rerun')[0].run.slug, 'nov22-50x9-primary/islam-rerun');
+  assert.equal(publishedBoards(runs)[0].runs.length, 2);
 });
 
 test('generic metadata only resolves recognized value names; unknown runs do not become values', () => {

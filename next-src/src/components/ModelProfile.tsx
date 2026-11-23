@@ -4,7 +4,7 @@ import { ValueLabel, ValueLogo } from './ValueLogo';
 import { useMemo, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
 import { modelInfo } from '@/lib/registry';
-import { modelMatch, rowStrength, scoreInterval, scoreRank, type ValueBoard } from '@/lib/arena-data';
+import { DEFAULT_VALUE, modelMatch, rowStrength, runLabel, scoreInterval, scoreRank, type ValueBoard } from '@/lib/arena-data';
 import { trustShare } from '@/lib/hub';
 import { ModelLogo } from './ModelLogo';
 import type { SummaryRow } from '@/lib/types';
@@ -29,7 +29,7 @@ export function ModelProfile({ name, active, board, rows, data }: Props) {
   };
   const position = current && rows ? rowStrength(rows, current) * 100 : 0;
   return <article className="model-profile" data-model={name} data-active={active} aria-label={`${name} model profile`}>
-        <div className="profile-toolbar"><button onClick={download}>Download data</button><a href={`/compare/?model=${encodeURIComponent(name)}&run=${encodeURIComponent(board?.run.slug || '')}&value=${encodeURIComponent(board?.id || 'kindness')}`}>Compare models</a></div>
+        <div className="profile-toolbar"><button onClick={download}>Download data</button><a href={`/compare/?model=${encodeURIComponent(name)}&run=${encodeURIComponent(board?.run.slug || '')}&value=${encodeURIComponent(board?.id || DEFAULT_VALUE)}`}>Compare models</a></div>
         <div className="profile-body">
           <header className="profile-heading"><div>{info?.lab && <p>{info.lab}</p>}<h2 tabIndex={-1}><ModelLogo name={name} size={36} /><span>{name}</span></h2></div></header>
           <p className="profile-description">{info && <>{name} is {info.open ? 'an open-weight' : 'a proprietary'} model from {info.lab}. </>}{current && rows && board ? <>It ranks {scoreRank(rows, current)} of {rows.length} models on {constLabel(board.id).toLowerCase()} in this evaluation.</> : 'Explore this model’s results across the selected evaluations.'}</p>
@@ -58,7 +58,7 @@ export function ModelProfile({ name, active, board, rows, data }: Props) {
             {data.boards.some(b => !data.scores[b.run.slug] && !data.failures[b.run.slug]) ? <p className="results-status" role="status">Loading remaining values…</p> : !appearances.length && <p className="results-status">This model has no results in the selected runs.</p>}
             {Object.keys(data.failures).length > 0 && <div className="results-status">Some value scores could not be loaded.<button onClick={data.retry}>Retry</button></div>}
           </section>
-          {board && <details className="profile-configuration"><summary>Evaluation settings</summary><dl><div><dt>Run</dt><dd>{board.run.name || board.run.slug}</dd></div><div><dt>Source</dt><dd><a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}>Evaluation details</a></dd></div></dl></details>}
+          {board && <details className="profile-configuration"><summary>Evaluation settings</summary><dl><div><dt>Run</dt><dd>{runLabel(board.run, constLabel)}</dd></div><div><dt>Source</dt><dd><a href={`/run/?slug=${encodeURIComponent(board.run.slug)}`}>Evaluation details</a></dd></div></dl></details>}
         </div>
   </article>;
 }

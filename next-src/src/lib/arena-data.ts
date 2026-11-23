@@ -1,11 +1,22 @@
 import type { IndexRun, SummaryRow } from './types';
 
 export interface ValueBoard { id: string; run: IndexRun; runs: IndexRun[] }
-const FEATURED = 'frontier-direct-ratings-200';
+/** The runs the site presents as its results: one per constitution, same nine-model panel. */
+export const HEADLINE_GROUP = 'nov22-50x9-primary';
+export const HEADLINE_VALUES = ['buddhism', 'care-ethics', 'christianity', 'conservatism', 'environmental-ethics', 'islam',
+  'kantian-deontology', 'lockean-rights', 'marxism', 'power-seeking', 'sycophancy', 'utilitarianism'];
+export const DEFAULT_VALUE = 'utilitarianism';
+export const isHeadline = (run: IndexRun) => run.slug.startsWith(`${HEADLINE_GROUP}/`);
+export const headlineRuns = (runs: IndexRun[]) => runs.filter(isHeadline);
+/** A run's display name: results runs are named by their constitution alone. */
+export const runLabel = (run: IndexRun, label: (id: string) => string) => isHeadline(run) ? label(valueId(run)) : run.name || run.slug;
 const KNOWN = new Set(['kindness', 'goodness', 'humor', 'sarcasm', 'loving', 'poeticism', 'nonchalance', 'remorse', 'impulsiveness', 'mathematical', 'sycophancy', 'misalignment', 'claude', 'openai', 'conservatism', 'deep_ecology']);
 
-// Later panels name some values without the _constitution suffix; keep one board per value.
-const ALIASES: Record<string, string> = { taoism: 'taoism_constitution', marxism: 'marxism_constitution', 'lockean-rights': 'lockean_rights_constitution' };
+// The results name multi-word constitutions with underscores; the site's ids use hyphens.
+const ALIASES: Record<string, string> = {
+  care_ethics: 'care-ethics', environmental_ethics: 'environmental-ethics', kantian_deontology: 'kantian-deontology',
+  lockean_rights: 'lockean-rights', power_seeking: 'power-seeking',
+};
 
 export function boardId(value: string | null | undefined): string {
   const id = String(value || '').toLowerCase().trim().replace(/^oct_/, '');
@@ -19,20 +30,20 @@ export function valueId(run: IndexRun): string {
   return KNOWN.has(tail) ? tail : '';
 }
 
+/** One board per constitution, from the site's results only. */
 export function publishedBoards(runs: IndexRun[], preferredRun?: string): ValueBoard[] {
   const groups = new Map<string, IndexRun[]>();
-  for (const run of runs) {
+  for (const run of headlineRuns(runs)) {
     const id = valueId(run);
     if (!id) continue;
     groups.set(id, [...(groups.get(id) || []), run]);
   }
   return [...groups].map(([id, choices]) => {
     choices.sort((a, b) => Number(b.slug === preferredRun) - Number(a.slug === preferredRun)
-      || Number(b.group === FEATURED) - Number(a.group === FEATURED)
       || (Number(b.models_count) || 0) - (Number(a.models_count) || 0)
       || String(b.timestamp).localeCompare(String(a.timestamp)));
     return { id, run: choices[0], runs: choices };
-  }).sort((a, b) => Number(b.id === 'kindness') - Number(a.id === 'kindness') || a.id.localeCompare(b.id));
+  }).sort((a, b) => HEADLINE_VALUES.indexOf(a.id) - HEADLINE_VALUES.indexOf(b.id) || a.id.localeCompare(b.id));
 }
 
 export function rankedRows(rows: SummaryRow[]): SummaryRow[] {

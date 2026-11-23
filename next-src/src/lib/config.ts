@@ -93,8 +93,12 @@ const QWEN_NICK_PATTERNS = [
   /^introspection[-_]/,
 ];
 
+// Short names in the results panel whose maker isn't in the name.
+const NICKNAME_LOGOS: Record<string, string> = { astra: 'openai', sol: 'openai', opus: 'anthropic', muse: 'meta' };
+
 export function getModelLogo(modelId: string | null | undefined): string | null {
   const lower = (modelId || '').toLowerCase();
+  if (NICKNAME_LOGOS[lower.trim()]) return asset(MODEL_LOGOS[NICKNAME_LOGOS[lower.trim()]]);
   for (const [key, path] of Object.entries(MODEL_LOGOS)) {
     if (lower.includes(key)) return asset(path);
   }

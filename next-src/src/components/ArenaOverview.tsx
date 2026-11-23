@@ -5,12 +5,10 @@ import { fetchIndex, fetchSummary } from '@/lib/hf';
 import { constLabel } from '@/lib/nicks';
 import { PixelHills } from './PixelHills';
 import { ModelLogo } from './ModelLogo';
-import { TrendsCard } from './hub/TrendsCard';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
 import { detectLab } from '@/lib/labs';
-import { boardId, valueId } from '@/lib/arena-data';
-import { CONSTITUTIONS } from '@/lib/config';
+import { DEFAULT_VALUE, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
 import type { IndexRun, SummaryRow } from '@/lib/types';
 
 const COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Kimi: '#9abbb6', GLM: '#a9b3be', Microsoft: '#b4c89a', xAI: '#c4c6bc', Nvidia: '#bed69d', Baidu: '#bacbc9' };
@@ -18,7 +16,7 @@ function lab(name: string) { return /kimi|moonshot/i.test(name) ? 'Kimi' : /glm|
 
 export function ArenaOverview({ full = false }: { full?: boolean }) {
   const [runs, setRuns] = useState<IndexRun[]>([]);
-  const [constitution, setConstitution] = useState('kindness');
+  const [constitution, setConstitution] = useState(DEFAULT_VALUE);
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<SummaryRow[]>([]);
   const [search, setSearch] = useState('');
@@ -31,7 +29,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     setError('');
     fetchIndex().then(index => {
       if (!active) return;
-      const available = index.runs.filter(r => valueId(r));
+      const available = headlineRuns(index.runs).filter(r => valueId(r));
       setRuns(available);
       if (!available.length) { setLoading(false); return; }
       const params = new URLSearchParams(window.location.search);
@@ -51,7 +49,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     return () => { active = false; };
   }, [retry]);
   const constitutions = useMemo(() => [...new Set(runs.map(valueId))].sort((a, b) => {
-    const order = (id: string) => { const i = CONSTITUTIONS.findIndex(c => c.id === id); return i < 0 ? CONSTITUTIONS.length : i; };
+    const order = (id: string) => { const i = HEADLINE_VALUES.indexOf(id); return i < 0 ? HEADLINE_VALUES.length : i; };
     return order(a) - order(b) || a.localeCompare(b);
   }), [runs]);
   const choices = useMemo(() => runs.filter(r => valueId(r) === constitution).sort((a, b) => (Number(b.models_count) || 0) - (Number(a.models_count) || 0) || String(b.timestamp).localeCompare(String(a.timestamp))), [runs, constitution]);
@@ -144,7 +142,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
         const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
         const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
         tabs[next]?.focus({ preventScroll: true }); tabs[next]?.click();
-      }}>{(constitutions.length ? constitutions : ['kindness']).map(c => <button key={c} id={`ranking-value-${c}`} role="tab" aria-selected={constitution === c} aria-controls="home-ranking-panel" tabIndex={constitution === c ? 0 : -1} onClick={() => choose(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}</div>
+      }}>{(constitutions.length ? constitutions : [DEFAULT_VALUE]).map(c => <button key={c} id={`ranking-value-${c}`} role="tab" aria-selected={constitution === c} aria-controls="home-ranking-panel" tabIndex={constitution === c ? 0 : -1} onClick={() => choose(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}</div>
       <div className="arena-ranking-actions">
       {!full && <a className="arena-ranking-more" href={`/leaderboard/?constitution=${encodeURIComponent(constitution)}&run=${encodeURIComponent(run?.slug || '')}`}>Full results</a>}
       <div className="arena-filter" ref={filtersRef}
@@ -210,7 +208,6 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
             <div className="home-actions"><a className="button-primary" href="/constitutions/">Explore results</a><a className="button-secondary" href="/methodology/">How EigenBench works</a></div>
           </section>
         </div>
-      <section className="arena-trends" id="trends" aria-label="Model release history"><div className="hub hub-embed"><TrendsCard compact flat showNotes={false} home /></div></section>
       {ranking}
       <HomeInsights />
     </div>}
