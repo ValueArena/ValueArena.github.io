@@ -6,7 +6,7 @@ export const HEADLINE_GROUP = 'nov22-50x9-primary';
 export const HEADLINE_VALUES = ['buddhism', 'care-ethics', 'christianity', 'conservatism', 'environmental-ethics', 'islam',
   'kantian-deontology', 'lockean-rights', 'marxism', 'power-seeking', 'sycophancy', 'utilitarianism'];
 export const DEFAULT_VALUE = 'utilitarianism';
-/** The six values the comparison radar starts with; it draws 3–8 axes. */
+/** The six values the comparison radar starts with; it draws 3–12 axes. */
 export const COMPARISON_VALUES = ['care-ethics', 'conservatism', 'environmental-ethics', 'lockean-rights', 'marxism', 'buddhism'];
 export const isHeadline = (run: IndexRun) => run.slug.startsWith(`${HEADLINE_GROUP}/`);
 export const headlineRuns = (runs: IndexRun[]) => runs.filter(isHeadline);
