@@ -210,8 +210,8 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
             <div className="home-actions"><a className="button-primary" href="/constitutions/">Explore results</a><a className="button-secondary" href="/methodology/">How EigenBench works</a></div>
           </section>
         </div>
+      <section className="arena-trends" id="trends" aria-label="Model release history"><div className="hub hub-embed"><ValueTrends /></div></section>
       {ranking}
-      <section className="arena-trends" id="trends" aria-label="Values over time"><div className="hub hub-embed"><ValueTrends /></div></section>
       <HomeInsights />
     </div>}
   </>;

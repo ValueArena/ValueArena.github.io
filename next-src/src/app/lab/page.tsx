@@ -28,6 +28,7 @@ const TEAM: Member[] = [
   { name: 'Lionel Levine', role: 'Professor of Mathematics, Cornell University', href: 'https://lionellevine.github.io/', photo: '/assets/team/levine.jpg' },
   { name: 'Jonathn Chang', role: 'PhD student, MATS fellow', href: 'https://jonathnchang.com/', photo: '/assets/team/chang.jpg' },
   { name: 'Jash Vira', role: 'Master’s student', href: 'https://jashvira.com/', photo: '/assets/team/vira.jpg' },
+  { name: 'Bhagyesh Kumar', role: 'Student Researcher', photo: '/assets/team/kumar.jpg' },
 ];
 
 export default function LabPage() {

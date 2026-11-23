@@ -9,12 +9,12 @@ import { constLabel } from '@/lib/nicks';
 import { CONSTITUTION_TAGLINES } from '@/lib/taglines';
 import { ComparisonValueChart, ComparisonRanks, ComparisonMetadata } from './ComparisonVisuals';
 import { modelInfo } from '@/lib/registry';
-import { DEFAULT_VALUE, HEADLINE_VALUES, modelMatch, profileURL, rowStrength, scoreInterval } from '@/lib/arena-data';
+import { COMPARISON_VALUES, DEFAULT_VALUE, modelMatch, profileURL, rowStrength, scoreInterval } from '@/lib/arena-data';
 
 export function ModelComparison() {
   const [ready, setReady] = useState(false);
   const [models, setModels] = useState<string[] | null>(null);
-  const [values, setValues] = useState(HEADLINE_VALUES);
+  const [values, setValues] = useState(COMPARISON_VALUES);
   const [preferred, setPreferred] = useState('');
   const [chartValue, setChartValue] = useState(DEFAULT_VALUE);
   useEffect(() => {
