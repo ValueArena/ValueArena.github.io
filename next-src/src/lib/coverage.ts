@@ -1,5 +1,22 @@
 import type { MetaJson } from './types';
 
+export function directCoverageLabel(samplerMode: string, redundancy: unknown): string {
+  switch (samplerMode) {
+    case 'pair_balanced_random_matching':
+      return 'One rating per answer per scenario';
+    case 'balanced_unique_judge':
+    case 'partitioned_random_judge':
+    case 'partitioned':
+    case 'random_partition':
+      return `Every response rated ${redundancy}× per scenario`;
+    case 'all_to_all':
+    case 'exhaustive':
+      return 'All judge–evaluee pairs per scenario';
+    default:
+      return 'Not specified';
+  }
+}
+
 export interface OmittedSample {
   /** Null when the judgment is one of several identical ones (a recurring pair or an epoch). */
   sample_id: string | null;

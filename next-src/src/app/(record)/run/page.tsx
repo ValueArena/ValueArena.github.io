@@ -7,6 +7,7 @@ import { runSlug } from '@/lib/run-slug';
 import { useEffect, useMemo, useState } from 'react';
 import { GIT_REPO } from '@/lib/config';
 import { fetchIndex, fetchMeta, fetchSummary, hfImageURL } from '@/lib/hf';
+import { directCoverageLabel } from '@/lib/coverage';
 import { bootstrapUnit, collectionTypeLabel, inspectViewerURL, metaEvaluationMode } from '@/lib/protocol';
 import type { EvaluationMode, IndexJson, MetaJson, Summary } from '@/lib/types';
 import { EloBarChart } from '@/components/EloBarChart';
@@ -284,7 +285,7 @@ function SpecCard({ meta, mode }: { meta: MetaJson; mode: EvaluationMode }) {
     const sampled = samplerMode === 'partitioned_random_judge';
     const redundancy = analysis.response_redundancy ?? cl.response_redundancy ?? 1;
     evaluationRows.push(
-      ['Coverage', sampled ? `Every response rated ${redundancy}× per scenario` : 'All judge–evaluee pairs per scenario'],
+      ['Coverage', directCoverageLabel(samplerMode, redundancy)],
       ['Sampler Mode', samplerMode],
       ['Group Size', sampled ? ((analysis.group_size ?? cl.group_size) as React.ReactNode) : '—'],
       ['Response Redundancy', sampled ? (redundancy as React.ReactNode) : '—'],

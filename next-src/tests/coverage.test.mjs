@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { estimateCoverage, parseCollectionReport } from '../src/lib/coverage.ts';
+import { directCoverageLabel, estimateCoverage, parseCollectionReport } from '../src/lib/coverage.ts';
+
+test('run spec distinguishes fixed, redundant, exhaustive, and unknown direct sampling', () => {
+  assert.equal(directCoverageLabel('pair_balanced_random_matching', 1), 'One rating per answer per scenario');
+  assert.equal(directCoverageLabel('partitioned_random_judge', 3), 'Every response rated 3\u00d7 per scenario');
+  assert.equal(directCoverageLabel('balanced_unique_judge', 2), 'Every response rated 2\u00d7 per scenario');
+  for (const sampler of ['all_to_all', 'exhaustive']) {
+    assert.equal(directCoverageLabel(sampler, 1), 'All judge\u2013evaluee pairs per scenario');
+  }
+  assert.equal(directCoverageLabel('custom', 1), 'Not specified');
+});
 
 const meta = {
   evaluation_mode: 'direct_rating',
