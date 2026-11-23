@@ -4,7 +4,7 @@ import { ValueSelect, ValueLabel } from './ValueLogo';
 import { useEffect, useRef, useState } from 'react';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
-import { DEFAULT_VALUE, HEADLINE_VALUES, modelMatch, profileURL, scoreInterval } from '@/lib/arena-data';
+import { COMPARISON_VALUES, modelMatch, profileURL, scoreInterval } from '@/lib/arena-data';
 import { getModelLogo } from '@/lib/config';
 import { papers } from '@/lib/papers';
 import { modelInfo } from '@/lib/registry';
@@ -12,7 +12,7 @@ import { ModelLogo } from './ModelLogo';
 import { useWidth } from './hub/useWidth';
 import { ComparisonRanks } from './ComparisonVisuals';
 
-const RANK_VALUES = HEADLINE_VALUES;
+const RANK_VALUES = COMPARISON_VALUES;
 
 const LAB_COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Moonshot: '#9abbb6', Zhipu: '#a9b3be', Nvidia: '#bed69d', xAI: '#c4c6bc' };
 const labOf = (name: string) => modelInfo(name)?.lab || 'Other';
@@ -48,7 +48,7 @@ export function HomeInsights() {
   const [yMin, yMax] = domain(points.length ? points.map(p => p.y.elo_mean) : [1400, 1600]);
   const failed = data.error || data.failures[xBoard?.run.slug || ''] || data.failures[yBoard?.run.slug || ''];
   const rankBoards = data.boards.filter(b => RANK_VALUES.includes(b.id));
-  const rankCohort = data.scores[rankBoards.find(b => b.id === DEFAULT_VALUE)?.run.slug || ''] || [];
+  const rankCohort = data.scores[rankBoards.find(b => b.id === RANK_VALUES[0])?.run.slug || ''] || [];
   const rankLabs = new Set<string>();
   const rankModels = rankCohort.filter(row => {
     const lab = modelInfo(row.model_name)?.lab || row.model_name;
