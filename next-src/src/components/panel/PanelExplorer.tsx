@@ -45,7 +45,7 @@ export function PanelExplorer() {
     let active = true;
     fetch('/panel/panel.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status))))
       .then(json => { if (active) setData(json); })
-      .catch(() => { if (active) setError('The panel data could not be loaded.'); });
+      .catch(() => { if (active) setError('The results could not be loaded.'); });
     return () => { active = false; };
   }, []);
 
@@ -70,16 +70,16 @@ export function PanelExplorer() {
   return <section className="panel-page">
     <header className="panel-head">
       <div>
-        <p className="panel-kicker">{data ? `${data.models.length} models · ${data.constitutions.length} constitutions · ${data.bank.length} scenarios` : 'EigenBench panel'}</p>
-        <h1>{data?.title ?? 'Nov 22 panel'}</h1>
+        {data && <p className="panel-kicker">{data.models.length} models · {data.constitutions.length} constitutions · {data.bank.length} scenarios</p>}
+        <h1>Results</h1>
       </div>
-      {nav && <NavContext.Provider value={nav}><nav className="panel-tabs" aria-label="Panel views">
+      {nav && <NavContext.Provider value={nav}><nav className="panel-tabs" aria-label="Results views">
         {TABS.map(t => <RouteLink key={t.tab} to={t.tab === 'scenarios' ? { tab: 'relationships' } : { tab: t.tab, constitution: route.constitution }}
           aria-current={section === t.tab ? 'page' : undefined}>{t.label}</RouteLink>)}
       </nav></NavContext.Provider>}
     </header>
     {error ? <p className="results-status" role="alert">{error}</p>
-      : !nav ? <p className="results-status" role="status">Loading the panel…</p>
+      : !nav ? <p className="results-status" role="status">Loading results…</p>
         : <NavContext.Provider value={nav}>
           {section === 'scenarios' && <nav className="panel-subtabs" aria-label="Scenario views">
             <RouteLink to={{ tab: 'scenarios' }} aria-current={route.tab === 'scenarios' ? 'page' : undefined}>Browse</RouteLink>
