@@ -212,8 +212,8 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
           </section>
         </div>
       <section className="arena-trends" id="trends" aria-label="Model release history"><div className="hub hub-embed"><ValueTrends /></div></section>
-      <PanelSection tab="relationships" title="Scenarios" id="scenarios" />
       {ranking}
+      <PanelSection tab="relationships" title="Scenarios" id="scenarios" />
       <HomeInsights />
     </div>}
   </>;

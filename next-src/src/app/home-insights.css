@@ -36,16 +36,16 @@
   background:radial-gradient(color-mix(in srgb,var(--accent) var(--texture-home-strength,20%),transparent) .65px,transparent .8px) 0 0 / 8px 8px;
   mask-image:linear-gradient(180deg,transparent,#000 12%,#000 82%,transparent);
 }
-.arena-home-canvas #scenarios {
+.arena-home-canvas .arena-ranking {
   --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,var(--bg));
   --home-band-color:var(--bg);
   --home-band-to:var(--bg);
-  margin:var(--home-section-gap) var(--home-inset) 0;
 }
-.arena-home-canvas .arena-ranking {
+.arena-home-canvas #scenarios {
   --home-band-from:var(--bg);
   --home-band-color:var(--bg);
   --home-band-to:color-mix(in srgb,var(--bg) 50%,var(--band-sage));
+  margin:var(--home-section-gap) var(--home-inset) 0;
 }
 .home-value-comparison {
   --home-band-from:color-mix(in srgb,var(--bg) 50%,var(--band-sage));
