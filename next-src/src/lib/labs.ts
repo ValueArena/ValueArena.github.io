@@ -13,6 +13,7 @@ const MODEL_LABS: Record<string, string> = {
   gemma: 'Google',
   llama: 'Meta',
   meta: 'Meta',
+  muse: 'Meta',
   deepseek: 'DeepSeek',
   qwen: 'Qwen',
   mistral: 'Mistral',

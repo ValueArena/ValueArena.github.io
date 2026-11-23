@@ -94,7 +94,7 @@ const QWEN_NICK_PATTERNS = [
 ];
 
 // Short names in the results panel whose maker isn't in the name.
-const NICKNAME_LOGOS: Record<string, string> = { astra: 'openai', sol: 'openai', opus: 'anthropic', muse: 'meta' };
+const NICKNAME_LOGOS: Record<string, string> = { astra: 'openai', sol: 'openai', opus: 'anthropic', muse: 'meta', 'muse wonder': 'meta' };
 
 export function getModelLogo(modelId: string | null | undefined): string | null {
   const lower = (modelId || '').toLowerCase();

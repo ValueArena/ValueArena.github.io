@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import type { PanelData } from './data';
+import { MODEL_NAMES } from '@/lib/model-names';
 import { routeFromHash, routeHash, type Route, type Tab } from './route';
 import { Sampling } from './Sampling';
 import { ScenarioBrowser } from './ScenarioBrowser';
@@ -32,7 +33,8 @@ export function RouteLink({ to, replace = false, className, children, title, ...
 
 let panelRequest: Promise<PanelData> | null = null;
 function loadPanel(): Promise<PanelData> {
-  panelRequest ??= fetch('/panel/panel.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status))));
+  panelRequest ??= fetch('/panel/panel.json').then(r => r.ok ? r.json() : Promise.reject(new Error(String(r.status))))
+    .then((data: PanelData) => ({ ...data, models: data.models.map(m => ({ ...m, name: MODEL_NAMES[m.name] ?? m.name })) }));
   panelRequest.catch(() => { panelRequest = null; });
   return panelRequest;
 }

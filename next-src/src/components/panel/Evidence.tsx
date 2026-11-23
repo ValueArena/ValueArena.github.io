@@ -5,6 +5,7 @@ import { fetchRawRecord } from '@/lib/transcripts';
 import { renderMarkdownSanitized } from '@/lib/chat-render';
 import { judgmentFileURL, rangeKey, type Layer, type PanelConstitution } from './data';
 import { RouteLink, useNav } from './PanelExplorer';
+import { renameModels } from '@/lib/model-names';
 
 interface JudgmentRecord {
   response: string;
@@ -23,7 +24,7 @@ const cache = new Map<string, Promise<JudgmentRecord>>();
 function loadJudgment(url: string, start: number, length: number): Promise<JudgmentRecord> {
   const key = `${url}#${start}`;
   if (!cache.has(key)) {
-    const pending = fetchRawRecord(url, start, length).then(text => JSON.parse(text) as JudgmentRecord);
+    const pending = fetchRawRecord(url, start, length).then(text => renameModels(JSON.parse(text) as JudgmentRecord));
     pending.catch(() => cache.delete(key));
     cache.set(key, pending);
   }

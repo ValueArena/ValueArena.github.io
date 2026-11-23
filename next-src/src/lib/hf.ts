@@ -6,6 +6,7 @@
 import { privateRun, privateAssetURL, fetchPrivateJSON } from './run-source';
 import { HF_BASE } from './config';
 import type { IndexJson, MetaJson, Summary } from './types';
+import { withModelNames } from './model-names';
 
 const memCache: Record<string, unknown> = {};
 const pending = new Map<string, Promise<unknown>>();
@@ -52,15 +53,15 @@ export async function hfFetch<T = unknown>(path: string): Promise<T> {
   if (path in memCache) return memCache[path] as T;
   const cached = ssGet<T>(path);
   if (cached !== null) {
-    memCache[path] = cached;
-    return cached;
+    memCache[path] = withModelNames(path, cached);
+    return memCache[path] as T;
   }
   if (pending.has(path)) return pending.get(path) as Promise<T>;
   const request = (async () => {
     const url = `${HF_BASE}/${path}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-    const data = (await res.json()) as T;
+    const data = withModelNames(path, (await res.json()) as T);
     memCache[path] = data;
     ssSet(path, data);
     return data;

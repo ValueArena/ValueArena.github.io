@@ -13,6 +13,7 @@
 
 import { hfImageURL } from './hf';
 import { fetchRunAsset } from './run-source';
+import { withModelNames } from './model-names';
 
 /** First window. Small, so the first rows appear without waiting on the file. */
 export const FIRST_WINDOW_BYTES = 256 * 1024;
@@ -107,7 +108,7 @@ export class JsonlWindowReader {
       const lines = await this.readWindow(size);
       for (const { line, byteStart, byteLen, text } of lines) {
         try {
-          out.records.push({ line, byteStart, byteLen, value: JSON.parse(text) });
+          out.records.push({ line, byteStart, byteLen, value: withModelNames(this.url, JSON.parse(text)) });
         } catch {
           out.malformed += 1;
         }
