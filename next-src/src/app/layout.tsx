@@ -11,6 +11,7 @@ import './themes.css';
 import './page-backgrounds.css';
 import './controls.css';
 import './value-logos.css';
+import './panel.css';
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { ArenaShell } from '@/components/ArenaShell';

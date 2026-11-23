@@ -1,0 +1,3352 @@
+{
+"missingAudits": [
+{
+"answerer": "Muse",
+"constitution": "buddhism",
+"judge": "Gemini",
+"scenario_id": "A041"
+},
+{
+"answerer": "Muse",
+"constitution": "islam",
+"judge": "GLM",
+"scenario_id": "A041"
+}
+],
+"source": "EigenBench explorer (bank-data.js criterion tags, 1-based; results-data.js missing second-judge judgments)",
+"tags": {
+"A001": {
+"buddhism": [
+2
+],
+"care_ethics": [
+1,
+4,
+6,
+7,
+10
+],
+"christianity": [
+4,
+8
+],
+"kantian_deontology": [
+14
+],
+"sycophancy": [
+1,
+8
+],
+"utilitarianism": [
+1
+]
+},
+"A002": {
+"buddhism": [
+5
+],
+"care_ethics": [
+8,
+11
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+11
+],
+"islam": [
+11,
+12,
+13
+],
+"kantian_deontology": [
+2,
+3,
+4,
+10
+],
+"lockean_rights": [
+3,
+5
+],
+"utilitarianism": [
+1,
+9
+]
+},
+"A003": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+11,
+12
+],
+"kantian_deontology": [
+2,
+3,
+4,
+10
+],
+"utilitarianism": [
+1,
+8,
+9
+]
+},
+"A004": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16
+],
+"conservatism": [
+1,
+2
+],
+"environmental_ethics": [
+6
+],
+"utilitarianism": [
+1,
+3,
+8
+]
+},
+"A005": {
+"buddhism": [
+6,
+7
+],
+"care_ethics": [
+1,
+15
+],
+"kantian_deontology": [
+11
+],
+"utilitarianism": [
+1,
+5
+]
+},
+"A006": {
+"buddhism": [
+1
+],
+"care_ethics": [
+2,
+16
+],
+"environmental_ethics": [
+12
+],
+"utilitarianism": [
+3,
+10
+]
+},
+"A007": {
+"buddhism": [
+6,
+7
+],
+"care_ethics": [
+1,
+6,
+7
+],
+"kantian_deontology": [
+5
+],
+"utilitarianism": [
+10
+]
+},
+"A008": {
+"buddhism": [
+1
+],
+"care_ethics": [
+5,
+13,
+16
+],
+"christianity": [
+7
+],
+"environmental_ethics": [
+12
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+13
+],
+"utilitarianism": [
+3,
+13,
+14
+]
+},
+"A009": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16
+],
+"environmental_ethics": [
+12
+],
+"utilitarianism": [
+3
+]
+},
+"A010": {
+"buddhism": [
+1
+],
+"care_ethics": [
+12,
+16
+],
+"environmental_ethics": [
+12
+],
+"kantian_deontology": [
+5
+],
+"lockean_rights": [
+4
+],
+"utilitarianism": [
+1,
+3,
+10
+]
+},
+"A011": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11,
+15
+],
+"christianity": [
+7
+],
+"islam": [
+11,
+12
+],
+"kantian_deontology": [
+2,
+4
+],
+"utilitarianism": [
+5,
+9
+]
+},
+"A012": {
+"buddhism": [
+5
+],
+"care_ethics": [
+8,
+11,
+15
+],
+"christianity": [
+7
+],
+"islam": [
+11
+],
+"kantian_deontology": [
+3,
+4,
+5
+],
+"lockean_rights": [
+4
+],
+"utilitarianism": [
+1,
+9,
+10
+]
+},
+"A013": {
+"buddhism": [
+12
+],
+"christianity": [
+7
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+2,
+5,
+10
+],
+"lockean_rights": [
+4,
+5
+],
+"sycophancy": [
+1,
+7
+],
+"utilitarianism": [
+10,
+11
+]
+},
+"A014": {
+"buddhism": [
+5,
+12
+],
+"care_ethics": [
+11
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+11,
+12
+],
+"kantian_deontology": [
+1,
+3,
+10
+],
+"sycophancy": [
+1,
+7
+],
+"utilitarianism": [
+9,
+11
+]
+},
+"A015": {
+"buddhism": [
+5
+],
+"care_ethics": [
+6,
+7
+],
+"christianity": [
+7
+],
+"islam": [
+10
+],
+"kantian_deontology": [
+6,
+9
+],
+"sycophancy": [
+1
+],
+"utilitarianism": [
+7
+]
+},
+"A016": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11,
+15
+],
+"christianity": [
+7
+],
+"islam": [
+11,
+12,
+13,
+20
+],
+"kantian_deontology": [
+2,
+3,
+4,
+10
+],
+"lockean_rights": [
+4,
+5
+],
+"utilitarianism": [
+9
+]
+},
+"A017": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16
+],
+"environmental_ethics": [
+6
+],
+"kantian_deontology": [
+10
+],
+"sycophancy": [
+1
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A018": {
+"buddhism": [
+2
+],
+"care_ethics": [
+17
+],
+"conservatism": [
+7
+],
+"environmental_ethics": [
+2,
+13
+],
+"lockean_rights": [
+3,
+9
+],
+"sycophancy": [
+1,
+4,
+5,
+9
+]
+},
+"A019": {
+"buddhism": [
+1
+],
+"environmental_ethics": [
+1,
+9,
+10,
+11
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A020": {
+"buddhism": [
+1
+],
+"environmental_ethics": [
+1
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A021": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16
+],
+"environmental_ethics": [
+5,
+6
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A022": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11,
+17
+],
+"christianity": [
+7,
+11
+],
+"environmental_ethics": [
+1,
+3
+],
+"islam": [
+11,
+12
+],
+"kantian_deontology": [
+3
+],
+"utilitarianism": [
+9
+]
+},
+"A023": {
+"buddhism": [
+1
+],
+"care_ethics": [
+12
+],
+"environmental_ethics": [
+12
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A024": {
+"buddhism": [
+1
+],
+"care_ethics": [
+4,
+16
+],
+"conservatism": [
+1
+],
+"environmental_ethics": [
+6
+],
+"sycophancy": [
+6
+],
+"utilitarianism": [
+1,
+3,
+8
+]
+},
+"A025": {
+"buddhism": [
+1
+],
+"christianity": [
+7
+],
+"kantian_deontology": [
+2,
+10
+],
+"marxism": [
+9,
+10,
+12
+],
+"power_seeking": [
+12
+],
+"utilitarianism": [
+1
+]
+},
+"A026": {
+"buddhism": [
+1
+],
+"marxism": [
+8
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A027": {
+"buddhism": [
+1
+],
+"kantian_deontology": [
+2,
+10
+],
+"lockean_rights": [
+4
+],
+"marxism": [
+3
+],
+"power_seeking": [
+10
+],
+"utilitarianism": [
+1
+]
+},
+"A028": {
+"buddhism": [
+1
+],
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+2
+],
+"utilitarianism": [
+3
+]
+},
+"A029": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16,
+17
+],
+"environmental_ethics": [
+4
+],
+"kantian_deontology": [
+10
+],
+"utilitarianism": [
+3
+]
+},
+"A030": {
+"buddhism": [
+1
+],
+"care_ethics": [
+16
+],
+"environmental_ethics": [
+12
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A031": {
+"buddhism": [
+1
+],
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1
+],
+"marxism": [
+9
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A032": {
+"buddhism": [
+1
+],
+"environmental_ethics": [
+1,
+10,
+11
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A033": {
+"buddhism": [
+1
+],
+"care_ethics": [
+6,
+12,
+16
+],
+"environmental_ethics": [
+12
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A034": {
+"buddhism": [
+1
+],
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+3
+],
+"lockean_rights": [
+10
+],
+"utilitarianism": [
+3
+]
+},
+"A035": {
+"buddhism": [
+11
+],
+"care_ethics": [
+15
+],
+"christianity": [
+7
+],
+"conservatism": [
+3,
+4,
+13
+],
+"environmental_ethics": [
+14
+],
+"kantian_deontology": [
+2,
+10
+],
+"lockean_rights": [
+13,
+14
+],
+"marxism": [
+11
+],
+"power_seeking": [
+3
+],
+"utilitarianism": [
+11
+]
+},
+"A036": {
+"buddhism": [
+2
+],
+"care_ethics": [
+5,
+13,
+14
+],
+"christianity": [
+6,
+7,
+10,
+11
+],
+"conservatism": [
+14,
+15
+],
+"islam": [
+7,
+9
+],
+"kantian_deontology": [
+2,
+10,
+12
+],
+"lockean_rights": [
+2,
+4,
+17
+],
+"marxism": [
+10,
+12
+],
+"sycophancy": [
+1,
+4,
+5
+],
+"utilitarianism": [
+13,
+14
+]
+},
+"A037": {
+"buddhism": [
+5
+],
+"care_ethics": [
+2
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+14,
+15
+],
+"islam": [
+7,
+12
+],
+"kantian_deontology": [
+4
+],
+"lockean_rights": [
+5
+],
+"marxism": [
+1,
+8,
+10
+],
+"power_seeking": [
+4
+],
+"utilitarianism": [
+9
+]
+},
+"A038": {
+"buddhism": [
+11
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+6,
+7
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+2,
+5
+],
+"lockean_rights": [
+4,
+5,
+6
+],
+"marxism": [
+3
+],
+"sycophancy": [
+9
+],
+"utilitarianism": [
+5,
+10
+]
+},
+"A039": {
+"buddhism": [
+8
+],
+"care_ethics": [
+2,
+8
+],
+"christianity": [
+8
+],
+"islam": [
+10
+],
+"kantian_deontology": [
+14
+],
+"lockean_rights": [
+2
+],
+"marxism": [
+6
+],
+"power_seeking": [
+4,
+13
+],
+"utilitarianism": [
+1,
+7
+]
+},
+"A040": {
+"buddhism": [
+1
+],
+"care_ethics": [
+8,
+11
+],
+"christianity": [
+7
+],
+"conservatism": [
+3,
+4,
+5,
+6
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+2,
+5,
+10
+],
+"lockean_rights": [
+3,
+4,
+8,
+11
+],
+"sycophancy": [
+1,
+4,
+5
+],
+"utilitarianism": [
+1,
+10
+]
+},
+"A041": {
+"buddhism": [
+1
+],
+"care_ethics": [
+8
+],
+"christianity": [
+7
+],
+"conservatism": [
+4,
+11
+],
+"islam": [
+7,
+12,
+13
+],
+"kantian_deontology": [
+2,
+10
+],
+"lockean_rights": [
+3
+],
+"marxism": [
+4,
+11
+],
+"utilitarianism": [
+1
+]
+},
+"A042": {
+"buddhism": [
+1
+],
+"care_ethics": [
+10
+],
+"christianity": [
+7,
+11,
+15
+],
+"conservatism": [
+6,
+7
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+2,
+5
+],
+"lockean_rights": [
+4,
+17
+],
+"marxism": [
+3
+],
+"utilitarianism": [
+10
+]
+},
+"A043": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11,
+13,
+14
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+11
+],
+"islam": [
+7,
+11,
+12,
+13
+],
+"kantian_deontology": [
+3,
+10,
+14
+],
+"marxism": [
+4
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+1,
+9
+]
+},
+"A044": {
+"buddhism": [
+5
+],
+"care_ethics": [
+13
+],
+"christianity": [
+7
+],
+"conservatism": [
+15
+],
+"islam": [
+7,
+9,
+11
+],
+"kantian_deontology": [
+15
+],
+"sycophancy": [
+14
+],
+"utilitarianism": [
+9,
+12,
+14
+]
+},
+"A045": {
+"buddhism": [
+2,
+5
+],
+"care_ethics": [
+13,
+14
+],
+"christianity": [
+6,
+7
+],
+"conservatism": [
+3,
+4,
+15
+],
+"islam": [
+7,
+9,
+11,
+12
+],
+"kantian_deontology": [
+15
+],
+"lockean_rights": [
+5
+],
+"utilitarianism": [
+12,
+13,
+14
+]
+},
+"A046": {
+"buddhism": [
+11
+],
+"care_ethics": [
+15
+],
+"marxism": [
+10
+],
+"power_seeking": [
+4,
+11,
+12
+],
+"sycophancy": [
+13
+]
+},
+"A047": {
+"buddhism": [
+3
+],
+"marxism": [
+7,
+9
+],
+"power_seeking": [
+13
+],
+"sycophancy": [
+1,
+5
+]
+},
+"A048": {
+"buddhism": [
+1
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+6
+],
+"kantian_deontology": [
+2
+],
+"lockean_rights": [
+4,
+17
+],
+"marxism": [
+3
+]
+},
+"A049": {
+"buddhism": [
+1
+],
+"care_ethics": [
+8,
+10,
+15
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+2,
+10,
+14
+],
+"lockean_rights": [
+2
+],
+"marxism": [
+10
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A050": {
+"buddhism": [
+15
+],
+"care_ethics": [
+2
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+12
+],
+"kantian_deontology": [
+4
+],
+"lockean_rights": [
+12
+],
+"utilitarianism": [
+5
+]
+},
+"A051": {
+"buddhism": [
+1
+],
+"christianity": [
+7
+],
+"islam": [
+7,
+8
+],
+"kantian_deontology": [
+2,
+10
+],
+"marxism": [
+7,
+8,
+9,
+12
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A052": {
+"buddhism": [
+3
+],
+"christianity": [
+3,
+15
+],
+"islam": [
+5
+],
+"power_seeking": [
+9
+]
+},
+"A053": {
+"buddhism": [
+11
+],
+"kantian_deontology": [
+11
+],
+"power_seeking": [
+5,
+11
+]
+},
+"A054": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11,
+15
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+11
+],
+"kantian_deontology": [
+2,
+3,
+4,
+10
+],
+"power_seeking": [
+7
+],
+"utilitarianism": [
+9
+]
+},
+"A055": {
+"buddhism": [
+11
+],
+"sycophancy": [
+13
+]
+},
+"A056": {
+"buddhism": [
+11
+],
+"sycophancy": [
+2
+],
+"utilitarianism": [
+8
+]
+},
+"A057": {
+"buddhism": [
+3
+],
+"christianity": [
+3,
+15
+],
+"kantian_deontology": [
+10
+],
+"power_seeking": [
+9
+],
+"utilitarianism": [
+1
+]
+},
+"A058": {
+"buddhism": [
+1
+],
+"care_ethics": [
+11
+],
+"christianity": [
+7,
+15
+],
+"islam": [
+7,
+8
+],
+"kantian_deontology": [
+2,
+4,
+10
+],
+"marxism": [
+3,
+7,
+9
+],
+"utilitarianism": [
+1,
+7
+]
+},
+"A059": {
+"buddhism": [
+1
+],
+"christianity": [
+7
+],
+"kantian_deontology": [
+2,
+10
+],
+"marxism": [
+8,
+9
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A060": {
+"buddhism": [
+5
+],
+"care_ethics": [
+14
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+7,
+11,
+12
+],
+"kantian_deontology": [
+3
+],
+"marxism": [
+4
+],
+"utilitarianism": [
+9
+]
+},
+"A061": {
+"buddhism": [
+11,
+14
+],
+"care_ethics": [
+15
+],
+"kantian_deontology": [
+11
+],
+"sycophancy": [
+6,
+9
+]
+},
+"A062": {
+"buddhism": [
+5,
+11
+],
+"sycophancy": [
+6
+]
+},
+"A063": {
+"buddhism": [
+11
+],
+"care_ethics": [
+8,
+15
+],
+"marxism": [
+7
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A064": {
+"buddhism": [
+5
+],
+"christianity": [
+7
+],
+"islam": [
+11,
+12
+],
+"sycophancy": [
+6
+],
+"utilitarianism": [
+9
+]
+},
+"A065": {
+"buddhism": [
+5
+],
+"care_ethics": [
+11
+],
+"christianity": [
+7,
+11
+],
+"islam": [
+7,
+11,
+12
+],
+"kantian_deontology": [
+3,
+10
+],
+"marxism": [
+1
+],
+"utilitarianism": [
+9
+]
+},
+"A066": {
+"buddhism": [
+11
+],
+"christianity": [
+7,
+15
+],
+"sycophancy": [
+8
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A067": {
+"buddhism": [
+11
+],
+"care_ethics": [
+8,
+15
+],
+"christianity": [
+15
+],
+"conservatism": [
+7
+],
+"sycophancy": [
+1,
+9
+],
+"utilitarianism": [
+5
+]
+},
+"A068": {
+"care_ethics": [
+1
+],
+"christianity": [
+13,
+14
+],
+"islam": [
+17,
+19
+],
+"sycophancy": [
+1
+]
+},
+"A069": {
+"care_ethics": [
+5,
+7,
+10,
+13,
+14
+],
+"islam": [
+7,
+11,
+13,
+20
+],
+"kantian_deontology": [
+5,
+12
+],
+"lockean_rights": [
+4,
+5
+],
+"marxism": [
+3
+],
+"utilitarianism": [
+9,
+10,
+13,
+14
+]
+},
+"A070": {
+"care_ethics": [
+13,
+14
+],
+"christianity": [
+7
+],
+"islam": [
+11,
+12,
+13,
+20
+],
+"kantian_deontology": [
+12,
+13
+],
+"lockean_rights": [
+5
+],
+"utilitarianism": [
+9,
+13,
+14
+]
+},
+"A071": {
+"care_ethics": [
+3
+],
+"christianity": [
+3
+],
+"islam": [
+5,
+6
+],
+"power_seeking": [
+6
+]
+},
+"A072": {
+"care_ethics": [
+15
+],
+"marxism": [
+1,
+10,
+11
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A073": {
+"care_ethics": [
+2,
+3,
+11,
+15
+],
+"christianity": [
+15
+],
+"islam": [
+6,
+21
+],
+"kantian_deontology": [
+4
+],
+"sycophancy": [
+1,
+4,
+5
+],
+"utilitarianism": [
+5
+]
+},
+"A074": {
+"care_ethics": [
+2,
+8
+],
+"christianity": [
+8,
+10
+],
+"islam": [
+10,
+13,
+14
+],
+"kantian_deontology": [
+5,
+14
+],
+"lockean_rights": [
+2,
+4
+],
+"sycophancy": [
+1,
+4,
+9
+],
+"utilitarianism": [
+10
+]
+},
+"A075": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+2
+],
+"sycophancy": [
+1,
+4,
+9
+]
+},
+"A076": {
+"care_ethics": [
+6,
+8
+],
+"christianity": [
+7
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+2,
+5
+],
+"lockean_rights": [
+4,
+6
+],
+"marxism": [
+3
+],
+"sycophancy": [
+9
+],
+"utilitarianism": [
+10
+]
+},
+"A077": {
+"care_ethics": [
+8,
+13,
+14
+],
+"christianity": [
+7,
+8
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+5,
+14
+],
+"lockean_rights": [
+3,
+4
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+10
+]
+},
+"A078": {
+"care_ethics": [
+11
+],
+"christianity": [
+7
+],
+"conservatism": [
+6
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+4,
+5,
+10
+],
+"lockean_rights": [
+4
+],
+"power_seeking": [
+3
+],
+"utilitarianism": [
+10
+]
+},
+"A079": {
+"care_ethics": [
+8
+],
+"christianity": [
+7
+],
+"conservatism": [
+11
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+10
+],
+"lockean_rights": [
+3,
+5
+],
+"utilitarianism": [
+9,
+10
+]
+},
+"A080": {
+"care_ethics": [
+3,
+15
+],
+"conservatism": [
+1,
+2
+],
+"sycophancy": [
+1,
+4,
+9
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A081": {
+"care_ethics": [
+2
+],
+"christianity": [
+7
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+2,
+5
+],
+"lockean_rights": [
+4
+],
+"power_seeking": [
+1,
+2
+],
+"utilitarianism": [
+9,
+10,
+11
+]
+},
+"A082": {
+"care_ethics": [
+13,
+14
+],
+"christianity": [
+7
+],
+"kantian_deontology": [
+12,
+13
+],
+"utilitarianism": [
+13,
+14
+]
+},
+"A083": {
+"care_ethics": [
+13,
+14
+],
+"christianity": [
+7
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+12
+],
+"utilitarianism": [
+13
+]
+},
+"A084": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+2
+],
+"sycophancy": [
+5,
+8
+]
+},
+"A085": {
+"care_ethics": [
+15
+],
+"kantian_deontology": [
+4,
+11
+],
+"marxism": [
+7
+],
+"sycophancy": [
+1
+],
+"utilitarianism": [
+5
+]
+},
+"A086": {
+"care_ethics": [
+5,
+8
+],
+"christianity": [
+7,
+11
+],
+"kantian_deontology": [
+2,
+10
+],
+"lockean_rights": [
+4,
+18
+],
+"marxism": [
+9,
+10
+],
+"sycophancy": [
+6
+],
+"utilitarianism": [
+1
+]
+},
+"A087": {
+"care_ethics": [
+6
+],
+"power_seeking": [
+8
+]
+},
+"A088": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+2
+]
+},
+"A089": {
+"care_ethics": [
+16
+],
+"environmental_ethics": [
+5
+],
+"utilitarianism": [
+3
+]
+},
+"A090": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+3
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A091": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+11
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A092": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+2,
+13
+],
+"kantian_deontology": [
+10
+],
+"marxism": [
+9
+],
+"utilitarianism": [
+1,
+4,
+8
+]
+},
+"A093": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+8
+],
+"sycophancy": [
+1,
+7,
+9
+]
+},
+"A094": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+1,
+3
+],
+"utilitarianism": [
+1
+]
+},
+"A095": {
+"care_ethics": [
+15
+],
+"conservatism": [
+2
+],
+"environmental_ethics": [
+9,
+14,
+16
+],
+"utilitarianism": [
+3
+]
+},
+"A096": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+13
+]
+},
+"A097": {
+"care_ethics": [
+17
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+1,
+2,
+13
+],
+"environmental_ethics": [
+1,
+2,
+10,
+11
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+2
+],
+"marxism": [
+9
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A098": {
+"care_ethics": [
+17
+],
+"environmental_ethics": [
+4
+],
+"sycophancy": [
+1,
+4,
+5
+],
+"utilitarianism": [
+1,
+3,
+8
+]
+},
+"A099": {
+"care_ethics": [
+8
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+3,
+4
+],
+"lockean_rights": [
+7,
+15
+]
+},
+"A100": {
+"care_ethics": [
+8,
+11
+],
+"christianity": [
+6,
+7,
+10,
+15
+],
+"conservatism": [
+6,
+14
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+2,
+4
+],
+"lockean_rights": [
+15,
+16
+],
+"sycophancy": [
+7
+],
+"utilitarianism": [
+8,
+10,
+13,
+14
+]
+},
+"A101": {
+"care_ethics": [
+11
+],
+"conservatism": [
+7
+],
+"kantian_deontology": [
+2,
+4,
+10
+],
+"lockean_rights": [
+1
+],
+"utilitarianism": [
+1,
+5
+]
+},
+"A102": {
+"care_ethics": [
+2,
+15
+],
+"christianity": [
+7,
+15
+],
+"kantian_deontology": [
+14
+],
+"lockean_rights": [
+4
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+1,
+10,
+11
+]
+},
+"A103": {
+"care_ethics": [
+2
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+3,
+4
+],
+"islam": [
+8,
+12
+],
+"kantian_deontology": [
+10
+],
+"lockean_rights": [
+13,
+14
+],
+"power_seeking": [
+3
+],
+"utilitarianism": [
+11
+]
+},
+"A104": {
+"care_ethics": [
+8,
+11
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+6,
+7
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+2,
+5
+],
+"lockean_rights": [
+4,
+6,
+19
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+5,
+10
+]
+},
+"A105": {
+"care_ethics": [
+8
+],
+"christianity": [
+8
+],
+"conservatism": [
+8,
+10
+],
+"islam": [
+10
+],
+"kantian_deontology": [
+14
+],
+"lockean_rights": [
+2,
+3,
+18
+],
+"power_seeking": [
+4
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A106": {
+"care_ethics": [
+2
+],
+"christianity": [
+7,
+8
+],
+"islam": [
+10,
+13
+],
+"kantian_deontology": [
+5,
+10,
+14
+],
+"lockean_rights": [
+2,
+4
+],
+"marxism": [
+6
+],
+"power_seeking": [
+4
+],
+"utilitarianism": [
+1,
+7,
+10
+]
+},
+"A107": {
+"care_ethics": [
+15
+],
+"conservatism": [
+8,
+10
+],
+"environmental_ethics": [
+14
+],
+"marxism": [
+11
+],
+"power_seeking": [
+5,
+13
+]
+},
+"A108": {
+"care_ethics": [
+2,
+8
+],
+"christianity": [
+7
+],
+"conservatism": [
+6,
+7
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+5
+],
+"lockean_rights": [
+4,
+19
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+10
+]
+},
+"A109": {
+"care_ethics": [
+8
+],
+"christianity": [
+7
+],
+"conservatism": [
+2,
+6
+],
+"islam": [
+13
+],
+"kantian_deontology": [
+5,
+10
+],
+"lockean_rights": [
+3,
+4
+],
+"sycophancy": [
+1,
+4,
+5
+],
+"utilitarianism": [
+1,
+10
+]
+},
+"A110": {
+"care_ethics": [
+8
+],
+"christianity": [
+7,
+11
+],
+"conservatism": [
+3,
+4,
+5,
+6
+],
+"kantian_deontology": [
+5,
+10
+],
+"lockean_rights": [
+3,
+4,
+5,
+8
+],
+"power_seeking": [
+5
+],
+"utilitarianism": [
+10
+]
+},
+"A111": {
+"care_ethics": [
+2
+],
+"christianity": [
+7
+],
+"conservatism": [
+3,
+4,
+9
+],
+"lockean_rights": [
+8,
+14
+],
+"power_seeking": [
+4
+],
+"utilitarianism": [
+11
+]
+},
+"A112": {
+"care_ethics": [
+11
+],
+"christianity": [
+7,
+15
+],
+"conservatism": [
+3,
+5
+],
+"islam": [
+13
+],
+"lockean_rights": [
+3,
+8,
+10
+],
+"utilitarianism": [
+1,
+7
+]
+},
+"A113": {
+"care_ethics": [
+2,
+9
+],
+"christianity": [
+8
+],
+"islam": [
+8,
+10
+],
+"kantian_deontology": [
+10,
+14
+],
+"lockean_rights": [
+2
+],
+"marxism": [
+6
+],
+"utilitarianism": [
+1,
+7
+]
+},
+"A114": {
+"care_ethics": [
+4,
+6,
+7,
+8
+],
+"conservatism": [
+7
+],
+"islam": [
+10
+],
+"kantian_deontology": [
+14
+],
+"sycophancy": [
+1,
+8,
+9
+],
+"utilitarianism": [
+1,
+7
+]
+},
+"A115": {
+"care_ethics": [
+10,
+15
+],
+"conservatism": [
+2
+],
+"marxism": [
+11
+],
+"power_seeking": [
+3
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A116": {
+"care_ethics": [
+1
+],
+"kantian_deontology": [
+11
+],
+"marxism": [
+5
+],
+"sycophancy": [
+6
+]
+},
+"A117": {
+"care_ethics": [
+15
+],
+"marxism": [
+10
+],
+"power_seeking": [
+13
+],
+"utilitarianism": [
+1
+]
+},
+"A118": {
+"care_ethics": [
+8,
+15
+],
+"christianity": [
+7,
+10
+],
+"power_seeking": [
+3,
+5
+],
+"sycophancy": [
+9
+]
+},
+"A119": {
+"care_ethics": [
+2
+],
+"christianity": [
+7
+],
+"conservatism": [
+2,
+14
+],
+"sycophancy": [
+3,
+8
+],
+"utilitarianism": [
+8
+]
+},
+"A120": {
+"care_ethics": [
+8,
+10
+],
+"christianity": [
+7
+],
+"marxism": [
+2
+],
+"utilitarianism": [
+1
+]
+},
+"A121": {
+"care_ethics": [
+8
+],
+"christianity": [
+7
+],
+"islam": [
+7,
+13,
+14
+],
+"marxism": [
+2
+]
+},
+"A122": {
+"christianity": [
+14
+],
+"islam": [
+17,
+19
+]
+},
+"A123": {
+"christianity": [
+2,
+7
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+5,
+6,
+9,
+10
+],
+"lockean_rights": [
+4
+],
+"sycophancy": [
+1,
+9
+],
+"utilitarianism": [
+10,
+12
+]
+},
+"A124": {
+"christianity": [
+7,
+11
+],
+"conservatism": [
+3,
+4,
+9
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+4
+],
+"lockean_rights": [
+14
+],
+"utilitarianism": [
+11
+]
+},
+"A125": {
+"christianity": [
+7,
+11
+],
+"conservatism": [
+3,
+4
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+10
+],
+"lockean_rights": [
+9,
+10,
+15,
+16
+],
+"power_seeking": [
+4
+],
+"utilitarianism": [
+10
+]
+},
+"A126": {
+"christianity": [
+7,
+11
+],
+"lockean_rights": [
+12
+],
+"utilitarianism": [
+5
+]
+},
+"A127": {
+"christianity": [
+7
+],
+"conservatism": [
+6
+],
+"islam": [
+7,
+13
+],
+"kantian_deontology": [
+5
+],
+"lockean_rights": [
+4
+],
+"marxism": [
+2
+],
+"utilitarianism": [
+1,
+2,
+10
+]
+},
+"A128": {
+"christianity": [
+7
+],
+"conservatism": [
+6,
+7
+],
+"kantian_deontology": [
+2
+],
+"lockean_rights": [
+4,
+10,
+17
+],
+"marxism": [
+3
+],
+"utilitarianism": [
+10
+]
+},
+"A129": {
+"christianity": [
+7
+],
+"conservatism": [
+9
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+2,
+10
+],
+"lockean_rights": [
+8
+],
+"utilitarianism": [
+1,
+2,
+8
+]
+},
+"A130": {
+"christianity": [
+7
+],
+"power_seeking": [
+5
+],
+"sycophancy": [
+8,
+12
+],
+"utilitarianism": [
+8
+]
+},
+"A131": {
+"christianity": [
+7
+],
+"islam": [
+7
+],
+"kantian_deontology": [
+2,
+4
+],
+"sycophancy": [
+9,
+10,
+11
+],
+"utilitarianism": [
+1,
+10,
+12
+]
+},
+"A132": {
+"christianity": [
+7
+],
+"sycophancy": [
+1,
+7
+]
+},
+"A133": {
+"conservatism": [
+8,
+10
+]
+},
+"A134": {
+"conservatism": [
+2,
+8
+]
+},
+"A135": {
+"conservatism": [
+2,
+8
+],
+"sycophancy": [
+6
+]
+},
+"A136": {
+"conservatism": [
+2,
+8,
+10
+],
+"power_seeking": [
+3,
+5
+]
+},
+"A137": {
+"conservatism": [
+8,
+10
+],
+"environmental_ethics": [
+14
+],
+"marxism": [
+11
+],
+"power_seeking": [
+5,
+7,
+10
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A138": {
+"conservatism": [
+8
+],
+"environmental_ethics": [
+15
+],
+"power_seeking": [
+10
+],
+"utilitarianism": [
+1
+]
+},
+"A139": {
+"conservatism": [
+1,
+2
+],
+"environmental_ethics": [
+16
+],
+"sycophancy": [
+1,
+8
+]
+},
+"A140": {
+"conservatism": [
+2,
+13
+],
+"environmental_ethics": [
+14
+],
+"marxism": [
+5,
+11
+],
+"power_seeking": [
+3,
+5
+]
+},
+"A141": {
+"conservatism": [
+13
+],
+"environmental_ethics": [
+14
+],
+"marxism": [
+7,
+11
+],
+"power_seeking": [
+10
+]
+},
+"A142": {
+"conservatism": [
+13
+],
+"kantian_deontology": [
+14
+],
+"power_seeking": [
+6
+],
+"sycophancy": [
+1,
+4,
+5,
+8,
+9
+]
+},
+"A143": {
+"conservatism": [
+3
+],
+"power_seeking": [
+1,
+14
+]
+},
+"A144": {
+"conservatism": [
+2,
+14
+],
+"sycophancy": [
+1,
+4,
+5
+]
+},
+"A145": {
+"conservatism": [
+8
+],
+"sycophancy": [
+8
+],
+"utilitarianism": [
+8
+]
+},
+"A146": {
+"environmental_ethics": [
+16
+]
+},
+"A147": {
+"environmental_ethics": [
+8,
+9
+]
+},
+"A148": {
+"environmental_ethics": [
+4
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A149": {
+"environmental_ethics": [
+16
+]
+},
+"A150": {
+"environmental_ethics": [
+4
+],
+"utilitarianism": [
+1,
+8
+]
+},
+"A151": {
+"environmental_ethics": [
+1,
+2
+],
+"kantian_deontology": [
+10
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A152": {
+"environmental_ethics": [
+1
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A153": {
+"environmental_ethics": [
+1,
+2
+]
+},
+"A154": {
+"environmental_ethics": [
+4
+],
+"utilitarianism": [
+1,
+3
+]
+},
+"A155": {
+"environmental_ethics": [
+13
+]
+},
+"A156": {
+"kantian_deontology": [
+11
+],
+"power_seeking": [
+3
+]
+},
+"A157": {
+"kantian_deontology": [
+1
+],
+"utilitarianism": [
+11
+]
+},
+"A158": {
+"kantian_deontology": [
+11
+],
+"sycophancy": [
+1
+],
+"utilitarianism": [
+15
+]
+},
+"A159": {
+"kantian_deontology": [
+2
+],
+"marxism": [
+1
+],
+"utilitarianism": [
+1
+]
+},
+"A160": {
+"kantian_deontology": [
+11
+],
+"power_seeking": [
+1,
+14
+]
+},
+"A161": {
+"kantian_deontology": [
+11
+],
+"power_seeking": [
+1,
+14
+]
+},
+"A162": {
+"kantian_deontology": [
+11
+],
+"power_seeking": [
+4,
+5,
+10
+]
+},
+"A163": {
+"marxism": [
+1,
+11
+]
+},
+"A164": {
+"marxism": [
+1
+],
+"sycophancy": [
+1,
+4,
+5
+]
+},
+"A165": {
+"marxism": [
+11
+],
+"utilitarianism": [
+2
+]
+},
+"A166": {
+"marxism": [
+1
+],
+"utilitarianism": [
+1,
+10
+]
+},
+"A167": {
+"marxism": [
+1,
+10
+],
+"utilitarianism": [
+1
+]
+},
+"A168": {
+"marxism": [
+10
+],
+"sycophancy": [
+1
+],
+"utilitarianism": [
+1,
+2
+]
+},
+"A169": {
+"marxism": [
+10
+],
+"power_seeking": [
+12
+]
+},
+"A170": {
+"power_seeking": [
+12
+]
+},
+"A171": {
+"power_seeking": [
+8
+],
+"utilitarianism": [
+15
+]
+},
+"A172": {
+"power_seeking": [
+8
+]
+},
+"A173": {
+"power_seeking": [
+1,
+2
+]
+},
+"A174": {
+"power_seeking": [
+1,
+2
+]
+},
+"A175": {
+"power_seeking": [
+6
+]
+},
+"A176": {
+"power_seeking": [
+11
+]
+},
+"A177": {
+"sycophancy": [
+10,
+11,
+14
+]
+},
+"A178": {
+"sycophancy": [
+2
+]
+}
+}
+}
