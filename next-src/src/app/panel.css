@@ -42,7 +42,7 @@
 .panel-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--text); box-shadow:0 0 0 1.5px var(--bg); }
 .panel-judges { display:flex; flex-wrap:wrap; gap:6px; }
 .panel-judges a { display:inline-flex; gap:6px; align-items:center; font-size:12px; padding:4px 10px; }
-.panel-chip-swatch { width:10px; height:10px; border-radius:2px; }
+.panel-chip-swatch { width:10px; height:10px; border-radius:3px; }
 
 .panel-split { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,360px); gap:20px; align-items:start; }
 .panel-matrix-wrap { overflow-x:auto; padding-bottom:4px; }
@@ -52,13 +52,13 @@
 .panel-colhead { text-align:left; overflow:visible; height:16px; }
 .panel-rowhead { padding-right:8px; display:flex; align-items:center; }
 .panel-colhead.is-on, .panel-rowhead.is-on { color:var(--text); font-weight:600; }
-.panel-cell { position:relative; min-height:20px; padding:0; border:1px solid transparent; background:var(--panel-grey); cursor:pointer; display:grid; place-items:center; font-size:11px; color:var(--text); }
+.panel-cell { position:relative; min-height:20px; padding:0; border:1px solid transparent; border-radius:3px; background:var(--panel-grey); cursor:pointer; display:grid; place-items:center; font-size:11px; color:var(--text); }
 .panel-cell:hover { outline:1px solid var(--text-muted); outline-offset:0; z-index:1; }
 .panel-cell:focus-visible { outline:2px solid var(--accent); z-index:2; }
 .panel-cell[aria-pressed='true'] { outline:2px solid var(--text); outline-offset:0; z-index:2; }
 .panel-cell.is-empty { background:transparent; border:1px dashed var(--border); }
 .panel-cell.is-multi { background:repeating-linear-gradient(45deg,var(--text-muted) 0 2px,var(--panel-grey) 2px 5px); }
-.panel-cell.is-missing::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(-45deg,var(--bg) 0 2px,transparent 2px 5px); opacity:.7; }
+.panel-cell.is-missing::after { content:''; position:absolute; inset:0;  border-radius:inherit; background:repeating-linear-gradient(-45deg,var(--bg) 0 2px,transparent 2px 5px); opacity:.7; }
 .panel-matrix.is-tracing .panel-cell:not(.is-traced):not(.is-empty) { background:var(--panel-grey); }
 .panel-cell.is-traced { box-shadow:inset 0 -3px 0 var(--text); }
 .panel-matrix.is-pairs .panel-cell { min-height:30px; background:color-mix(in srgb,var(--text) var(--shade),var(--bg-elevated)); }

@@ -78,5 +78,6 @@ export function promptTags(data: PanelData, c: PanelConstitution): number[][] {
 }
 
 /** Judge palette: distinct hues that hold up in both themes. */
-export const JUDGE_COLORS = ['#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac', '#86bcb6', '#d37295'];
+/** The site's lab colours, one per panel model, stepped apart so nine stay distinct. */
+export const JUDGE_COLORS = ['#5fae8c', '#b8d47e', '#e8956f', '#6fa6dd', '#b9bbb0', '#5bbcc4', '#a98bd0', '#e58fae', '#e9bd55'];
 export const judgeColor = (j: number) => JUDGE_COLORS[j % JUDGE_COLORS.length];
