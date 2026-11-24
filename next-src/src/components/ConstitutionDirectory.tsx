@@ -1,8 +1,9 @@
 'use client';
 
-import { ValueSelect } from './ValueLogo';
+import { ValueLogo, ValueSelect } from './ValueLogo';
 import { useEffect, useRef, useState } from 'react';
 import { constLabel } from '@/lib/nicks';
+import { CONSTITUTION_TAGLINES } from '@/lib/taglines';
 import { usePublishedBoards } from './usePublishedBoards';
 import { ModelLogo } from './ModelLogo';
 import { ValuePortrait } from './ValuePortrait';
@@ -13,8 +14,11 @@ const SYMBOL_TONES = ['sage', 'sand', 'mint', 'clay', 'dusk'] as const;
 export function ConstitutionDirectory() {
   const data = usePublishedBoards();
   const [active, setActive] = useState(DEFAULT_VALUE);
+  const [view, setView] = useState<'chapters' | 'overview'>('chapters');
+  const [spotlight, setSpotlight] = useState<string | null>(null);
   const directory = useRef<HTMLElement>(null);
   const initialHashHandled = useRef(false);
+  const pendingScroll = useRef<string | null>(null);
   const shown = data.boards;
   const current = shown.find(board => board.id === active) || shown[0];
 
@@ -29,9 +33,14 @@ export function ConstitutionDirectory() {
   }, []);
 
   useEffect(() => {
+    if (view !== 'chapters') return;
     const chapters = Array.from(directory.current?.querySelectorAll<HTMLElement>('.value-chapter') || []);
     if (!chapters.length) return;
-    if (!initialHashHandled.current) {
+    if (pendingScroll.current) {
+      const target = document.getElementById(`value-${pendingScroll.current}`);
+      pendingScroll.current = null;
+      target?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    } else if (!initialHashHandled.current) {
       initialHashHandled.current = true;
       chapters.find(chapter => chapter.id === location.hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
@@ -62,9 +71,16 @@ export function ConstitutionDirectory() {
       window.removeEventListener('resize', schedule);
       window.removeEventListener('hashchange', schedule);
     };
-  }, [shown]);
+  }, [shown, view]);
 
   const jumpToValue = (id: string) => {
+    if (view !== 'chapters') {
+      pendingScroll.current = id;
+      setActive(id);
+      setView('chapters');
+      history.replaceState(history.state, '', `${location.pathname}${location.search}#value-${id}`);
+      return;
+    }
     const chapter = document.getElementById(`value-${id}`);
     if (!chapter) return;
     history.replaceState(history.state, '', `${location.pathname}${location.search}#value-${id}`);
@@ -73,18 +89,63 @@ export function ConstitutionDirectory() {
 
   return <section className="values-directory" ref={directory}>
     <header className="values-heading" id="values-top">
-      <div><h1>Model performance across values</h1><p>Different values, different rankings.</p></div>
+      <div><h1>Model performance across values</h1><p>{view === 'overview' ? 'All constitutions at a glance. Hover any model to trace its rank across values.' : 'Different values, different rankings.'}</p></div>
       <nav className="values-controls" aria-label="Value index">
-        <ValueSelect aria-label="Jump to a value" disabled={!shown.length} value={current?.id || ''} onChange={e => jumpToValue(e.target.value)}>
+        <div className="arena-scope-tabs" role="tablist" aria-label="Values layout">
+          <button type="button" role="tab" aria-selected={view === 'chapters'} onClick={() => setView('chapters')}>Chapters</button>
+          <button type="button" role="tab" aria-selected={view === 'overview'} onClick={() => { setSpotlight(null); setView('overview'); }}>Top-down</button>
+        </div>
+        {view === 'chapters' && <ValueSelect aria-label="Jump to a value" disabled={!shown.length} value={current?.id || ''} onChange={e => jumpToValue(e.target.value)}>
           {!shown.length && <option value="">{data.loading ? 'Loading values…' : 'No values'}</option>}
           {shown.map(board => <option key={board.id} value={board.id}>{constLabel(board.id)}</option>)}
-        </ValueSelect>
+        </ValueSelect>}
       </nav>
     </header>
     {data.error ? <div className="results-status" role="alert">{data.error}<button onClick={data.retry}>Retry</button></div>
       : data.loading ? <p className="results-status" role="status">Loading values…</p>
         : !shown.length ? <p className="results-status">No values have published results yet.</p>
-          : <div className="values-story">
+          : view === 'overview' ? <div className="values-overview" onMouseLeave={() => setSpotlight(null)}>
+            {shown.map((board, i) => {
+              const rows = data.scores[board.run.slug];
+              const href = `/leaderboard/?constitution=${encodeURIComponent(board.id)}&run=${encodeURIComponent(board.run.slug)}`;
+              const min = rows?.length ? Math.min(...rows.map(r => r.elo_mean)) : 1400;
+              const max = rows?.length ? Math.max(...rows.map(r => r.elo_mean)) : 1600;
+              const span = Math.max(1, max - min);
+              return <article className="value-tile" key={board.id} data-tone={SYMBOL_TONES[i % SYMBOL_TONES.length]}>
+                <header className="value-tile-head">
+                  <button type="button" className="value-tile-title" onClick={() => jumpToValue(board.id)} title={`Zoom into ${constLabel(board.id)}`}>
+                    <ValueLogo id={board.id} size={30} />
+                    <span>
+                      <strong>{constLabel(board.id)}</strong>
+                      {CONSTITUTION_TAGLINES[board.id] && <small>{CONSTITUTION_TAGLINES[board.id]}</small>}
+                    </span>
+                  </button>
+                </header>
+                {rows?.length ? <ol className="value-tile-list">{rows.map(row => {
+                  const pct = Math.max(8, ((row.elo_mean - min) / span) * 100);
+                  const isSpot = spotlight === row.model_name;
+                  const isDim = !!spotlight && !isSpot;
+                  return <li key={row.model_name} data-spot={isSpot || undefined} data-dim={isDim || undefined}>
+                    <a href={profileURL(row.model_name, board.run.slug)}
+                      onMouseEnter={() => setSpotlight(row.model_name)}
+                      onFocus={() => setSpotlight(row.model_name)}
+                      title={`${row.model_name} · ${row.elo_mean.toFixed(1)} Elo`}>
+                      <span className="value-tile-rank">{scoreRank(rows, row)}</span>
+                      <ModelLogo name={row.model_name} size={15} />
+                      <span className="value-tile-name">{row.model_name}</span>
+                      <span className="value-tile-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></span>
+                      <strong>{row.elo_mean.toFixed(0)}</strong>
+                    </a>
+                  </li>;
+                })}</ol> : data.failures[board.run.slug] ? <button className="results-retry" onClick={data.retry}>Retry</button> : <p className="value-tile-status">{rows ? 'No scores.' : 'Loading…'}</p>}
+                <footer className="value-tile-foot">
+                  <a href={href}>Leaderboard</a>
+                  <a href={`/constitution/?id=${encodeURIComponent(board.id)}`}>Criteria</a>
+                </footer>
+              </article>;
+            })}
+          </div>
+            : <div className="values-story">
             <div className="value-symbol-stage" aria-hidden="true" data-value={current?.id}>
               {shown.map((board, i) => <div key={board.id} className="value-symbol-layer" data-active={current?.id === board.id} data-tone={SYMBOL_TONES[i % SYMBOL_TONES.length]}>
                 <ValuePortrait id={board.id} priority={i === 0} />

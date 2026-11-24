@@ -32,12 +32,22 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   useEffect(() => {
     let active = true;
     setError('');
+    // Start loading the default headline summary in parallel with index.json to avoid a 2-step waterfall.
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('run') && !params.get('constitution')) {
+      fetchSummary(`${HEADLINE_GROUP}/${DEFAULT_VALUE.replace(/-/g, '_')}`)
+        .then(data => {
+          if (!active) return;
+          setRows(prev => prev.length ? prev : data.filter(r => Number.isFinite(r.elo_mean)).sort((a, b) => b.elo_mean - a.elo_mean));
+          setLoading(false);
+        })
+        .catch(() => { /* fall back to index-driven load below */ });
+    }
     fetchIndex().then(index => {
       if (!active) return;
       const available = headlineRuns(index.runs).filter(r => valueId(r));
       setRuns(available);
       if (!available.length) { setLoading(false); return; }
-      const params = new URLSearchParams(window.location.search);
       const requestedRun = available.find(r => r.slug === params.get('run'));
       const requestedConstitution = boardId(params.get('constitution'));
       if (requestedRun) {
@@ -222,7 +232,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                         const isActive = activeRow?.model_name === row.model_name;
                         return <a className={`arena-monolith${above ? ' is-above' : ' is-below'}${isActive ? ' is-active' : ''}`} key={row.model_name} data-model={row.model_name} data-lab={family.toLowerCase()}
                           style={{ '--column-color': color } as React.CSSProperties}
-                          href={`/model/?run=${encodeURIComponent(run.slug)}&id=${encodeURIComponent(row.model_name)}`}
+                          href={`/model/?run=${encodeURIComponent(run?.slug || `${HEADLINE_GROUP}/${constitution.replace(/-/g, '_')}`)}&id=${encodeURIComponent(row.model_name)}`}
                           onMouseEnter={() => setHovered(row.model_name)}
                           onFocus={() => setHovered(row.model_name)}
                           aria-label={`Rank ${rank}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}>

@@ -33,13 +33,13 @@ interface Point extends TrendPoint { info: ModelInfo; lo?: number; hi?: number }
 
 const DAY = 864e5;
 // One replay runs through the whole release history in this many milliseconds.
-const PLAY_MS = 16000;
+const PLAY_MS = 10000;
 // While playing, the x-axis shows a moving window of this many months and scrolls with the head;
 // at the end it zooms out to the whole history over ZOOM_MS.
 const WINDOW_MONTHS = 9;
-const ZOOM_MS = 1800;
+const ZOOM_MS = 1200;
 // A short beat on the finished chart before the next grouping replays.
-const CYCLE_PAUSE_MS = 2600;
+const CYCLE_PAUSE_MS = 1800;
 const month = (t: number | string) => new Date(typeof t === 'string' ? `${t}T00:00:00Z` : t)
   .toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 

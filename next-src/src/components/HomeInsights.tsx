@@ -1,7 +1,7 @@
 'use client';
 
 import { ValueSelect, ValueLabel } from './ValueLogo';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { usePublishedBoards } from './usePublishedBoards';
 import { constLabel } from '@/lib/nicks';
 import { modelMatch, profileURL, scoreInterval } from '@/lib/arena-data';
@@ -16,16 +16,8 @@ const labOf = (name: string) => modelInfo(name)?.lab || 'Other';
 const colorOf = (name: string) => LAB_COLORS[labOf(name)] || '#afbdac';
 
 export function HomeInsights() {
-  const section = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) { setVisible(true); observer.disconnect(); }
-    }, { rootMargin: '300px' });
-    if (section.current) observer.observe(section.current);
-    return () => observer.disconnect();
-  }, []);
-  const data = usePublishedBoards(visible ? '' : null);
+  // Preload all headline summaries immediately so Value leaderboards and every home value tab are ready without scroll delay.
+  const data = usePublishedBoards('');
   const [xValue, setXValue] = useState('utilitarianism');
   const [yValue, setYValue] = useState('kantian-deontology');
   const [selected, setSelected] = useState('');
@@ -45,7 +37,7 @@ export function HomeInsights() {
   const [yMin, yMax] = domain(points.length ? points.map(p => p.y.elo_mean) : [1400, 1600]);
   const failed = data.error || data.failures[xBoard?.run.slug || ''] || data.failures[yBoard?.run.slug || ''];
 
-  return <div className="home-insights" ref={section}>
+  return <div className="home-insights">
     <section className="home-value-comparison" aria-labelledby="home-compare-heading">
       <header className="home-section-heading"><h2 id="home-compare-heading">Value leaderboards</h2></header>
         <div id="featured-value-chart">

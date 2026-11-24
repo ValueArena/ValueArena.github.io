@@ -560,6 +560,14 @@ html { scroll-padding-top:88px; }
   transform:translate(-50%,-14%);
 }
 .arena-mascot { display:block; image-rendering:pixelated; object-fit:contain; }
+@keyframes arena-mascot-bob {
+  0%,100% { transform:translateY(0) rotate(0deg); }
+  35% { transform:translateY(-4px) rotate(-2.5deg); }
+  70% { transform:translateY(-1px) rotate(2deg); }
+}
+.arena-monolith.is-active .arena-mascot {
+  animation:arena-mascot-bob 1.5s ease-in-out infinite;
+}
 .arena-monolith:hover .arena-monolith-stem,.arena-monolith.is-active .arena-monolith-stem,.arena-monolith:focus-visible .arena-monolith-stem {
   opacity:1;
 }
@@ -650,4 +658,5 @@ html { scroll-padding-top:88px; }
 }
 @media(prefers-reduced-motion:reduce) {
   .arena-monolith,.arena-monolith-stem,.arena-monolith-aura,.arena-monolith-node,.arena-monolith-foot,.arena-lab-toggle,.arena-plate-tabs>button { transition:none; }
+  .arena-monolith.is-active .arena-mascot { animation:none; }
 }
