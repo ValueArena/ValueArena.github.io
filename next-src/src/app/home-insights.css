@@ -1,6 +1,6 @@
 /* Inset supporting sections; the ranking bars still span the viewport. */
 .arena-content:has(>.arena-home-canvas) { max-width:1280px; }
-.arena-home-canvas { --home-inset:clamp(18px,6.25vw,80px); --home-section-gap:120px; --home-intro-gap:32px; }
+.arena-home-canvas { --home-inset:clamp(18px,6.25vw,80px); --home-section-gap:176px; --home-intro-gap:64px; }
 /* Original section tints meet halfway through each gap, across the whole viewport. */
 .arena-home-canvas :is(.arena-trends,.arena-ranking,.home-value-comparison,.home-ranks,.panel-embed,.home-research-strip) {
   position:relative;
@@ -20,7 +20,7 @@
 .arena-home-canvas .arena-trends {
   --home-band-from:var(--bg);
   --home-band-color:var(--band-dusk);
-  --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,#e3dfd0);
+  --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,#d5d0be);
 }
 .arena-home-canvas .arena-trends::before { top:calc(-1 * var(--home-intro-gap)); }
 .arena-home-canvas .arena-trends::after {
@@ -37,9 +37,9 @@
   mask-image:linear-gradient(180deg,transparent,#000 12%,#000 82%,transparent);
 }
 .arena-home-canvas .arena-ranking {
-  --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,#e3dfd0);
-  --home-band-color:#e3dfd0;
-  --home-band-to:color-mix(in srgb,#e3dfd0 50%,var(--band-sage));
+  --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,#d5d0be);
+  --home-band-color:#d5d0be;
+  --home-band-to:color-mix(in srgb,#d5d0be 50%,var(--band-sage));
 }
 .arena-home-canvas .arena-ranking::after {
   content:'';
@@ -60,7 +60,7 @@
   margin:var(--home-section-gap) var(--home-inset) 0;
 }
 .home-value-comparison {
-  --home-band-from:color-mix(in srgb,#e3dfd0 50%,var(--band-sage));
+  --home-band-from:color-mix(in srgb,#d5d0be 50%,var(--band-sage));
   --home-band-color:var(--band-sage);
   --home-band-to:color-mix(in srgb,var(--band-sage) 50%,var(--band-clay));
 }
@@ -75,7 +75,7 @@
   --home-band-to:var(--bg);
 }
 .arena-home-canvas .home-research-strip::before { bottom:0; }
-.arena-home-canvas .arena-ranking { margin-top:var(--home-section-gap); }
+.arena-home-canvas .arena-ranking { margin-top:var(--home-section-gap); padding-block:24px; }
 .home-insights { padding-top:var(--home-section-gap); }
 .home-value-comparison>.home-section-heading { padding-top:0; }
 .arena-home-canvas #sampling { margin:var(--home-section-gap) var(--home-inset) 0; }

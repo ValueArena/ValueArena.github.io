@@ -527,14 +527,22 @@ html { scroll-padding-top:88px; }
 .arena-monolith-aura {
   position:absolute;
   left:50%;
-  width:24px;
+  width:10px;
   transform:translateX(-50%);
-  border-radius:999px;
-  background:color-mix(in srgb,var(--column-color) 24%,transparent);
-  border-top:1.5px solid color-mix(in srgb,var(--column-color) 72%,var(--text));
-  border-bottom:1.5px solid color-mix(in srgb,var(--column-color) 72%,var(--text));
+  border-top:1.5px solid color-mix(in srgb,var(--text) 62%,transparent);
+  border-bottom:1.5px solid color-mix(in srgb,var(--text) 62%,transparent);
   pointer-events:none;
-  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),background-color 160ms ease,width 160ms ease;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),border-color 160ms ease;
+}
+.arena-monolith-aura::after {
+  content:'';
+  position:absolute;
+  left:50%;
+  top:0;
+  bottom:0;
+  width:1px;
+  transform:translateX(-50%);
+  background:color-mix(in srgb,var(--text) 45%,transparent);
 }
 .arena-monolith-node {
   position:absolute;
@@ -556,8 +564,10 @@ html { scroll-padding-top:88px; }
   opacity:1;
 }
 .arena-monolith:hover .arena-monolith-aura,.arena-monolith.is-active .arena-monolith-aura,.arena-monolith:focus-visible .arena-monolith-aura {
-  width:28px;
-  background:color-mix(in srgb,var(--column-color) 38%,transparent);
+  border-color:var(--accent);
+}
+.arena-monolith:hover .arena-monolith-aura::after,.arena-monolith.is-active .arena-monolith-aura::after,.arena-monolith:focus-visible .arena-monolith-aura::after {
+  background:var(--accent);
 }
 .arena-monolith.is-above:hover .arena-monolith-node,.arena-monolith.is-above.is-active .arena-monolith-node,.arena-monolith.is-above:focus-visible .arena-monolith-node {
   transform:translate(-50%,-96%) scale(1.12);
