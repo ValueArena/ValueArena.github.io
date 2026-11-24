@@ -23,6 +23,12 @@
   --texture-value-strength:32%;
 }
 :root[data-theme=light] { color-scheme:light; }
+[data-theme=dark] .arena-home-canvas .arena-trends { --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,#090b0d); }
+[data-theme=dark] .arena-home-canvas .arena-ranking { --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,#090b0d); --home-band-color:#090b0d; --home-band-to:color-mix(in srgb,#090b0d 50%,var(--band-sage)); }
+[data-theme=dark] .arena-home-canvas .arena-ranking::after { background-image:url('/assets/art/leaderboard-geometry-dark.svg'); }
+[data-theme=dark] .home-value-comparison { --home-band-from:color-mix(in srgb,#090b0d 50%,var(--band-sage)); }
+[data-theme=dark] .arena-monolith-node { filter:drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
+[data-theme=dark] .arena-monolith-aura { background:color-mix(in srgb,var(--column-color) 24%,transparent); }
 [data-theme=dark] .arena-home-canvas .arena-chart,[data-theme=dark] .arena-home-canvas .arena-chart-loading { background-color:var(--bg); background-image:url('/assets/art/leaderboard-geometry-dark.svg'); }
 [data-theme=dark] .arena-column-bar,[data-theme=dark] .comparison-column-fill,[data-theme=dark] .comparison-column-name { color:#17231a; }
 [data-theme=dark] .arena-column-label { background:color-mix(in srgb,var(--column-color) 20%,var(--bg-elevated)); color:var(--text); }

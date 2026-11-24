@@ -20,7 +20,7 @@
 .arena-home-canvas .arena-trends {
   --home-band-from:var(--bg);
   --home-band-color:var(--band-dusk);
-  --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,var(--bg));
+  --home-band-to:color-mix(in srgb,var(--band-dusk) 50%,#e3dfd0);
 }
 .arena-home-canvas .arena-trends::before { top:calc(-1 * var(--home-intro-gap)); }
 .arena-home-canvas .arena-trends::after {
@@ -37,9 +37,21 @@
   mask-image:linear-gradient(180deg,transparent,#000 12%,#000 82%,transparent);
 }
 .arena-home-canvas .arena-ranking {
-  --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,var(--bg));
-  --home-band-color:var(--bg);
-  --home-band-to:var(--bg);
+  --home-band-from:color-mix(in srgb,var(--band-dusk) 50%,#e3dfd0);
+  --home-band-color:#e3dfd0;
+  --home-band-to:color-mix(in srgb,#e3dfd0 50%,var(--band-sage));
+}
+.arena-home-canvas .arena-ranking::after {
+  content:'';
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  inset-block:calc(var(--home-section-gap) / -2);
+  left:50%;
+  width:100vw;
+  transform:translateX(-50%);
+  background:url('/assets/art/leaderboard-geometry.svg') center center / cover no-repeat;
+  mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent);
 }
 .arena-home-canvas #scenarios {
   --home-band-from:var(--bg);
@@ -48,9 +60,9 @@
   margin:var(--home-section-gap) var(--home-inset) 0;
 }
 .home-value-comparison {
-  --home-band-from:color-mix(in srgb,var(--bg) 50%,var(--band-sage));
+  --home-band-from:color-mix(in srgb,#e3dfd0 50%,var(--band-sage));
   --home-band-color:var(--band-sage);
-  --home-band-to:color-mix(in srgb,var(--band-sage) 50%,var(--band-sand));
+  --home-band-to:color-mix(in srgb,var(--band-sage) 50%,var(--band-clay));
 }
 .home-ranks, .arena-home-canvas #sampling {
   --home-band-from:color-mix(in srgb,var(--band-sage) 50%,var(--band-sand));
@@ -58,7 +70,7 @@
   --home-band-to:color-mix(in srgb,var(--band-sand) 50%,var(--band-clay));
 }
 .home-research-strip {
-  --home-band-from:color-mix(in srgb,var(--band-sand) 50%,var(--band-clay));
+  --home-band-from:color-mix(in srgb,var(--band-sage) 50%,var(--band-clay));
   --home-band-color:var(--band-clay);
   --home-band-to:var(--bg);
 }

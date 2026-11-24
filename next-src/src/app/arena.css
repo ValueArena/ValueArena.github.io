@@ -203,12 +203,12 @@ html { scroll-padding-top:88px; }
 .arena-nav nav { padding:5px 8px; gap:2px; }
 .arena-nav nav a { font-size:11px; padding:7px 8px; }
 .arena-nav-group { position:relative; }
-.arena-nav-trigger { display:inline-flex; align-items:center; gap:5px; padding:7px 8px; border:0; border-radius:30px; background:transparent; color:inherit; font-size:11px; line-height:inherit; cursor:pointer; }
+.arena-nav-trigger { display:inline-grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:50%; background:transparent; color:inherit; font:inherit; cursor:pointer; }
 .arena-nav-trigger svg { opacity:.7; transition:transform 160ms ease; }
 .arena-nav-group[data-open=true] .arena-nav-trigger svg { transform:rotate(180deg); }
 .arena-nav-trigger:hover,.arena-nav-trigger[data-active=true],.arena-nav-group[data-open=true] .arena-nav-trigger { background:var(--accent-dim); color:var(--accent); }
-.arena-nav-dropdown { position:absolute; top:calc(100% + 10px); left:0; min-width:150px; display:flex; flex-direction:column; gap:2px; padding:6px; border:1px solid var(--border); border-radius:14px; background:var(--bg-elevated); box-shadow:0 10px 28px rgba(0,0,0,.14); z-index:60; }
-.arena-nav-dropdown a { display:block; padding:8px 12px; border-radius:8px; font-size:12px; white-space:nowrap; }
+.arena-nav-dropdown { position:absolute; top:calc(100% + 10px); right:0; min-width:150px; display:flex; flex-direction:column; gap:2px; padding:6px; border:1px solid var(--border); border-radius:14px; background:var(--bg-elevated); box-shadow:0 10px 28px rgba(0,0,0,.14); z-index:60; }
+.arena-nav-dropdown a { display:block; padding:8px 12px; border-radius:8px; font:400 12px/18px var(--font-body); white-space:nowrap; }
 .arena-nav>.arena-tool-link { padding:11px 15px; font-size:12px; }
 @media(max-width:1000px) {
   html { scroll-padding-top:112px; }
@@ -268,9 +268,376 @@ html { scroll-padding-top:88px; }
 .arena-shell { isolation:isolate; }
 .arena-page { position:relative; display:flow-root; background:var(--bg); }
 
-/* A separate geometric field fills the leaderboard to the first viewport edge. */
-.arena-home-canvas .arena-chart { background:#f0eee4 url('/assets/art/leaderboard-geometry.svg') center top / cover no-repeat; }
-.arena-home-canvas .arena-column-stage,.arena-home-canvas .arena-grid-lines { height:var(--arena-stage-height,290px); }
-.arena-home-canvas .arena-chart-loading { padding:0; background:#f0eee4 url('/assets/art/leaderboard-geometry.svg') center top / cover no-repeat; }
-.arena-home-canvas .arena-chart-loading>div { height:var(--arena-stage-height,290px); gap:0; }
-.arena-home-canvas .arena-chart-loading p { min-height:89px; margin:0; padding:18px; background:var(--bg); }
+/* Borderless, odd stepped-monolith skyline floating directly on the home canvas. */
+.arena-home-canvas .arena-plate {
+  margin:0 var(--home-inset);
+  border:0;
+  background:transparent;
+}
+.arena-plate-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  padding:8px 0 14px;
+  border-bottom:0;
+  background:transparent;
+}
+.arena-plate-title { display:flex; align-items:center; gap:12px; min-width:0; }
+.arena-plate-title h2 { margin:0; font:500 24px/30px var(--font-body); letter-spacing:-.5px; }
+.arena-plate-title p { margin:2px 0 0; font:400 13px/18px var(--font-body); color:var(--text-secondary); }
+.arena-scope-tabs {
+  display:inline-flex;
+  gap:2px;
+  padding:3px;
+  min-height:40px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+}
+.arena-scope-tabs>button {
+  border:0;
+  border-radius:7px;
+  padding:4px 12px;
+  min-height:32px;
+  background:transparent;
+  color:var(--text-secondary);
+  font:500 .84rem var(--font-body);
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background-color 140ms ease,color 140ms ease;
+}
+.arena-scope-tabs>button:hover { color:var(--text); }
+.arena-scope-tabs>button[aria-selected=true] {
+  background:var(--bg-hover);
+  color:var(--text);
+  box-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+.arena-plate-link {
+  margin-left:8px;
+  font:400 12px/18px var(--font-body);
+  color:var(--text);
+  white-space:nowrap;
+}
+.arena-plate-link:hover { color:var(--accent); text-decoration:underline; text-underline-offset:3px; }
+.arena-plate-tabs {
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:4px;
+  margin-bottom:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  overflow-x:auto;
+  scrollbar-width:thin;
+}
+.arena-plate-tabs>button {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+  padding:6px 12px;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:var(--text-secondary);
+  font:500 12px/16px var(--font-body);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background-color 140ms ease,color 140ms ease,box-shadow 140ms ease;
+}
+.arena-plate-tabs .hub-icon { width:14px; height:14px; flex-shrink:0; stroke-width:1.4; }
+.arena-plate-tabs>button:hover { color:var(--text); }
+.arena-plate-tabs>button[aria-selected=true] {
+  background:var(--bg-hover);
+  color:var(--text);
+  box-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+.arena-plate-readout {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 14px;
+  min-height:34px;
+  padding:4px 0 14px;
+  border-bottom:0;
+  background:transparent;
+  font:400 12px/18px var(--font-body);
+  color:var(--text-secondary);
+}
+.arena-readout-rank { font:600 11px/16px var(--font-mono); color:var(--accent); }
+.arena-readout-name { font:500 13px/18px var(--font-body); color:var(--text); }
+.arena-readout-score { font:600 12px/16px var(--font-mono); color:var(--text); font-variant-numeric:tabular-nums; }
+.arena-readout-delta { font:500 11px/16px var(--font-mono); padding:1px 7px; border-radius:999px; font-variant-numeric:tabular-nums; }
+.arena-readout-delta.is-up { background:color-mix(in srgb,var(--accent) 16%,transparent); color:var(--accent); }
+.arena-readout-delta.is-down { background:color-mix(in srgb,var(--text) 8%,transparent); color:var(--text-secondary); }
+.arena-readout-ci { margin-left:auto; font:11px/16px var(--font-mono); color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.arena-readout-empty { color:var(--text-muted); }
+
+.arena-skyline-scroll { overflow-x:auto; scrollbar-width:thin; }
+.arena-skyline { position:relative; background:transparent; }
+.arena-skyline-stage { position:relative; }
+.arena-skyline-grid {
+  position:absolute;
+  top:28px;
+  left:0;
+  right:0;
+  height:330px;
+  pointer-events:none;
+}
+.arena-skyline-tick {
+  position:absolute;
+  left:0;
+  right:0;
+  border-top:1px dotted color-mix(in srgb,var(--border) 60%,transparent);
+  mask-image:linear-gradient(90deg,#000,#000 92%,transparent);
+  transition:top 520ms cubic-bezier(.22,1,.36,1);
+}
+.arena-skyline-tick>span {
+  position:absolute;
+  left:0;
+  top:-15px;
+  font:10px/14px var(--font-mono);
+  color:var(--text-muted);
+  font-variant-numeric:tabular-nums;
+}
+.arena-skyline-datum {
+  position:absolute;
+  left:0;
+  right:0;
+  z-index:2;
+  border-top:1.5px dashed color-mix(in srgb,var(--accent) 75%,var(--text));
+  mask-image:linear-gradient(90deg,#000,#000 94%,transparent);
+  transition:top 520ms cubic-bezier(.22,1,.36,1);
+}
+.arena-skyline-datum>span {
+  position:absolute;
+  left:0;
+  top:-17px;
+  color:var(--accent);
+  font:600 10px/14px var(--font-mono);
+  letter-spacing:.03em;
+}
+.arena-skyline-cols {
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:14px;
+  padding:0 12px 10px 64px;
+}
+.arena-monolith {
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  color:var(--text)!important;
+  transition:opacity 160ms ease,transform 180ms ease;
+}
+.arena-monolith:first-child { flex:1; }
+.arena-monolith.is-below { flex:1; }
+.arena-monolith-plot {
+  position:relative;
+  height:330px;
+  margin-top:30px;
+  margin-bottom:8px;
+}
+/* Character-matched custom stems anchored to 1500, translucent 95% CI halo, and perched pixel mascot. */
+.arena-monolith-stem {
+  position:absolute;
+  left:50%;
+  width:6px;
+  transform:translateX(-50%);
+  background:color-mix(in srgb,var(--column-color) 75%,var(--text));
+  opacity:.85;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),opacity 160ms ease;
+}
+/* Small perch cap at the Elo tip where the mascot stands or clings. */
+.arena-monolith.is-above .arena-monolith-stem::before,
+.arena-monolith.is-below .arena-monolith-stem::before {
+  content:'';
+  position:absolute;
+  left:50%;
+  width:24px;
+  height:3px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--column-color) 65%,var(--text));
+}
+.arena-monolith.is-above .arena-monolith-stem::before { top:-1px; }
+.arena-monolith.is-below .arena-monolith-stem::before { bottom:-1px; }
+
+/* 1. Anthropic (Owl): warm terracotta drafting ruler with fine brass millimeter ticks. */
+.arena-monolith[data-lab='anthropic'] .arena-monolith-stem {
+  width:9px;
+  background:
+    repeating-linear-gradient(180deg,color-mix(in srgb,#6b3b23 70%,transparent) 0 1px,transparent 1px 6px) left / 4px 100% no-repeat,
+    linear-gradient(90deg,color-mix(in srgb,#e8ab8c 75%,transparent),color-mix(in srgb,#d98a64 45%,transparent));
+  border-left:1.5px solid #9e5938;
+  border-right:1px solid color-mix(in srgb,#9e5938 45%,transparent);
+}
+/* 2. OpenAI (Sprout Bot): mint-emerald segmented botanical vine / circuit stalk. */
+.arena-monolith[data-lab='openai'] .arena-monolith-stem {
+  width:7px;
+  background:
+    repeating-linear-gradient(180deg,#4e9a78 0 10px,#a7dbc2 10px 13px,transparent 13px 15px);
+  border-radius:999px;
+}
+/* 3. Google (Star Spirit): dual parallel sky-blue & soft-gold prism beams. */
+.arena-monolith[data-lab='google'] .arena-monolith-stem {
+  width:9px;
+  background:
+    linear-gradient(90deg,#5b94d6 0 2px,color-mix(in srgb,#8cb7e0 25%,transparent) 2px 7px,#dfb958 7px 9px);
+}
+/* 4. DeepSeek (Pixel Whale): vertical sonar bubble chain. */
+.arena-monolith[data-lab='deepseek'] .arena-monolith-stem {
+  width:8px;
+  background:
+    radial-gradient(circle,#5b8ce0 2.5px,transparent 3px) center / 8px 11px repeat-y;
+}
+/* 5. Meta (Llama): woven periwinkle braided textile cord. */
+.arena-monolith[data-lab='meta'] .arena-monolith-stem {
+  width:8px;
+  background:
+    repeating-linear-gradient(45deg,#768ad6 0 3px,#c4d0f5 3px 6px);
+  border-inline:1px solid color-mix(in srgb,#4d5fa8 55%,transparent);
+}
+/* 6. Kimi (Moon Rabbit): silver-teal dotted starlight moonbeam tether. */
+.arena-monolith[data-lab='kimi'] .arena-monolith-stem {
+  width:5px;
+  background:
+    repeating-linear-gradient(180deg,#5f9991 0 3px,transparent 3px 6px,#e0c168 6px 8px,transparent 8px 12px);
+}
+/* 7. xAI (Astro Cat): sleek charcoal orbital telemetry rail with amber ticks. */
+.arena-monolith[data-lab='xai'] .arena-monolith-stem {
+  width:8px;
+  background:
+    linear-gradient(90deg,transparent 0 3px,#3a3f42 3px 5px,transparent 5px 8px),
+    repeating-linear-gradient(180deg,#d69f3a 0 2px,transparent 2px 9px);
+}
+/* 8. GLM (Lantern Frog): sage-slate segmented bamboo stalk with ochre joint rings. */
+.arena-monolith[data-lab='glm'] .arena-monolith-stem {
+  width:8px;
+  background:
+    repeating-linear-gradient(180deg,#6e878f 0 15px,#d6b05e 15px 18px);
+  border-radius:3px;
+}
+
+.arena-monolith-aura {
+  position:absolute;
+  left:50%;
+  width:30px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--column-color) 24%,transparent);
+  border-top:1.5px solid color-mix(in srgb,var(--column-color) 72%,var(--text));
+  border-bottom:1.5px solid color-mix(in srgb,var(--column-color) 72%,var(--text));
+  pointer-events:none;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),background-color 160ms ease,width 160ms ease;
+}
+.arena-monolith-node {
+  position:absolute;
+  left:50%;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  width:54px;
+  height:54px;
+  transform:translate(-50%,-86%);
+  filter:drop-shadow(0 3px 6px rgba(24,36,26,.18));
+  transition:top 520ms cubic-bezier(.22,1,.36,1),transform 180ms cubic-bezier(.2,.8,.2,1),filter 160ms ease;
+}
+.arena-monolith.is-below .arena-monolith-node {
+  transform:translate(-50%,-14%);
+}
+.arena-mascot { display:block; image-rendering:pixelated; object-fit:contain; }
+.arena-monolith:hover .arena-monolith-stem,.arena-monolith.is-active .arena-monolith-stem,.arena-monolith:focus-visible .arena-monolith-stem {
+  opacity:1;
+}
+.arena-monolith:hover .arena-monolith-aura,.arena-monolith.is-active .arena-monolith-aura,.arena-monolith:focus-visible .arena-monolith-aura {
+  width:36px;
+  background:color-mix(in srgb,var(--column-color) 38%,transparent);
+}
+.arena-monolith.is-above:hover .arena-monolith-node,.arena-monolith.is-above.is-active .arena-monolith-node,.arena-monolith.is-above:focus-visible .arena-monolith-node {
+  transform:translate(-50%,-96%) scale(1.12);
+  filter:drop-shadow(0 6px 12px color-mix(in srgb,var(--accent) 32%,rgba(0,0,0,.2)));
+}
+.arena-monolith.is-below:hover .arena-monolith-node,.arena-monolith.is-below.is-active .arena-monolith-node,.arena-monolith.is-below:focus-visible .arena-monolith-node {
+  transform:translate(-50%,-6%) scale(1.12);
+  filter:drop-shadow(0 6px 12px color-mix(in srgb,var(--accent) 32%,rgba(0,0,0,.2)));
+}
+.arena-monolith-score {
+  position:absolute;
+  left:50%;
+  font:600 11px/14px var(--font-mono);
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+  white-space:nowrap;
+  pointer-events:none;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),transform 320ms cubic-bezier(.22,1,.36,1);
+}
+#home-ranking-panel[data-updating=true] .arena-skyline { opacity:.86; transition:opacity 180ms ease; }
+.arena-monolith.is-above .arena-monolith-score { transform:translate(-50%,calc(-100% - 48px)); }
+.arena-monolith.is-below .arena-monolith-score { transform:translate(-50%,48px); }
+/* Minimal borderless labels beneath each stem. */
+.arena-monolith-foot {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:12px 4px 10px;
+  min-height:66px;
+  border-top:0;
+  background:transparent;
+  text-align:center;
+  transition:transform 160ms ease;
+}
+.arena-monolith:hover .arena-monolith-foot,.arena-monolith.is-active .arena-monolith-foot { transform:translateY(-2px); }
+.arena-monolith-rank {
+  font:500 10px/14px var(--font-mono);
+  color:var(--text-muted);
+  padding:1px 5px;
+  border-radius:999px;
+}
+.arena-monolith-rank.is-first { background:var(--accent); color:var(--bg); }
+.arena-monolith-label { display:inline-flex; align-items:center; justify-content:center; gap:5px; max-width:100%; }
+.arena-monolith-label>.model-logo { width:14px; height:14px; flex-shrink:0; margin:0; }
+.arena-monolith-name {
+  font:500 11px/14px var(--font-body);
+  color:var(--text);
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.arena-skyline-skeleton {
+  position:relative;
+  display:flex;
+  gap:14px;
+  height:368px;
+  padding:28px 12px 20px 64px;
+  background:transparent;
+}
+.arena-skyline-skeleton::before {
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  border-top:1px dashed var(--border);
+}
+.arena-skeleton-col { flex:1; position:relative; }
+.arena-skeleton-col>span { position:absolute; left:50%; width:2px; transform:translateX(-50%); background:var(--border); }
+@media(max-width:760px) {
+  .arena-home-canvas .arena-plate { margin:0 12px; }
+  .arena-plate-head { padding:6px 0 12px; }
+  .arena-plate-tabs { padding:4px 0 10px; }
+  .arena-plate-readout { padding:4px 0 10px; }
+  .arena-readout-ci { margin-left:0; }
+  .arena-skyline-cols { padding:0 8px 8px 46px; gap:10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .arena-monolith,.arena-monolith-stem,.arena-monolith-aura,.arena-monolith-node,.arena-monolith-foot,.arena-lab-toggle,.arena-plate-tabs>button { transition:none; }
+}

@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { fetchIndex, fetchSummary } from '@/lib/hf';
 import { constLabel } from '@/lib/nicks';
 import { PixelHills } from './PixelHills';
 import { ModelLogo } from './ModelLogo';
+import { ModelMascot } from './ModelMascot';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
 import { detectLab } from '@/lib/labs';
 import { DEFAULT_VALUE, HEADLINE_GROUP, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
 import { TrendsCard } from './hub/TrendsCard';
-import { ValueSelect } from './ValueLogo';
+import { ValueLogo, ValueSelect } from './ValueLogo';
 import type { IndexRun, SummaryRow } from '@/lib/types';
 
 const COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Kimi: '#9abbb6', GLM: '#a9b3be', Microsoft: '#b4c89a', xAI: '#c4c6bc', Nvidia: '#bed69d', Baidu: '#bacbc9' };
@@ -21,11 +22,13 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   const [constitution, setConstitution] = useState(DEFAULT_VALUE);
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<SummaryRow[]>([]);
-  const [search, setSearch] = useState('');
   const [perLab, setPerLab] = useState(!full);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
+  const colsRef = useRef<HTMLDivElement>(null);
+  const prevXRef = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     let active = true;
     setError('');
@@ -59,10 +62,10 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   useEffect(() => {
     if (!run) return;
     let active = true;
-    setLoading(true); setError(''); setRows([]);
+    setUpdating(true); setError('');
     fetchSummary(run.slug).then(data => { if (active) setRows(data.filter(r => Number.isFinite(r.elo_mean)).sort((a, b) => b.elo_mean - a.elo_mean)); })
       .catch(() => { if (active) setError('Scores could not be loaded. Try another run or retry.'); })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => { if (active) { setLoading(false); setUpdating(false); } });
     return () => { active = false; };
   }, [run, retry]);
   const shown = useMemo(() => {
@@ -73,35 +76,9 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
       const key = family === 'Other' ? row.model_name : family;
       if (seen.has(key)) return false;
       seen.add(key); return true;
-    }).filter(row => row.model_name.toLowerCase().includes(search.toLowerCase()));
-  }, [rows, search, perLab]);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const filtersRef = useRef<HTMLDivElement>(null);
-  const filterButton = useRef<HTMLButtonElement>(null);
-  const searchInput = useRef<HTMLInputElement>(null);
+    });
+  }, [rows, perLab]);
   const valueTabs = useRef<HTMLDivElement>(null);
-  const rankingRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (full) return;
-    const ranking = rankingRef.current;
-    if (!ranking) return;
-    const nav = document.querySelector('.arena-nav');
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      const top = (nav?.getBoundingClientRect().bottom ?? 56) + 12;
-      const bar = ranking.querySelector('.arena-value-bar')?.getBoundingClientRect().height || 40;
-      // Keep the bars compact; the entrance still aligns their baseline with the screen edge.
-      const height = Math.max(200, Math.min(520, innerHeight * .55, innerHeight - top - bar));
-      ranking.style.setProperty('--arena-stage-height', `${Math.round(height)}px`);
-    };
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
-    const observer = new ResizeObserver(schedule);
-    if (nav) observer.observe(nav);
-    observer.observe(ranking);
-    window.addEventListener('resize', schedule); schedule();
-    return () => { observer.disconnect(); cancelAnimationFrame(frame); window.removeEventListener('resize', schedule); };
-  }, [full, shown]);
   useEffect(() => {
     const strip = valueTabs.current;
     const tab = strip?.querySelector<HTMLElement>('[aria-selected=true]');
@@ -110,34 +87,94 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     if (item.left < bounds.left) strip.scrollLeft += item.left - bounds.left;
     else if (item.right > bounds.right) strip.scrollLeft += item.right - bounds.right;
   }, [constitution, constitutions]);
-  useEffect(() => {
-    if (!filtersOpen) return;
-    searchInput.current?.focus({ preventScroll: true });
-    filtersRef.current?.querySelector('.arena-filter-panel')?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-    const outside = (event: PointerEvent) => {
-      if (!filtersRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const scaleSource = shown.length ? shown : rows;
+  const { low, high } = useMemo(() => {
+    if (!scaleSource.length) return { low: 1400, high: 1600 };
+    const minScore = Math.min(1500, ...scaleSource.map(r => r.elo_ci_lower ?? r.elo_mean));
+    const maxScore = Math.max(1500, ...scaleSource.map(r => r.elo_ci_upper ?? r.elo_mean));
+    const rawSpan = Math.max(24, maxScore - minScore);
+    const pad = Math.max(6, rawSpan * 0.14);
+    const step = rawSpan <= 60 ? 5 : rawSpan <= 160 ? 10 : rawSpan <= 360 ? 25 : 50;
+    return {
+      low: Math.floor((minScore - pad) / step) * step,
+      high: Math.ceil((maxScore + pad) / step) * step,
     };
-    document.addEventListener('pointerdown', outside);
-    return () => document.removeEventListener('pointerdown', outside);
-  }, [filtersOpen]);
-  const closeFilters = () => {
-    setFiltersOpen(false);
-    filterButton.current?.focus({ preventScroll: true });
-  };
-  const low = rows.length ? Math.floor((Math.min(...rows.map(r => r.elo_ci_lower ?? r.elo_mean)) - 200) / 100) * 100 : 1000;
-  const high = rows.length ? Math.ceil((Math.max(...rows.map(r => r.elo_ci_upper ?? r.elo_mean)) + 30) / 100) * 100 : 1800;
-  const pos = (n: number) => Math.max(0, Math.min(100, (n - low) / Math.max(1, high - low) * 100));
+  }, [scaleSource]);
+  const span = Math.max(1, high - low);
+  // Percentage from the TOP of the stage (0% = high, 100% = low).
+  const yOf = (n: number) => Math.max(0, Math.min(100, (high - n) / span * 100));
+  const datumY = yOf(1500);
+  const gridTicks = useMemo(() => {
+    const step = span <= 80 ? 20 : span <= 160 ? 25 : span <= 360 ? 50 : 100;
+    const ticks: number[] = [];
+    for (let v = Math.ceil(low / step) * step; v <= high; v += step) {
+      if (Math.abs(v - 1500) >= span * 0.08) ticks.push(v);
+    }
+    return ticks;
+  }, [low, high, span]);
+  const activeRow = shown.find(r => r.model_name === hovered) || shown[0] || null;
+  const activeRank = activeRow ? rows.indexOf(activeRow) + 1 : null;
+  const activeInterval = activeRow && typeof activeRow.elo_ci_lower === 'number' && typeof activeRow.elo_ci_upper === 'number'
+    ? `${activeRow.elo_ci_lower.toFixed(1)}–${activeRow.elo_ci_upper.toFixed(1)}` : null;
   const choose = (c: string) => {
     if (c === constitution) return;
-    setConstitution(c); setSelected(''); setSearch(''); setLoading(true); setRows([]);
+    setConstitution(c); setSelected(''); setHovered(null); setUpdating(true);
     const params = new URLSearchParams(location.search);
     params.set('constitution', c); params.delete('run');
     history.replaceState(null, '', `${location.pathname}?${params}${location.hash}`);
   };
-  const ranking = <section className="arena-ranking" id="rankings" aria-labelledby="ranking-heading" ref={rankingRef}>
-    <h2 id="ranking-heading" className="sr-only">{constLabel(constitution)}</h2>
-    <div className="arena-value-bar">
-      <div className="arena-value-tabs" role="tablist" aria-label="Leaderboard values" ref={valueTabs} onKeyDown={event => {
+  // FLIP horizontal rank swaps so mascots glide smoothly to their new positions when switching values.
+  useLayoutEffect(() => {
+    const container = colsRef.current;
+    if (!container) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const nodes = Array.from(container.querySelectorAll<HTMLElement>('[data-model]'));
+    const nextX = new Map<string, number>();
+    nodes.forEach(el => { nextX.set(el.dataset.model!, el.getBoundingClientRect().left); });
+    if (!reduced && prevXRef.current.size) {
+      const moved: HTMLElement[] = [];
+      nodes.forEach(el => {
+        const prev = prevXRef.current.get(el.dataset.model!);
+        const cur = nextX.get(el.dataset.model!);
+        if (prev === undefined || cur === undefined) return;
+        const dx = prev - cur;
+        if (Math.abs(dx) < 1) return;
+        el.style.transition = 'none';
+        el.style.transform = `translateX(${dx}px)`;
+        moved.push(el);
+      });
+      if (moved.length) {
+        container.getBoundingClientRect();
+        requestAnimationFrame(() => {
+          moved.forEach(el => {
+            el.style.transition = 'transform 520ms cubic-bezier(.22,1,.36,1)';
+            el.style.transform = '';
+          });
+        });
+      }
+    }
+    prevXRef.current = nextX;
+  }, [shown]);
+  const ranking = <section className="arena-ranking" id="rankings" aria-labelledby="ranking-heading">
+    <div className="arena-plate">
+      <header className="arena-plate-head">
+        <div className="arena-plate-title">
+          <ValueLogo id={constitution} size={28} />
+          <div>
+            <h2 id="ranking-heading">{constLabel(constitution)}</h2>
+            <p>Deviation from 1500 equal-trust baseline · 95% confidence plumb-lines</p>
+          </div>
+        </div>
+        <div className="arena-ranking-actions">
+          <div className="arena-scope-tabs" role="tablist" aria-label="Models shown">
+            <button type="button" role="tab" aria-selected={perLab} onClick={() => setPerLab(true)}>Top per lab</button>
+            <button type="button" role="tab" aria-selected={!perLab} onClick={() => setPerLab(false)}>All models</button>
+          </div>
+          {!full && <a className="arena-plate-link" href={`/leaderboard/?constitution=${encodeURIComponent(constitution)}&run=${encodeURIComponent(run?.slug || '')}`}>Full results</a>}
+        </div>
+      </header>
+      <div className="arena-plate-tabs" role="tablist" aria-label="Leaderboard values" ref={valueTabs} onKeyDown={event => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
         const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role=tab]'));
@@ -145,54 +182,68 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
         const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
         tabs[next]?.focus({ preventScroll: true }); tabs[next]?.click();
       }}>{(constitutions.length ? constitutions : [DEFAULT_VALUE]).map(c => <button key={c} id={`ranking-value-${c}`} role="tab" aria-selected={constitution === c} aria-controls="home-ranking-panel" tabIndex={constitution === c ? 0 : -1} onClick={() => choose(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}</div>
-      <div className="arena-ranking-actions">
-      {!full && <a className="arena-ranking-more" href={`/leaderboard/?constitution=${encodeURIComponent(constitution)}&run=${encodeURIComponent(run?.slug || '')}`}>Full results</a>}
-      <div className="arena-filter" ref={filtersRef}
-        onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); closeFilters(); } }}
-        onBlur={e => { if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) setFiltersOpen(false); }}>
-        <button className="arena-filter-toggle" ref={filterButton} aria-label="Filter rankings"
-          aria-expanded={filtersOpen} aria-controls="ranking-filters" onClick={() => setFiltersOpen(open => !open)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M4 5h16l-6.5 8v5l-3 2v-7L4 5Z" />
-          </svg>
-        </button>
-        {filtersOpen && <div className="arena-filter-panel" id="ranking-filters" role="region" aria-label="Ranking filters">
-          <label>Model<input ref={searchInput} aria-label="Search models" value={search} onChange={e => setSearch(e.target.value)} placeholder="Find a model" /></label>
-          {choices.length > 1 && <label>Evaluation run<select value={run?.slug || ''} onChange={e => setSelected(e.target.value)}>
-            {choices.map(r => <option key={r.slug} value={r.slug}>{r.name || r.slug}</option>)}
-          </select></label>}
-          <label className="arena-filter-check"><input type="checkbox" checked={perLab} onChange={e => setPerLab(e.target.checked)} /> Best model from each lab</label>
-          <div className="arena-filter-actions"><button onClick={() => { setSearch(''); setPerLab(false); }}>Clear model filters</button><button onClick={closeFilters}>Done</button></div>
-          <div className="arena-filter-sources"><a href={`/constitution/?id=${encodeURIComponent(constitution)}`}>Read criteria</a>{run && <a href={`/run/?slug=${encodeURIComponent(run.slug)}`}>Run details</a>}</div>
-        </div>}
+      <div className="arena-plate-readout" aria-live="polite">
+        {activeRow ? <>
+          <span className="arena-readout-rank">#{activeRank}</span>
+          <ModelLogo name={activeRow.model_name} size={16} />
+          <strong className="arena-readout-name">{activeRow.model_name}</strong>
+          <span className="arena-readout-score">{activeRow.elo_mean.toFixed(1)} Elo</span>
+          <span className={`arena-readout-delta${activeRow.elo_mean >= 1500 ? ' is-up' : ' is-down'}`}>
+            {activeRow.elo_mean >= 1500 ? '+' : ''}{(activeRow.elo_mean - 1500).toFixed(1)} vs 1500
+          </span>
+          {activeInterval && <span className="arena-readout-ci">95% CI {activeInterval}</span>}
+        </> : <span className="arena-readout-empty">{loading ? 'Loading published scores…' : 'Hover or focus a monolith to inspect'}</span>}
       </div>
-      </div>
-    </div>
-    <div id="home-ranking-panel" role="tabpanel" aria-labelledby={`ranking-value-${constitution}`}>
-    {error ? <div className="arena-feedback" role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry</button></div>
-      : loading ? <div className="arena-chart-loading" role="status"><div>{[62, 57, 52, 48, 43, 39, 34, 30, 28, 25].map((height, i) => <span key={i} style={{ height: `${height}%` }} />)}</div><p>Loading published scores…</p></div>
-      : !shown.length ? <p className="arena-feedback" role="status">{search ? 'No models match your search.' : 'No scores available.'}</p>
-      : <div className="arena-chart-scroll" role="region" aria-label="Model rankings" tabIndex={0}><div className="arena-chart" style={{ minWidth: Math.max(640, shown.length * 120) }}>
-        <div className="arena-grid-lines" aria-hidden="true">{[0, 25, 50, 75, 100].map(p => <div key={p} style={{ bottom: `${p}%` }}><span>{Math.round(low + (high - low) * p / 100)}</span></div>)}</div>
-        <div className="arena-columns">{shown.map((row, i) => {
-        const interval = typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number'
-          ? `95% interval ${row.elo_ci_lower.toFixed(1)}–${row.elo_ci_upper.toFixed(1)}` : 'Interval not reported';
-        return <a className="arena-column" key={row.model_name} style={{ '--column-color': COLORS[lab(row.model_name)] || ['#c0c9b4', '#d8c5b4', '#b4c6cf'][i % 3] } as React.CSSProperties}
-            href={`/model/?run=${encodeURIComponent(run.slug)}&id=${encodeURIComponent(row.model_name)}`}
-            aria-label={`Rank ${rows.indexOf(row) + 1}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}
-            aria-describedby={`ranking-tooltip-${i}`}>
-            <span className="arena-column-tooltip" id={`ranking-tooltip-${i}`} role="tooltip" data-align={i >= shown.length / 2 ? 'end' : 'start'}>
-              <span className="arena-column-tooltip-name"><ModelLogo name={row.model_name} size={20} />{row.model_name}</span>
-              <span className="arena-column-tooltip-score">{row.elo_mean.toFixed(1)} <span>Elo</span></span>
-              <span className="arena-column-tooltip-interval">{interval}</span>
-            </span>
-            <div className="arena-column-stage">
-              <div className="arena-column-bar" style={{ height: `${pos(row.elo_mean)}%` }}><strong>{row.elo_mean.toFixed(0)}</strong><span className="arena-bar-rank">#{rows.indexOf(row) + 1}</span></div>
-              {typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number' && <span className="arena-whisker" aria-hidden="true" style={{ bottom: `${pos(row.elo_ci_lower)}%`, height: `${pos(row.elo_ci_upper) - pos(row.elo_ci_lower)}%` }} />}
+      <div id="home-ranking-panel" role="tabpanel" aria-labelledby={`ranking-value-${constitution}`} data-updating={updating || undefined}>
+        {error ? <div className="arena-feedback" role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry</button></div>
+          : loading && !rows.length ? <div className="arena-skyline-skeleton" role="status" aria-label="Loading published scores">
+              {[38, 31, 24, 18, 11, -8, -17, -26].map((delta, i) => <div className="arena-skeleton-col" key={i}><span style={{ top: delta >= 0 ? `${50 - delta}%` : '50%', height: `${Math.abs(delta)}%` }} /></div>)}
             </div>
-            <div className="arena-column-label"><ModelLogo name={row.model_name} size={23} /><span>{row.model_name}</span></div>
-          </a>;
-      })}</div></div></div>}
+            : !shown.length ? <p className="arena-feedback" role="status">No scores available.</p>
+              : <div className="arena-skyline-scroll" role="region" aria-label="Model rankings" tabIndex={0}>
+                  <div className="arena-skyline" style={{ minWidth: Math.max(680, shown.length * 108) }}>
+                    <div className="arena-skyline-stage">
+                      <div className="arena-skyline-grid" aria-hidden="true">
+                        {gridTicks.map(tick => <div key={tick} className="arena-skyline-tick" style={{ top: `${yOf(tick)}%` }}><span>{tick}</span></div>)}
+                        <div className="arena-skyline-datum" style={{ top: `${datumY}%` }}><span>1500 · equal trust</span></div>
+                      </div>
+                      <div className="arena-skyline-cols" ref={colsRef}>{shown.map((row, i) => {
+                        const rank = rows.indexOf(row) + 1;
+                        const family = lab(row.model_name);
+                        const above = row.elo_mean >= 1500;
+                        const scoreY = yOf(row.elo_mean);
+                        const top = Math.min(scoreY, datumY);
+                        const height = Math.max(0.6, Math.abs(datumY - scoreY));
+                        const hasCI = typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number';
+                        const ciTop = hasCI ? yOf(row.elo_ci_upper!) : scoreY;
+                        const ciHeight = hasCI ? Math.max(0.6, yOf(row.elo_ci_lower!) - ciTop) : 0;
+                        const interval = hasCI ? `95% interval ${row.elo_ci_lower!.toFixed(1)}–${row.elo_ci_upper!.toFixed(1)}` : 'Interval not reported';
+                        const color = COLORS[family] || ['#c0c9b4', '#d8c5b4', '#b4c6cf'][i % 3];
+                        const isActive = activeRow?.model_name === row.model_name;
+                        return <a className={`arena-monolith${above ? ' is-above' : ' is-below'}${isActive ? ' is-active' : ''}`} key={row.model_name} data-model={row.model_name} data-lab={family.toLowerCase()}
+                          style={{ '--column-color': color } as React.CSSProperties}
+                          href={`/model/?run=${encodeURIComponent(run.slug)}&id=${encodeURIComponent(row.model_name)}`}
+                          onMouseEnter={() => setHovered(row.model_name)}
+                          onFocus={() => setHovered(row.model_name)}
+                          aria-label={`Rank ${rank}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}>
+                          <div className="arena-monolith-plot">
+                            <span className="arena-monolith-stem" style={{ top: `${top}%`, height: `${height}%` }} />
+                            {hasCI && <span className="arena-monolith-aura" aria-hidden="true" style={{ top: `${ciTop}%`, height: `${ciHeight}%` }} />}
+                            <span className="arena-monolith-node" style={{ top: `${scoreY}%` }}>
+                              <ModelMascot lab={family} size={52} />
+                            </span>
+                            <span className="arena-monolith-score" style={{ top: `${above ? Math.min(scoreY, ciTop) : Math.max(scoreY, ciTop + ciHeight)}%` }}>{row.elo_mean.toFixed(0)}</span>
+                          </div>
+                          <div className="arena-monolith-foot">
+                            <span className={`arena-monolith-rank${rank === 1 ? ' is-first' : ''}`}>#{rank}</span>
+                            <span className="arena-monolith-label"><ModelLogo name={row.model_name} size={14} /><span className="arena-monolith-name">{row.model_name}</span></span>
+                          </div>
+                        </a>;
+                      })}</div>
+                    </div>
+                  </div>
+                </div>}
+      </div>
     </div>
   </section>;
 
