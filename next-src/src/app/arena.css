@@ -202,6 +202,13 @@ html { scroll-padding-top:88px; }
 .arena-lab img { width:28px; height:28px; }
 .arena-nav nav { padding:5px 8px; gap:2px; }
 .arena-nav nav a { font-size:11px; padding:7px 8px; }
+.arena-nav-group { position:relative; }
+.arena-nav-trigger { display:inline-flex; align-items:center; gap:5px; padding:7px 8px; border:0; border-radius:30px; background:transparent; color:inherit; font-size:11px; line-height:inherit; cursor:pointer; }
+.arena-nav-trigger svg { opacity:.7; transition:transform 160ms ease; }
+.arena-nav-group[data-open=true] .arena-nav-trigger svg { transform:rotate(180deg); }
+.arena-nav-trigger:hover,.arena-nav-trigger[data-active=true],.arena-nav-group[data-open=true] .arena-nav-trigger { background:var(--accent-dim); color:var(--accent); }
+.arena-nav-dropdown { position:absolute; top:calc(100% + 10px); left:0; min-width:150px; display:flex; flex-direction:column; gap:2px; padding:6px; border:1px solid var(--border); border-radius:14px; background:var(--bg-elevated); box-shadow:0 10px 28px rgba(0,0,0,.14); z-index:60; }
+.arena-nav-dropdown a { display:block; padding:8px 12px; border-radius:8px; font-size:12px; white-space:nowrap; }
 .arena-nav>.arena-tool-link { padding:11px 15px; font-size:12px; }
 @media(max-width:1000px) {
   html { scroll-padding-top:112px; }
@@ -230,6 +237,9 @@ html { scroll-padding-top:88px; }
   .arena-nav nav { position:absolute; top:48px; left:0; right:0; display:none; padding:8px; border-radius:16px; background:var(--bg-elevated); }
   .arena-nav nav[data-open=true] { display:flex; flex-direction:column; align-items:stretch; }
   .arena-nav nav a { padding:12px 14px; font-size:14px; text-align:left; border-radius:8px; }
+  .arena-nav-trigger { width:100%; justify-content:space-between; padding:12px 14px; font-size:14px; text-align:left; border-radius:8px; }
+  .arena-nav-dropdown { position:static; min-width:0; margin:2px 0 4px 12px; padding:4px 0 4px 8px; border:0; border-left:1px solid var(--border); border-radius:0; background:transparent; box-shadow:none; }
+  .arena-nav-dropdown a { padding:10px 12px; font-size:13px; }
   .arena-nav nav .arena-mobile-tool { display:block; border-top:1px solid var(--border); border-radius:0; margin-top:5px; }
 }
 

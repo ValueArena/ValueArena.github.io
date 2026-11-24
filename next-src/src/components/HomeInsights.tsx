@@ -10,7 +10,6 @@ import { papers } from '@/lib/papers';
 import { modelInfo } from '@/lib/registry';
 import { ModelLogo } from './ModelLogo';
 import { useWidth } from './hub/useWidth';
-import { PanelSection } from './panel/PanelExplorer';
 
 const LAB_COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Moonshot: '#9abbb6', Zhipu: '#a9b3be', Nvidia: '#bed69d', xAI: '#c4c6bc' };
 const labOf = (name: string) => modelInfo(name)?.lab || 'Other';
@@ -72,7 +71,6 @@ export function HomeInsights() {
           </div>
         </div>
     </section>
-    <PanelSection tab="sampling" title="Sampling" id="sampling" />
     <section className="home-research-strip" aria-labelledby="home-research-title">
       <header className="home-section-heading"><h2 id="home-research-title">Research behind ValueArena</h2><p>The methods and experiments behind the rankings.</p><a className="home-text-action" href="/research/">All research</a></header>
       <div className="home-research-cards">{papers.map(paper => <a href={`/research/${paper.slug}/`} key={paper.slug}><img src={paper.image} alt="" loading="lazy" width="160" height="160" /><div><h3>{paper.subtitle}</h3><span>{paper.title}</span></div></a>)}<a href="/methodology/"><img src="/assets/art/constitution-notebook.webp" alt="" loading="lazy" width="160" height="160" /><div><h3>How scenarios, constitutions, and judgments become scores</h3><span>Methodology</span></div></a></div>

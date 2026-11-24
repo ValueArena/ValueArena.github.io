@@ -51,6 +51,7 @@ export function ModelComparison() {
   }, [models, values, ready, preferred]);
 
   return <div className="comparison-page">
+    <nav className="methodology-tabs" aria-label="Leaderboard views"><a href="/leaderboard/">Leaderboard</a><a href="/compare/" aria-current="page">Compare</a></nav>
     <header className="results-page-heading"><h1>Compare models</h1></header>
     <section className="comparison-selection" aria-label="Comparison selection">
       <div><ComparisonPicker label="Models" choices={choices.map(id => ({ id, label: id }))} selected={selected} onChange={setModels} limit={7} />

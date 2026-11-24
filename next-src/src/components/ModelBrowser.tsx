@@ -112,7 +112,9 @@ export function ModelBrowser() {
     return () => observer.disconnect();
   }, [name, directoryOpen]);
   const chooseValue = (id: string) => { setValue(id); setPreferred(''); setModel(''); setQuery(''); setDeveloper(''); };
-  return <div className="results-browser">
+  return <>
+    <nav className="methodology-tabs" aria-label="Leaderboard views"><a href="/leaderboard/" aria-current="page">Leaderboard</a><a href="/compare/">Compare</a></nav>
+    <div className="results-browser">
     <aside className="model-directory" aria-label="Model rankings" data-open={directoryOpen}>
       <button className="directory-mobile-toggle" aria-expanded={directoryOpen} aria-label="Choose a model" onClick={() => setDirectoryOpen(!directoryOpen)}>{name || 'Choose a model'}<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5l3 3 3-3" stroke="currentColor" /></svg></button>
       <header><h1 className="sr-only">Leaderboard</h1><div className="directory-filters"><ValueSelect aria-label="Ranking value" value={board?.id || value} onChange={e => chooseValue(e.target.value)}>{data.boards.map(b => <option key={b.id} value={b.id}>{constLabel(b.id)}</option>)}</ValueSelect><select aria-label="Developer" value={developer} onChange={e => setDeveloper(e.target.value)}><option value="">All developers</option>{developers.map(lab => <option key={lab}>{lab}</option>)}</select></div>
@@ -142,5 +144,5 @@ export function ModelBrowser() {
       {shown.map(row => <ModelProfile key={`${board?.run.slug}:${row.model_name}`} name={row.model_name} active={name === row.model_name} board={board} rows={rows} data={data} />)}
       {!shown.length && <p className="results-status">{rows ? 'No matching models.' : 'Loading model profiles…'}</p>}
     </div>
-  </div>;
+  </div></>;
 }

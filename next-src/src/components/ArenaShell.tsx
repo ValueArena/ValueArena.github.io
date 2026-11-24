@@ -11,26 +11,59 @@ const arenaURL = process.env.NEXT_PUBLIC_VALUEARENA_URL || 'https://valuearena.g
 export function ArenaShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<'leaderboard' | 'results' | null>(null);
   const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
+  const closeMenus = () => { setMenuOpen(false); setOpenGroup(null); };
+  useEffect(() => { setMenuOpen(false); setOpenGroup(null); }, [pathname]);
   useEffect(() => {
-    if (!menuOpen) return;
-    const outside = (event: PointerEvent) => { if (!header.current?.contains(event.target as Node)) setMenuOpen(false); };
-    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenuOpen(false); toggle.current?.focus(); } };
+    if (!menuOpen && !openGroup) return;
+    const outside = (event: PointerEvent) => { if (!header.current?.contains(event.target as Node)) closeMenus(); };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (openGroup) setOpenGroup(null);
+      else { setMenuOpen(false); toggle.current?.focus(); }
+    };
     document.addEventListener('pointerdown', outside); document.addEventListener('keydown', escape);
     return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape); };
-  }, [menuOpen]);
+  }, [menuOpen, openGroup]);
   const separateTool = process.env.NEXT_PUBLIC_SITE_MODE === 'eigenbench';
   const tool = separateTool || pathname.startsWith('/eigenbench');
   return <div className="arena-shell">
     <header className="arena-nav" ref={header}>
       <div className="arena-brand-group va-glass-pill"><a className="arena-lab" href="/lab/" aria-label="LAISR Lab"><img src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" /><span>LAISR Lab</span></a><span className="va-brand-divider" aria-hidden="true" /><a href={tool ? '/eigenbench/' : '/'} className="arena-brand" aria-label={tool ? 'EigenBench home' : 'ValueArena home'}>{tool ? 'EigenBench' : 'ValueArena'}</a></div>
       <button ref={toggle} className="arena-menu-toggle va-glass-pill" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="arena-main-nav" onClick={() => setMenuOpen(!menuOpen)}><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d={menuOpen ? 'M4 4l10 10M14 4L4 14' : 'M3 5h12M3 9h12M3 13h12'} stroke="currentColor" strokeWidth="1.5" /></svg></button>
-      <nav id="arena-main-nav" className="va-glass-pill" aria-label="Main navigation" data-open={menuOpen} onClick={() => setMenuOpen(false)}>
-        {separateTool ? <><a href="/evaluate/">Run an evaluation</a><a href="/evaluation/">Your evaluations</a><a href="https://github.com/jchang153/EigenBench">Documentation</a></> : <><a href="/constitutions/" aria-current={pathname.startsWith('/constitution') ? 'page' : undefined}>Values</a><a href="/leaderboard/" aria-current={/^\/(leaderboard|model)\/?$/.test(pathname) ? 'page' : undefined}>Leaderboard</a><a href="/compare/" aria-current={pathname.startsWith('/compare') ? 'page' : undefined}>Compare</a><a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined}>Results</a><a href="/methodology/" aria-current={pathname.startsWith('/methodology') ? 'page' : undefined}>Methodology</a></>}
-        <a className="arena-mobile-tool" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL} target={tool ? undefined : '_blank'} rel={tool ? undefined : 'noopener noreferrer'}>{tool ? 'Browse ValueArena' : 'Try EigenBench'}</a>
+      <nav id="arena-main-nav" className="va-glass-pill" aria-label="Main navigation" data-open={menuOpen}>
+        {separateTool ? <><a href="/evaluate/" onClick={closeMenus}>Run an evaluation</a><a href="/evaluation/" onClick={closeMenus}>Your evaluations</a><a href="https://github.com/jchang153/EigenBench" onClick={closeMenus}>Documentation</a></> : <>
+          <a href="/constitutions/" aria-current={pathname.startsWith('/constitution') ? 'page' : undefined} onClick={closeMenus}>Values</a>
+          <div className="arena-nav-group" data-open={openGroup === 'leaderboard'}>
+            <button type="button" className="arena-nav-trigger" aria-expanded={openGroup === 'leaderboard'} aria-controls="arena-nav-leaderboard"
+              data-active={/^\/(leaderboard|model|compare)\/?$/.test(pathname) || undefined}
+              onClick={() => setOpenGroup(g => g === 'leaderboard' ? null : 'leaderboard')}>
+              Leaderboard
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            {openGroup === 'leaderboard' && <div id="arena-nav-leaderboard" className="arena-nav-dropdown">
+              <a href="/leaderboard/" aria-current={/^\/(leaderboard|model)\/?$/.test(pathname) ? 'page' : undefined} onClick={closeMenus}>Leaderboard</a>
+              <a href="/compare/" aria-current={pathname.startsWith('/compare') ? 'page' : undefined} onClick={closeMenus}>Compare</a>
+            </div>}
+          </div>
+          <div className="arena-nav-group" data-open={openGroup === 'results'}>
+            <button type="button" className="arena-nav-trigger" aria-expanded={openGroup === 'results'} aria-controls="arena-nav-results"
+              data-active={/^\/(results|methodology)\/?$/.test(pathname) || undefined}
+              onClick={() => setOpenGroup(g => g === 'results' ? null : 'results')}>
+              Results
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            {openGroup === 'results' && <div id="arena-nav-results" className="arena-nav-dropdown">
+              <a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined} onClick={closeMenus}>Results</a>
+              <a href="/methodology/" aria-current={pathname.startsWith('/methodology') ? 'page' : undefined} onClick={closeMenus}>Methodology</a>
+            </div>}
+          </div>
+        </>}
+        {tool && <a className="arena-mobile-tool" href={separateTool ? arenaURL : '/'} onClick={closeMenus}>Browse ValueArena</a>}
       </nav>
-      <a className="arena-tool-link va-glass-pill" href={tool ? (separateTool ? arenaURL : '/') : eigenBenchURL} target={tool ? undefined : '_blank'} rel={tool ? undefined : 'noopener noreferrer'}>{tool ? 'Browse ValueArena' : 'Try EigenBench'}</a>
+      {tool && <a className="arena-tool-link va-glass-pill" href={separateTool ? arenaURL : '/'}>Browse ValueArena</a>}
       <ThemeToggle />
     </header>
     <div className="arena-page"><main id="main-content" className="arena-content">{children}</main></div>

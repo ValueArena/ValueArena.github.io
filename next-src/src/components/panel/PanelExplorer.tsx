@@ -80,7 +80,9 @@ export function PanelExplorer() {
   const nav = useMemo(() => data ? { route, go, data, href: routeHash } : null, [route, go, data]);
   const section = route.tab === 'relationships' ? 'scenarios' : route.tab;
 
-  return <section className="panel-page">
+  return <>
+    <nav className="methodology-tabs" aria-label="Results and methodology"><a href="/results/" aria-current="page">Results</a><a href="/methodology/">Methodology</a></nav>
+    <section className="panel-page">
     <header className="panel-head">
       <div>
         {data && <p className="panel-kicker">{data.models.length} models · {data.constitutions.length} constitutions · {data.bank.length} scenarios</p>}
@@ -103,7 +105,7 @@ export function PanelExplorer() {
           {route.tab === 'relationships' && <Relationships />}
           {route.tab === 'criteria' && <CriteriaIndex />}
         </NavContext.Provider>}
-  </section>;
+  </section></>;
 }
 
 /**
