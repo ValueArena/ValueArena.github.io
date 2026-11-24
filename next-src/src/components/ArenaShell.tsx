@@ -29,7 +29,7 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
   }, [menuOpen, moreOpen]);
   const separateTool = process.env.NEXT_PUBLIC_SITE_MODE === 'eigenbench';
   const tool = separateTool || pathname.startsWith('/eigenbench');
-  const inExtraTab = /^\/(compare|results)\/?$/.test(pathname);
+  const inExtraTab = /^\/(compare|results|transcript)\/?$/.test(pathname);
   return <div className="arena-shell">
     <header className="arena-nav" ref={header}>
       <div className="arena-brand-group va-glass-pill"><a className="arena-lab" href="/lab/" aria-label="LAISR Lab"><img src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" /><span>LAISR Lab</span></a><span className="va-brand-divider" aria-hidden="true" /><a href={tool ? '/eigenbench/' : '/'} className="arena-brand" aria-label={tool ? 'EigenBench home' : 'ValueArena home'}>{tool ? 'EigenBench' : 'ValueArena'}</a></div>
@@ -43,11 +43,12 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
             <button type="button" className="arena-nav-trigger" aria-label="More pages" title="More pages" aria-expanded={moreOpen} aria-controls="arena-nav-more"
               data-active={inExtraTab || undefined}
               onClick={() => setMoreOpen(open => !open)}>
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.25" /><circle cx="8" cy="8" r="1.25" /><circle cx="12.5" cy="8" r="1.25" /></svg>
             </button>
             {moreOpen && <div id="arena-nav-more" className="arena-nav-dropdown">
               <a href="/compare/" aria-current={pathname.startsWith('/compare') ? 'page' : undefined} onClick={closeMenus}>Compare</a>
               <a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined} onClick={closeMenus}>Results</a>
+              <a href="/transcript/" aria-current={pathname.startsWith('/transcript') ? 'page' : undefined} onClick={closeMenus}>Transcript</a>
             </div>}
           </div>
         </>}

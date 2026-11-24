@@ -1,6 +1,7 @@
 'use client';
 
 import { runSlug } from '@/lib/run-slug';
+import { DEFAULT_VALUE, HEADLINE_GROUP } from '@/lib/arena-data';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchMeta } from '@/lib/hf';
@@ -115,11 +116,7 @@ export default function TranscriptPage() {
     (async () => {
       const params = new URLSearchParams(window.location.search);
       setModelFilter(params.get('model') || '');
-      const runId = runSlug(window.location.search, 'run');
-      if (!runId) {
-        setError('No run specified.');
-        return;
-      }
+      const runId = runSlug(window.location.search, 'run') || `${HEADLINE_GROUP}/${DEFAULT_VALUE.replace(/-/g, '_')}`;
       if (runId.startsWith('account/')) { location.replace(`https://eigenbench.github.io/transcript/${location.search}${location.hash}`); return; }
       setSlug(runId);
 
@@ -307,39 +304,18 @@ export default function TranscriptPage() {
 
   return (
     <>
-      <div className="breadcrumb">
-        <a href="/">ValueArena</a> /{' '}
-        <a className="link-subtle" href={`/run/?slug=${encodeURIComponent(slug)}`}>
-          {meta?.name || slug}
-        </a>{' '}
-        / Transcripts
-      </div>
-
-      {meta && <CollectionCoverage meta={meta} slug={slug} />}
-
-      <div className="specimen-hero">
-        <div className="specimen-hero-inner">
-          <div className="specimen-sigil" style={{ fontSize: '0.8rem' }}>
-            {shape.numCriteria}×
-          </div>
-          <div>
-            <div className="specimen-kicker">Transcripts</div>
-            <div className="specimen-title">{meta?.name || slug}</div>
-            <div className="specimen-sub">
-              <span>
-                {judgments.length.toLocaleString()} judgment
-                {judgments.length === 1 ? '' : 's'}
-                {scanning && estimated ? ` of ~${estimated.toLocaleString()}` : ''}
-              </span>
-              {' · '}
-              <span>{shape.numCriteria} criteria</span>
-              {' · '}
-              <span className={`protocol-badge protocol-${shape.mode}`}>
-                {shape.mode === 'direct_rating' ? 'Direct ratings' : 'Pairwise comparisons'}
-              </span>
-            </div>
-          </div>
-        </div>
+      <div className="specimen-sub" style={{ marginBottom: 14 }}>
+        <span>
+          {judgments.length.toLocaleString()} judgment
+          {judgments.length === 1 ? '' : 's'}
+          {scanning && estimated ? ` of ~${estimated.toLocaleString()}` : ''}
+        </span>
+        {' · '}
+        <span>{shape.numCriteria} criteria</span>
+        {' · '}
+        <span className={`protocol-badge protocol-${shape.mode}`}>
+          {shape.mode === 'direct_rating' ? 'Direct ratings' : 'Pairwise comparisons'}
+        </span>
       </div>
 
       <div className="tx-toolbar">
