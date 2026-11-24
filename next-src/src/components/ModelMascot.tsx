@@ -340,7 +340,7 @@ const MASCOT_ART: Record<string, string> = {
   GLM: '/assets/art/mascots/glm.webp',
 };
 
-export function ModelMascot({ lab, size = 52 }: { lab: string; size?: number }) {
+export function ModelMascot({ lab, size = 36 }: { lab: string; size?: number }) {
   const src = MASCOT_ART[lab];
   if (src) {
     return (

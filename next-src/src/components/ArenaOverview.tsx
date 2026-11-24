@@ -230,7 +230,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                             <span className="arena-monolith-stem" style={{ top: `${top}%`, height: `${height}%` }} />
                             {hasCI && <span className="arena-monolith-aura" aria-hidden="true" style={{ top: `${ciTop}%`, height: `${ciHeight}%` }} />}
                             <span className="arena-monolith-node" style={{ top: `${scoreY}%` }}>
-                              <ModelMascot lab={family} size={52} />
+                              <ModelMascot lab={family} size={36} />
                             </span>
                             <span className="arena-monolith-score" style={{ top: `${above ? Math.min(scoreY, ciTop) : Math.max(scoreY, ciTop + ciHeight)}%` }}>{row.elo_mean.toFixed(0)}</span>
                           </div>
