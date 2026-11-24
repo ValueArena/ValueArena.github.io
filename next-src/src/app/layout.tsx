@@ -32,7 +32,7 @@ const jetbrainsMono = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://valuearena.github.io'),
-  ...pageMetadata('ValueArena — LAISR Lab, Cornell University', 'ValueArena, from LAISR Lab at Cornell University. EigenBench scores language models on how well their answers fit a written set of values, which we call a constitution. Browse the rankings, compare models across constitutions, and read the actual responses and judgments behind every score.'),
+  ...pageMetadata('ValueArena — LAISR Lab, Cornell University', 'ValueArena, from LAISR Lab at Cornell University. EigenBench is a black-box framework for quantifying value alignment in language models without ground-truth labels, aggregating peer judgments with EigenTrust.'),
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

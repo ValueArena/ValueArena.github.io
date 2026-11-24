@@ -270,7 +270,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
             <PixelHills variant="hero" className="hero-hills arena-tv-hills" />
             <h1 id="arena-home-heading">Measuring values in language models</h1>
             <img className="home-pixel-art" src="/assets/art/model-conversation-values.webp?v=5" width="768" height="507" alt="" aria-hidden="true" />
-            <p className="research-deck">EigenBench scores language models on how well their answers fit a written set of values, which we call a constitution. Browse the rankings, compare models across constitutions, and read the actual responses and judgments behind every score.</p>
+            <p className="research-deck">EigenBench is a black-box framework for quantifying value alignment in language models without ground-truth labels. Models judge each other against a written constitution via pairwise BTD or direct ratings, aggregated into Elo scores with EigenTrust.</p>
             <div className="home-actions"><a className="button-primary" href="/constitutions/">Explore results</a><a className="button-secondary" href="/methodology/">How EigenBench works</a></div>
           </section>
         </div>
