@@ -320,11 +320,12 @@ html:has(.values-directory) { scroll-padding-top:0; }
 
 /* Methodology: 240px left margin, 800px article, 240px contents rail. */
 .methodology-page { position:relative; padding-bottom:0; }
-.methodology-tabs { height:44px; display:grid; grid-template-columns:1fr 1fr; padding:0 18.75%; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#e6e9df; }
+.methodology-tabs { position:sticky; top:56px; z-index:20; height:44px; display:grid; grid-template-columns:1fr 1fr; padding:0 18.75%; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#e6e9df; }
 .methodology-tabs a { display:grid; place-items:center; border-left:1px solid var(--border); font:500 12px/16px var(--font-body); }
 .methodology-tabs a:last-child { border-right:1px solid var(--border); }
 .methodology-tabs a[aria-current] { background:var(--accent); color:#fff; border-right:1px solid var(--border); }
 .methodology-tabs+.results-browser { border-top:0; }
+.methodology-tabs+.results-browser .model-directory { top:100px; max-height:calc(100svh - 100px); min-height:calc(100svh - 100px); }
 .methodology-article { min-width:0; border-left:1px solid var(--border); border-right:1px solid var(--border); }
 .methodology-article>.results-page-heading { margin:0; padding:80px 32px 40px; }
 .methodology-article>.results-page-heading p { margin:16px 0 0; font-size:20px; line-height:28px; }

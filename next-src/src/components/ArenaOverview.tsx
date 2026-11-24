@@ -101,10 +101,10 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   const scaleSource = shown.length ? shown : rows;
   const { low, high } = useMemo(() => {
     if (!scaleSource.length) return { low: 1400, high: 1600 };
-    const minScore = Math.min(1500, ...scaleSource.map(r => r.elo_ci_lower ?? r.elo_mean));
-    const maxScore = Math.max(1500, ...scaleSource.map(r => r.elo_ci_upper ?? r.elo_mean));
+    const minScore = Math.min(1500, ...scaleSource.map(r => r.elo_mean));
+    const maxScore = Math.max(1500, ...scaleSource.map(r => r.elo_mean));
     const rawSpan = Math.max(24, maxScore - minScore);
-    const pad = Math.max(6, rawSpan * 0.14);
+    const pad = Math.max(8, rawSpan * 0.16);
     const step = rawSpan <= 60 ? 5 : rawSpan <= 160 ? 10 : rawSpan <= 360 ? 25 : 50;
     return {
       low: Math.floor((minScore - pad) / step) * step,
@@ -173,7 +173,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
           <ValueLogo id={constitution} size={28} />
           <div>
             <h2 id="ranking-heading">{constLabel(constitution)}</h2>
-            <p>Deviation from 1500 equal-trust baseline · 95% confidence plumb-lines</p>
+            <p>Deviation from 1500 equal-trust baseline</p>
           </div>
         </div>
         <div className="arena-ranking-actions">
@@ -222,14 +222,16 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                         const family = lab(row.model_name);
                         const above = row.elo_mean >= 1500;
                         const scoreY = yOf(row.elo_mean);
-                        const top = Math.min(scoreY, datumY);
-                        const height = Math.max(0.6, Math.abs(datumY - scoreY));
+                        const stemHeight = Math.abs(datumY - scoreY);
                         const hasCI = typeof row.elo_ci_lower === 'number' && typeof row.elo_ci_upper === 'number';
                         const ciTop = hasCI ? yOf(row.elo_ci_upper!) : scoreY;
                         const ciHeight = hasCI ? Math.max(0.6, yOf(row.elo_ci_lower!) - ciTop) : 0;
                         const interval = hasCI ? `95% interval ${row.elo_ci_lower!.toFixed(1)}–${row.elo_ci_upper!.toFixed(1)}` : 'Interval not reported';
                         const color = COLORS[family] || ['#c0c9b4', '#d8c5b4', '#b4c6cf'][i % 3];
                         const isActive = activeRow?.model_name === row.model_name;
+                        const stemStyle: React.CSSProperties = above
+                          ? { bottom: `${100 - datumY}%`, height: `${stemHeight}%` }
+                          : { top: `${datumY}%`, height: `${stemHeight}%` };
                         return <a className={`arena-monolith${above ? ' is-above' : ' is-below'}${isActive ? ' is-active' : ''}`} key={row.model_name} data-model={row.model_name} data-lab={family.toLowerCase()}
                           style={{ '--column-color': color } as React.CSSProperties}
                           href={`/model/?run=${encodeURIComponent(run?.slug || `${HEADLINE_GROUP}/${constitution.replace(/-/g, '_')}`)}&id=${encodeURIComponent(row.model_name)}`}
@@ -237,12 +239,13 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                           onFocus={() => setHovered(row.model_name)}
                           aria-label={`Rank ${rank}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}>
                           <div className="arena-monolith-plot">
-                            <span className="arena-monolith-stem" style={{ top: `${top}%`, height: `${height}%` }} />
                             {hasCI && <span className="arena-monolith-aura" aria-hidden="true" style={{ top: `${ciTop}%`, height: `${ciHeight}%` }} />}
-                            <span className="arena-monolith-node" style={{ top: `${scoreY}%` }}>
-                              <ModelMascot lab={family} size={36} />
+                            <span className="arena-monolith-stem" style={stemStyle}>
+                              <span className="arena-monolith-node">
+                                <ModelMascot lab={family} size={36} />
+                              </span>
+                              <span className="arena-monolith-score">{row.elo_mean.toFixed(0)}</span>
                             </span>
-                            <span className="arena-monolith-score" style={{ top: `${above ? Math.min(scoreY, ciTop) : Math.max(scoreY, ciTop + ciHeight)}%` }}>{row.elo_mean.toFixed(0)}</span>
                           </div>
                           <div className="arena-monolith-foot">
                             <span className={`arena-monolith-rank${rank === 1 ? ' is-first' : ''}`}>#{rank}</span>

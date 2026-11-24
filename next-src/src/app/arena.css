@@ -381,7 +381,7 @@ html { scroll-padding-top:88px; }
 .arena-skyline-stage { position:relative; }
 .arena-skyline-grid {
   position:absolute;
-  top:28px;
+  top:44px;
   left:0;
   right:0;
   height:330px;
@@ -440,22 +440,22 @@ html { scroll-padding-top:88px; }
 .arena-monolith-plot {
   position:relative;
   height:330px;
-  margin-top:30px;
-  margin-bottom:8px;
+  margin-top:44px;
+  margin-bottom:44px;
 }
-/* Character-matched custom stems anchored to 1500, translucent 95% CI halo, and perched pixel mascot. */
+/* Character-matched custom stems anchored to 1500 (up for >=1500, down for <1500), with min-height so stems near 1500 stay clearly visible. */
 .arena-monolith-stem {
   position:absolute;
   left:50%;
   width:6px;
+  min-height:28px;
   transform:translateX(-50%);
   background:color-mix(in srgb,var(--column-color) 75%,var(--text));
-  opacity:.85;
-  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),opacity 160ms ease;
+  opacity:.88;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),bottom 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),opacity 160ms ease;
 }
-/* Small perch cap at the Elo tip where the mascot stands or clings. */
-.arena-monolith.is-above .arena-monolith-stem::before,
-.arena-monolith.is-below .arena-monolith-stem::before {
+/* Small perch cap at the outer tip where the mascot stands or hangs. */
+.arena-monolith-stem::before {
   content:'';
   position:absolute;
   left:50%;
@@ -527,12 +527,13 @@ html { scroll-padding-top:88px; }
 .arena-monolith-aura {
   position:absolute;
   left:50%;
-  width:10px;
+  width:6px;
   transform:translateX(-50%);
-  border-top:1.5px solid color-mix(in srgb,var(--text) 62%,transparent);
-  border-bottom:1.5px solid color-mix(in srgb,var(--text) 62%,transparent);
+  border-top:1px solid var(--text);
+  border-bottom:1px solid var(--text);
+  opacity:.16;
   pointer-events:none;
-  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),border-color 160ms ease;
+  transition:top 520ms cubic-bezier(.22,1,.36,1),height 520ms cubic-bezier(.22,1,.36,1),opacity 180ms ease,border-color 160ms ease;
 }
 .arena-monolith-aura::after {
   content:'';
@@ -542,7 +543,7 @@ html { scroll-padding-top:88px; }
   bottom:0;
   width:1px;
   transform:translateX(-50%);
-  background:color-mix(in srgb,var(--text) 45%,transparent);
+  background:var(--text);
 }
 .arena-monolith-node {
   position:absolute;
@@ -552,13 +553,11 @@ html { scroll-padding-top:88px; }
   place-items:center;
   width:38px;
   height:38px;
-  transform:translate(-50%,-86%);
   filter:drop-shadow(0 2px 5px rgba(24,36,26,.18));
-  transition:top 520ms cubic-bezier(.22,1,.36,1),transform 180ms cubic-bezier(.2,.8,.2,1),filter 160ms ease;
+  transition:transform 180ms cubic-bezier(.2,.8,.2,1),filter 160ms ease;
 }
-.arena-monolith.is-below .arena-monolith-node {
-  transform:translate(-50%,-14%);
-}
+.arena-monolith.is-above .arena-monolith-node { top:0; transform:translate(-50%,-88%); }
+.arena-monolith.is-below .arena-monolith-node { bottom:0; transform:translate(-50%,88%); }
 .arena-mascot { display:block; image-rendering:pixelated; object-fit:contain; }
 @keyframes arena-mascot-bob {
   0%,100% { transform:translateY(0) rotate(0deg); }
@@ -572,17 +571,18 @@ html { scroll-padding-top:88px; }
   opacity:1;
 }
 .arena-monolith:hover .arena-monolith-aura,.arena-monolith.is-active .arena-monolith-aura,.arena-monolith:focus-visible .arena-monolith-aura {
+  opacity:.65;
   border-color:var(--accent);
 }
 .arena-monolith:hover .arena-monolith-aura::after,.arena-monolith.is-active .arena-monolith-aura::after,.arena-monolith:focus-visible .arena-monolith-aura::after {
   background:var(--accent);
 }
 .arena-monolith.is-above:hover .arena-monolith-node,.arena-monolith.is-above.is-active .arena-monolith-node,.arena-monolith.is-above:focus-visible .arena-monolith-node {
-  transform:translate(-50%,-96%) scale(1.12);
+  transform:translate(-50%,-98%) scale(1.12);
   filter:drop-shadow(0 5px 10px color-mix(in srgb,var(--accent) 32%,rgba(0,0,0,.2)));
 }
 .arena-monolith.is-below:hover .arena-monolith-node,.arena-monolith.is-below.is-active .arena-monolith-node,.arena-monolith.is-below:focus-visible .arena-monolith-node {
-  transform:translate(-50%,-6%) scale(1.12);
+  transform:translate(-50%,98%) scale(1.12);
   filter:drop-shadow(0 5px 10px color-mix(in srgb,var(--accent) 32%,rgba(0,0,0,.2)));
 }
 .arena-monolith-score {
@@ -593,11 +593,10 @@ html { scroll-padding-top:88px; }
   color:var(--text);
   white-space:nowrap;
   pointer-events:none;
-  transition:top 520ms cubic-bezier(.22,1,.36,1),transform 320ms cubic-bezier(.22,1,.36,1);
 }
+.arena-monolith.is-above .arena-monolith-score { top:0; transform:translate(-50%,calc(-100% - 36px)); }
+.arena-monolith.is-below .arena-monolith-score { bottom:0; transform:translate(-50%,calc(100% + 36px)); }
 #home-ranking-panel[data-updating=true] .arena-skyline { opacity:.86; transition:opacity 180ms ease; }
-.arena-monolith.is-above .arena-monolith-score { transform:translate(-50%,calc(-100% - 34px)); }
-.arena-monolith.is-below .arena-monolith-score { transform:translate(-50%,34px); }
 /* Minimal borderless labels beneath each stem. */
 .arena-monolith-foot {
   position:relative;
