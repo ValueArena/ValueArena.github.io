@@ -18,9 +18,12 @@ import type { IndexRun, SummaryRow } from '@/lib/types';
 const COLORS: Record<string, string> = { OpenAI: '#78b99b', Anthropic: '#e8ab8c', Google: '#8cb7e0', Meta: '#adbce9', Qwen: '#b9a0d0', DeepSeek: '#a2bdec', Mistral: '#edc477', Kimi: '#9abbb6', GLM: '#a9b3be', Microsoft: '#b4c89a', xAI: '#c4c6bc', Nvidia: '#bed69d', Baidu: '#bacbc9' };
 function lab(name: string) { return /kimi|moonshot/i.test(name) ? 'Kimi' : /glm|zai/i.test(name) ? 'GLM' : /grok|xai/i.test(name) ? 'xAI' : /nvidia|nemotron/i.test(name) ? 'Nvidia' : /baidu|ernie/i.test(name) ? 'Baidu' : detectLab(name); }
 
+/** The value the home leaderboard opens on. */
+const LEADERBOARD_DEFAULT = 'power-seeking';
+
 export function ArenaOverview({ full = false }: { full?: boolean }) {
   const [runs, setRuns] = useState<IndexRun[]>([]);
-  const [constitution, setConstitution] = useState(DEFAULT_VALUE);
+  const [constitution, setConstitution] = useState(LEADERBOARD_DEFAULT);
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<SummaryRow[]>([]);
   const [perLab, setPerLab] = useState(!full);
@@ -36,7 +39,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     // Start loading the default headline summary in parallel with index.json to avoid a 2-step waterfall.
     const params = new URLSearchParams(window.location.search);
     if (!params.get('run') && !params.get('constitution')) {
-      fetchSummary(`${HEADLINE_GROUP}/${DEFAULT_VALUE.replace(/-/g, '_')}`)
+      fetchSummary(`${HEADLINE_GROUP}/${LEADERBOARD_DEFAULT.replace(/-/g, '_')}`)
         .then(data => {
           if (!active) return;
           setRows(prev => prev.length ? prev : data.filter(r => Number.isFinite(r.elo_mean)).sort((a, b) => b.elo_mean - a.elo_mean));
@@ -203,7 +206,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
         const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
         const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
         tabs[next]?.focus({ preventScroll: true }); tabs[next]?.click();
-      }}>{(constitutions.length ? constitutions : [DEFAULT_VALUE]).map(c => <button key={c} id={`ranking-value-${c}`} role="tab" aria-selected={constitution === c} aria-controls="home-ranking-panel" tabIndex={constitution === c ? 0 : -1} onClick={() => choose(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}</div>
+      }}>{(constitutions.length ? constitutions : [LEADERBOARD_DEFAULT]).map(c => <button key={c} id={`ranking-value-${c}`} role="tab" aria-selected={constitution === c} aria-controls="home-ranking-panel" tabIndex={constitution === c ? 0 : -1} onClick={() => choose(c)}><BoardIcon constitution={c} /><span>{constLabel(c)}</span></button>)}</div>
       <div className="arena-plate-readout" aria-live="polite">
         {activeRow ? <>
           <span className="arena-readout-rank">#{activeRank}</span>
