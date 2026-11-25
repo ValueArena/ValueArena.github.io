@@ -30,3 +30,13 @@
 }
 /* Paper overviews share the research index's tone. */
 .arena-page:has(.paper-page) { --page-tone:var(--band-clay); }
+/* Each section keeps its own texture: ruled ledger lines for the run archive, fine hatching for papers. */
+.arena-page:has(.experiments-page) {
+  --page-tone:var(--band-sage);
+  --page-pattern:linear-gradient(color-mix(in srgb,var(--accent) var(--texture-grid-strength,7%),transparent) 1px,transparent 1px);
+  --page-pattern-size:100% 28px;
+}
+.arena-page:has(.paper-page) {
+  --page-pattern:repeating-linear-gradient(135deg,color-mix(in srgb,var(--accent) 7%,transparent) 0 1px,transparent 1px 9px);
+  --page-pattern-size:auto;
+}

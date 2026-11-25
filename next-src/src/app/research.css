@@ -984,3 +984,19 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
 }
 .paper-page .story-jump a { padding:7px 14px; border-radius:999px; font-size:12px; color:var(--text-secondary); }
 .paper-page .story-jump a:hover { background:var(--bg-hover); color:var(--text); text-decoration:none; }
+
+/* Experiments: one solid table, consistent rows, quieter notes. */
+.experiments-page .table-wrap { border:1px solid var(--border); border-radius:10px; background:var(--bg-surface); overflow:auto; }
+.experiments-page .runs-table th { background:var(--bg-elevated); position:sticky; top:0; z-index:2; }
+.experiments-page .runs-table td { background:var(--bg-surface); border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent); padding:11px 14px; }
+.experiments-page .runs-table tbody tr:nth-child(even) td { background:color-mix(in srgb,var(--bg-surface) 92%,var(--text)); }
+.experiments-page .runs-table tbody tr:hover td { background:var(--bg-hover); }
+.experiments-page .group-header td { background:inherit; }
+.experiments-page .runs-table tr:not(.group-header):not(.child-row) td:first-child { padding-left:34px; }
+.experiments-page .child-row td { background:color-mix(in srgb,var(--bg) 60%,var(--bg-surface)); }
+.experiments-page .child-row td:first-child { padding-left:46px; border-left:2px solid var(--accent); }
+.experiments-page .note-cell { color:var(--text-secondary); font-weight:400; }
+.experiments-page .group-count { color:var(--text-muted); background:color-mix(in srgb,var(--text) 8%,transparent); border-radius:999px; }
+.experiments-page .group-summary { font-style:normal; color:var(--text-muted); }
+.experiments-page .run-name, .experiments-page .group-name { color:var(--text); }
+.experiments-page .run-name:hover { color:var(--accent); }
