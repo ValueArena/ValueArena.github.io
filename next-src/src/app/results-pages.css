@@ -490,3 +490,5 @@ html:has(.values-directory) { scroll-padding-top:0; }
   .values-directory,.constitution-detail { padding-left:18px; padding-right:18px; }
   .value-chapter-leaders li a { gap:7px; font-size:12px; }
 }
+/* Fill the strip above the sticky tabs so content doesn't scroll through behind the floating nav. */
+.methodology-tabs::before { content:''; position:absolute; left:0; right:0; bottom:calc(100% + 1px); height:56px; background:inherit; pointer-events:none; }
