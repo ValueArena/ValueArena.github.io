@@ -745,3 +745,5 @@ html { scroll-padding-top:88px; }
 /* The fade mask only covers the 1px line itself, so it hid the labels; drop it. */
 .arena-skyline-tick,.arena-skyline-datum { mask-image:none; }
 .arena-skyline-datum>span { padding:0 4px; background:color-mix(in srgb,var(--bg) 70%,transparent); border-radius:3px; }
+.arena-readout-release { margin-left:16px; }
+.arena-skyline-cols:has(.is-hover) .arena-monolith:not(.is-hover) { opacity:.72; }

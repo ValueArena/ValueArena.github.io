@@ -137,6 +137,8 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   const activeRank = activeRow ? shown.indexOf(activeRow) + 1 : null;
   const activeInterval = activeRow && typeof activeRow.elo_ci_lower === 'number' && typeof activeRow.elo_ci_upper === 'number'
     ? `${activeRow.elo_ci_lower.toFixed(1)}–${activeRow.elo_ci_upper.toFixed(1)}` : null;
+  const activeReleased = activeRow ? modelInfo(activeRow.model_name)?.released : null;
+  const activeRelease = activeReleased ? new Date(activeReleased + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
   const choose = (c: string) => {
     if (c === constitution) return;
     setConstitution(c); setSelected(''); setHovered(null); setUpdating(true);
@@ -212,6 +214,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
             {activeRow.elo_mean >= 1500 ? '+' : ''}{(activeRow.elo_mean - 1500).toFixed(1)} vs 1500
           </span>
           {activeInterval && <span className="arena-readout-ci">95% CI {activeInterval}</span>}
+          {activeRelease && <span className="arena-readout-ci arena-readout-release">Released {activeRelease}</span>}
         </> : <span className="arena-readout-empty">{loading ? 'Loading published scores…' : 'Hover or focus a monolith to inspect'}</span>}
       </div>
       <div id="home-ranking-panel" role="tabpanel" aria-labelledby={`ranking-value-${constitution}`} data-updating={updating || undefined}>
@@ -232,7 +235,6 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                         const rank = i + 1;
                         const clipped = row.elo_mean < low ? 'low' : row.elo_mean > high ? 'high' : '';
                         const pose = rank === 1 ? 'first' : clipped ? 'falling' : row.elo_mean >= 1500 ? 'proud' : 'hanging';
-                        const released = modelInfo(row.model_name)?.released;
                         const family = lab(row.model_name);
                         const above = row.elo_mean >= 1500;
                         const scoreY = yOf(row.elo_mean);
@@ -269,14 +271,6 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                               </span>
                             </span>
                             {clipped && <span className={`arena-monolith-break is-${clipped}`} aria-hidden="true" />}
-                            {isHover && <span className="arena-monolith-card" role="presentation">
-                              <strong><ModelLogo name={row.model_name} size={16} />{row.model_name}</strong>
-                              <span className="arena-card-score">{row.elo_mean.toFixed(1)} <small>Elo</small> <em className={above ? 'is-up' : 'is-down'}>{above ? '+' : ''}{(row.elo_mean - 1500).toFixed(1)}</em></span>
-                              {overall !== rank && <span>#{overall} of all models</span>}
-                              {hasCI && <span>95% CI {row.elo_ci_lower!.toFixed(0)}–{row.elo_ci_upper!.toFixed(0)}</span>}
-                              {released && <span>Released {new Date(released + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
-                              <span className="arena-card-link">View profile →</span>
-                            </span>}
                           </div>
                         </a>;
                       })}</div>
