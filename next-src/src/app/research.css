@@ -971,3 +971,16 @@ a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visib
   /* the SVG scales down ~0.6x on phones; enlarge its text in user units to stay readable */
   .ict-tick, .ict-ref-label { font-size: 15px; }
 }
+
+/* Research pages: same header offset, buttons and tab pills as the rest of the site. */
+.arena-shell:has(.paper-page,.research-index) { padding-top:56px; }
+.paper-page .research-intro { padding-top:48px; }
+.paper-page .paper-authors { margin:14px 0 0; font-size:13px; color:var(--text-secondary); }
+.paper-page .home-actions, .research-index .home-actions { margin:20px 0 0; }
+.paper-page .home-actions .button-primary, .research-index .home-actions .button-primary { color:var(--bg); }
+.paper-page .story-jump {
+  display:inline-flex; flex-wrap:wrap; gap:2px; padding:4px; margin-top:28px;
+  border:1px solid var(--border); border-radius:999px; background:color-mix(in srgb,var(--bg-elevated) 80%,transparent);
+}
+.paper-page .story-jump a { padding:7px 14px; border-radius:999px; font-size:12px; color:var(--text-secondary); }
+.paper-page .story-jump a:hover { background:var(--bg-hover); color:var(--text); text-decoration:none; }

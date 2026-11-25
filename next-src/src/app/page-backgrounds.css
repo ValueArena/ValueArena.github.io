@@ -28,3 +28,5 @@
   --page-pattern:radial-gradient(color-mix(in srgb,var(--accent) var(--texture-tool-strength,20%),transparent) .8px,transparent 1px);
   --page-pattern-size:16px 16px;
 }
+/* Paper overviews share the research index's tone. */
+.arena-page:has(.paper-page) { --page-tone:var(--band-clay); }

@@ -4,14 +4,14 @@ import { HomeRanking } from '@/components/HomeRanking';
 export const metadata = pageMetadata('EigenBench — ValueArena', 'A way to compare language models on a written set of values, using their answers and each other’s judgments.', '/research/eigenbench/');
 
 export default function EigenBenchPaper() {
-  return <div className="research-home story-home">
+  return <div className="research-home story-home paper-page">
     <section className="research-intro art-section-intro">
       <a className="paper-back" href="/research/">All research</a>
       <img className="section-pixel-art" src="/assets/art/model-conversation.webp" width="256" height="256" alt="" />
       <h1>EigenBench</h1>
       <p className="research-deck">A Comparative Behavioral Measure of Value Alignment</p>
       <p className="paper-authors">Jonathn Chang, Leonhard Piff, Suvadip Sana, Jasmine X. Li, and Lionel Levine</p>
-      <div className="research-links"><a className="research-primary" href="https://arxiv.org/abs/2509.01938">Read the paper</a><a href="/explore/">Published results</a></div>
+      <div className="home-actions"><a className="button-primary" href="https://arxiv.org/abs/2509.01938">Read the paper</a><a className="button-secondary" href="/explore/">Published results</a></div>
     </section>
     <section className="story-section">
       <div className="story-copy"><h2>Judging values by behavior</h2><p>EigenBench starts with a group of language models and a written constitution. The models answer the same scenarios, then judge one another’s answers. EigenTrust combines the judgments into scores, giving more weight to judges that the rest of the group rates highly.</p></div>
