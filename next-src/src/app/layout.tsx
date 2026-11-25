@@ -7,7 +7,6 @@ import './hub.css';
 import './arena.css';
 import './results-pages.css';
 import './home-insights.css';
-import './eigenbench.css';
 import './themes.css';
 import './page-backgrounds.css';
 import './controls.css';

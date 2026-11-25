@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { SiteFooter } from './SiteFooter';
 
-export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || '/eigenbench/';
+export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || '/evaluate/';
 const arenaURL = process.env.NEXT_PUBLIC_VALUEARENA_URL || 'https://valuearena.github.io/';
 
 export function ArenaShell({ children }: { children: React.ReactNode }) {
@@ -32,7 +32,7 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
   const inExtraTab = /^\/(leaderboard|model|results|transcript)\/?$/.test(pathname);
   return <div className="arena-shell">
     <header className="arena-nav" ref={header}>
-      <div className="arena-brand-group va-glass-pill"><a className="arena-lab" href="/lab/" aria-label="LAISR Lab"><img src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" /><span>LAISR Lab</span></a><span className="va-brand-divider" aria-hidden="true" /><a href={tool ? '/eigenbench/' : '/'} className="arena-brand" aria-label={tool ? 'EigenBench home' : 'ValueArena home'}>{tool ? 'EigenBench' : 'ValueArena'}</a></div>
+      <div className="arena-brand-group va-glass-pill"><a className="arena-lab" href="/lab/" aria-label="LAISR Lab"><img src="/assets/art/laisr-pixel-mark.webp" width="34" height="34" alt="" /><span>LAISR Lab</span></a><span className="va-brand-divider" aria-hidden="true" /><a href="/" className="arena-brand" aria-label={tool ? 'EigenBench home' : 'ValueArena home'}>{tool ? 'EigenBench' : 'ValueArena'}</a></div>
       <button ref={toggle} className="arena-menu-toggle va-glass-pill" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} aria-controls="arena-main-nav" onClick={() => setMenuOpen(!menuOpen)}><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d={menuOpen ? 'M4 4l10 10M14 4L4 14' : 'M3 5h12M3 9h12M3 13h12'} stroke="currentColor" strokeWidth="1.5" /></svg></button>
       <nav id="arena-main-nav" className="va-glass-pill" aria-label="Main navigation" data-open={menuOpen}>
         {separateTool ? <><a href="/evaluate/" onClick={closeMenus}>Run an evaluation</a><a href="/evaluation/" onClick={closeMenus}>Your evaluations</a><a href="https://github.com/jchang153/EigenBench" onClick={closeMenus}>Documentation</a></> : <>
@@ -50,7 +50,7 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
               <a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined} onClick={closeMenus}>Results</a>
               <a href="/transcript/" aria-current={pathname.startsWith('/transcript') ? 'page' : undefined} onClick={closeMenus}>Transcript</a>
               <a href="/experiments/" aria-current={pathname.startsWith('/experiments') ? 'page' : undefined} onClick={closeMenus}>Experiments</a>
-              <a href="/eigenbench/" aria-current={/^\/(eigenbench|evaluate|evaluation)/.test(pathname) ? 'page' : undefined} onClick={closeMenus}>Run an evaluation</a>
+              <a href="/evaluate/" aria-current={/^\/(evaluate|evaluation)/.test(pathname) ? 'page' : undefined} onClick={closeMenus}>Run an evaluation</a>
             </div>}
           </div>
         </>}
