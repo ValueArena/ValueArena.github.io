@@ -49,6 +49,7 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
               <a href="/leaderboard/" aria-current={/^\/(leaderboard|model)\/?$/.test(pathname) ? 'page' : undefined} onClick={closeMenus}>Leaderboard</a>
               <a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined} onClick={closeMenus}>Results</a>
               <a href="/transcript/" aria-current={pathname.startsWith('/transcript') ? 'page' : undefined} onClick={closeMenus}>Transcript</a>
+              <a href="/experiments/" aria-current={pathname.startsWith('/experiments') ? 'page' : undefined} onClick={closeMenus}>Experiments</a>
             </div>}
           </div>
         </>}
