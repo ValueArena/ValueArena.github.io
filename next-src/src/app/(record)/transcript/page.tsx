@@ -117,7 +117,6 @@ export default function TranscriptPage() {
       const params = new URLSearchParams(window.location.search);
       setModelFilter(params.get('model') || '');
       const runId = runSlug(window.location.search, 'run') || `${HEADLINE_GROUP}/${DEFAULT_VALUE.replace(/-/g, '_')}`;
-      if (runId.startsWith('account/')) { location.replace(`https://eigenbench.github.io/transcript/${location.search}${location.hash}`); return; }
       setSlug(runId);
 
       // meta gives the criteria count and rating scale up front; the records

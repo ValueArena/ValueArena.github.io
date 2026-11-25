@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { SiteFooter } from './SiteFooter';
 
-export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || 'https://eigenbench.github.io/';
+export const eigenBenchURL = process.env.NEXT_PUBLIC_EIGENBENCH_URL || '/eigenbench/';
 const arenaURL = process.env.NEXT_PUBLIC_VALUEARENA_URL || 'https://valuearena.github.io/';
 
 export function ArenaShell({ children }: { children: React.ReactNode }) {
@@ -50,6 +50,7 @@ export function ArenaShell({ children }: { children: React.ReactNode }) {
               <a href="/results/" aria-current={pathname.startsWith('/results') ? 'page' : undefined} onClick={closeMenus}>Results</a>
               <a href="/transcript/" aria-current={pathname.startsWith('/transcript') ? 'page' : undefined} onClick={closeMenus}>Transcript</a>
               <a href="/experiments/" aria-current={pathname.startsWith('/experiments') ? 'page' : undefined} onClick={closeMenus}>Experiments</a>
+              <a href="/eigenbench/" aria-current={/^\/(eigenbench|evaluate|evaluation)/.test(pathname) ? 'page' : undefined} onClick={closeMenus}>Run an evaluation</a>
             </div>}
           </div>
         </>}
