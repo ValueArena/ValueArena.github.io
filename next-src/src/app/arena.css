@@ -659,3 +659,89 @@ html { scroll-padding-top:88px; }
   .arena-monolith,.arena-monolith-stem,.arena-monolith-aura,.arena-monolith-node,.arena-monolith-foot,.arena-lab-toggle,.arena-plate-tabs>button { transition:none; }
   .arena-monolith.is-active .arena-mascot { animation:none; }
 }
+
+/* Leaderboard: name and score travel with each mascot; per-rank poses; hover card. */
+.arena-skyline-grid { top:104px; }
+.arena-monolith-plot { margin-top:104px; margin-bottom:104px; }
+.arena-skyline-tick>span { left:0; top:-8px; width:44px; text-align:right; color:color-mix(in srgb,var(--text) 55%,transparent); }
+.arena-skyline-datum>span { left:auto; right:0; top:-18px; }
+.arena-monolith-node { width:50px; height:50px; }
+.arena-monolith.is-above .arena-monolith-node { transform:translate(-50%,-92%); }
+.arena-monolith.is-below .arena-monolith-node { transform:translate(-50%,92%); }
+.arena-monolith-tag {
+  position:absolute; left:50%; width:max-content; max-width:150px;
+  display:flex; flex-direction:column; align-items:center; gap:2px; text-align:center; pointer-events:none;
+}
+.arena-monolith.is-above .arena-monolith-tag { top:0; transform:translate(-50%,calc(-100% - 52px)); }
+.arena-monolith[data-pose=first] .arena-monolith-tag { transform:translate(-50%,calc(-100% - 66px)); }
+.arena-monolith.is-below .arena-monolith-tag { bottom:0; transform:translate(-50%,calc(100% + 50px)); }
+.arena-monolith-tag .arena-monolith-score { position:static; transform:none!important; font-size:12px; display:inline-flex; align-items:center; gap:5px; }
+.arena-monolith-tag .arena-monolith-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; max-width:128px; }
+.arena-monolith-tag .arena-monolith-label { gap:4px; }
+.arena-monolith-tag .arena-monolith-rank { padding:0 4px; }
+.arena-monolith-foot { display:none; }
+
+/* Poses */
+.arena-mascot-pose { display:block; transform-origin:50% 0; }
+.arena-monolith.is-above .arena-mascot-pose { transform-origin:50% 100%; }
+.arena-monolith.is-active .arena-mascot { animation:none; }
+@keyframes pose-proud { 0%,100% { transform:translateY(0); } 50% { transform:translateY(calc(-1 * var(--lift,2px))); } }
+@keyframes pose-first { 0%,100% { transform:translateY(0) rotate(0); } 30% { transform:translateY(-6px) rotate(-3deg); } 60% { transform:translateY(-2px) rotate(3deg); } }
+@keyframes pose-hang { 0%,100% { transform:rotate(-5deg); } 50% { transform:rotate(5deg); } }
+@keyframes pose-fall { 0%,100% { transform:translateY(0) rotate(-12deg); } 50% { transform:translateY(3px) rotate(-18deg); } }
+@keyframes pose-hop { 0%,100% { transform:translateY(0) scale(1); } 40% { transform:translateY(-10px) scale(1.06); } }
+.arena-monolith[data-pose=proud] .arena-mascot-pose { animation:pose-proud 2.6s ease-in-out var(--pose-delay) infinite; }
+.arena-monolith[data-pose=first] .arena-mascot-pose { animation:pose-first 3.2s ease-in-out infinite; }
+.arena-monolith[data-pose=hanging] .arena-mascot-pose { animation:pose-hang 3.4s ease-in-out var(--pose-delay) infinite; }
+.arena-monolith[data-pose=falling] .arena-mascot-pose { animation:pose-fall 1.8s ease-in-out infinite; }
+.arena-monolith.is-hover .arena-mascot-pose { animation:pose-hop .5s ease-out 1; }
+.arena-monolith-crown {
+  position:absolute; left:50%; top:-14px; width:18px; height:10px; transform:translateX(-50%);
+  background:#e9bd55; clip-path:polygon(0 100%,0 20%,25% 60%,50% 0,75% 60%,100% 20%,100% 100%);
+  filter:drop-shadow(0 0 4px rgba(233,189,85,.7));
+  animation:crown-glint 2.4s ease-in-out infinite;
+}
+@keyframes crown-glint { 0%,100% { opacity:1; } 50% { opacity:.7; } }
+.arena-monolith-speed {
+  position:absolute; left:50%; top:-16px; width:22px; height:14px; transform:translateX(-50%);
+  background:repeating-linear-gradient(90deg,var(--column-color) 0 2px,transparent 2px 6px);
+  mask-image:linear-gradient(180deg,transparent,#000); opacity:.8;
+  animation:speed-lines .6s linear infinite;
+}
+@keyframes speed-lines { from { transform:translate(-50%,4px); opacity:.2; } to { transform:translate(-50%,-4px); opacity:.8; } }
+.arena-monolith-break {
+  position:absolute; left:50%; width:22px; height:8px; transform:translateX(-50%); z-index:2;
+  background:var(--bg); border-block:1.5px solid var(--text-muted);
+  clip-path:polygon(0 0,25% 100%,50% 0,75% 100%,100% 0,100% 100%,0 100%);
+}
+.arena-monolith-break.is-low { bottom:-12px; }
+.arena-monolith-break.is-high { top:-12px; }
+
+/* Others dim while one is hovered. */
+.arena-skyline-cols:has(.is-hover) .arena-monolith:not(.is-hover) { opacity:.45; }
+
+/* Hover card */
+.arena-monolith-card {
+  position:absolute; z-index:6; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:190px; display:grid; gap:4px; padding:12px 14px;
+  background:var(--bg-surface); border:1px solid color-mix(in srgb,var(--column-color) 60%,var(--border));
+  border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+  font:11px/16px var(--font-mono); color:var(--text-secondary); text-align:left;
+  animation:card-in .16s ease-out;
+}
+.arena-monolith-card strong { display:flex; align-items:center; gap:6px; font:600 13px/18px var(--font-body); color:var(--text); }
+.arena-card-score { font-size:16px; color:var(--text); }
+.arena-card-score small { font-size:10px; color:var(--text-muted); }
+.arena-card-score em { font-style:normal; font-size:11px; margin-left:4px; }
+.arena-card-score em.is-up { color:var(--accent); }
+.arena-card-score em.is-down { color:#e58f8f; }
+.arena-card-link { margin-top:4px; color:var(--accent); }
+@keyframes card-in { from { opacity:0; transform:translate(-50%,-46%); } }
+.arena-monolith:first-child .arena-monolith-card { left:0; transform:translate(0,-50%); }
+.arena-monolith:last-child .arena-monolith-card { left:auto; right:0; transform:translate(0,-50%); }
+@media(prefers-reduced-motion:reduce) {
+  .arena-mascot-pose,.arena-monolith-crown,.arena-monolith-speed,.arena-monolith-card { animation:none!important; }
+}
+/* The fade mask only covers the 1px line itself, so it hid the labels; drop it. */
+.arena-skyline-tick,.arena-skyline-datum { mask-image:none; }
+.arena-skyline-datum>span { padding:0 4px; background:color-mix(in srgb,var(--bg) 70%,transparent); border-radius:3px; }

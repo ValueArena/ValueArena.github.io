@@ -9,6 +9,7 @@ import { ModelMascot } from './ModelMascot';
 import { BoardIcon } from './hub/ui';
 import { HomeInsights } from './HomeInsights';
 import { detectLab } from '@/lib/labs';
+import { modelInfo } from '@/lib/registry';
 import { DEFAULT_VALUE, HEADLINE_GROUP, HEADLINE_VALUES, boardId, headlineRuns, valueId } from '@/lib/arena-data';
 import { TrendsCard } from './hub/TrendsCard';
 import { ValueLogo, ValueSelect } from './ValueLogo';
@@ -99,12 +100,21 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   }, [constitution, constitutions]);
   const [hovered, setHovered] = useState<string | null>(null);
   const scaleSource = shown.length ? shown : rows;
+  // One far outlier would squash everyone else, so it is drawn at the edge with a break mark instead.
   const { low, high } = useMemo(() => {
     if (!scaleSource.length) return { low: 1400, high: 1600 };
-    const minScore = Math.min(1500, ...scaleSource.map(r => r.elo_mean));
-    const maxScore = Math.max(1500, ...scaleSource.map(r => r.elo_mean));
+    const scores = scaleSource.map(r => r.elo_mean).sort((a, b) => a - b);
+    const restSpan = (lo: number, hi: number) => Math.max(40, Math.max(1500, hi) - Math.min(1500, lo));
+    let minScore = Math.min(1500, scores[0]);
+    let maxScore = Math.max(1500, scores[scores.length - 1]);
+    if (scores.length >= 4) {
+      const rest = restSpan(scores[1], scores[scores.length - 1]);
+      if (scores[1] - scores[0] > rest) minScore = Math.min(1500, scores[1]) - rest * 0.45;
+      const restTop = restSpan(scores[0], scores[scores.length - 2]);
+      if (scores[scores.length - 1] - scores[scores.length - 2] > restTop) maxScore = Math.max(1500, scores[scores.length - 2]) + restTop * 0.45;
+    }
     const rawSpan = Math.max(24, maxScore - minScore);
-    const pad = Math.max(8, rawSpan * 0.16);
+    const pad = Math.max(8, rawSpan * 0.12);
     const step = rawSpan <= 60 ? 5 : rawSpan <= 160 ? 10 : rawSpan <= 360 ? 25 : 50;
     return {
       low: Math.floor((minScore - pad) / step) * step,
@@ -119,12 +129,12 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     const step = span <= 80 ? 20 : span <= 160 ? 25 : span <= 360 ? 50 : 100;
     const ticks: number[] = [];
     for (let v = Math.ceil(low / step) * step; v <= high; v += step) {
-      if (Math.abs(v - 1500) >= span * 0.08) ticks.push(v);
+      if (Math.abs(v - 1500) >= span * 0.08 && (high - v) / span > 0.04) ticks.push(v);
     }
     return ticks;
   }, [low, high, span]);
   const activeRow = shown.find(r => r.model_name === hovered) || shown[0] || null;
-  const activeRank = activeRow ? rows.indexOf(activeRow) + 1 : null;
+  const activeRank = activeRow ? shown.indexOf(activeRow) + 1 : null;
   const activeInterval = activeRow && typeof activeRow.elo_ci_lower === 'number' && typeof activeRow.elo_ci_upper === 'number'
     ? `${activeRow.elo_ci_lower.toFixed(1)}–${activeRow.elo_ci_upper.toFixed(1)}` : null;
   const choose = (c: string) => {
@@ -218,7 +228,11 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                         <div className="arena-skyline-datum" style={{ top: `${datumY}%` }}><span>1500 · equal trust</span></div>
                       </div>
                       <div className="arena-skyline-cols" ref={colsRef}>{shown.map((row, i) => {
-                        const rank = rows.indexOf(row) + 1;
+                        const overall = rows.indexOf(row) + 1;
+                        const rank = i + 1;
+                        const clipped = row.elo_mean < low ? 'low' : row.elo_mean > high ? 'high' : '';
+                        const pose = rank === 1 ? 'first' : clipped ? 'falling' : row.elo_mean >= 1500 ? 'proud' : 'hanging';
+                        const released = modelInfo(row.model_name)?.released;
                         const family = lab(row.model_name);
                         const above = row.elo_mean >= 1500;
                         const scoreY = yOf(row.elo_mean);
@@ -232,24 +246,37 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
                         const stemStyle: React.CSSProperties = above
                           ? { bottom: `${100 - datumY}%`, height: `${stemHeight}%` }
                           : { top: `${datumY}%`, height: `${stemHeight}%` };
-                        return <a className={`arena-monolith${above ? ' is-above' : ' is-below'}${isActive ? ' is-active' : ''}`} key={row.model_name} data-model={row.model_name} data-lab={family.toLowerCase()}
-                          style={{ '--column-color': color } as React.CSSProperties}
+                        const isHover = hovered === row.model_name;
+                        return <a className={`arena-monolith${above ? ' is-above' : ' is-below'}${isActive ? ' is-active' : ''}${isHover ? ' is-hover' : ''}${clipped ? ' is-clipped' : ''}`} key={row.model_name} data-model={row.model_name} data-lab={family.toLowerCase()} data-pose={pose}
+                          style={{ '--column-color': color, '--pose-delay': `${(i * 0.37) % 2.2}s`, '--lift': `${Math.min(6, 1.5 + Math.max(0, row.elo_mean - 1500) / 25)}px` } as React.CSSProperties}
                           href={`/model/?run=${encodeURIComponent(run?.slug || `${HEADLINE_GROUP}/${constitution.replace(/-/g, '_')}`)}&id=${encodeURIComponent(row.model_name)}`}
                           onMouseEnter={() => setHovered(row.model_name)}
                           onFocus={() => setHovered(row.model_name)}
-                          aria-label={`Rank ${rank}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}>
+                          onMouseLeave={() => setHovered(h => h === row.model_name ? null : h)}
+                          onBlur={() => setHovered(h => h === row.model_name ? null : h)}
+                          aria-label={`Rank ${rank}${overall !== rank ? ` (#${overall} overall)` : ''}. ${row.model_name}, ${row.elo_mean.toFixed(1)} Elo. ${interval}. View model profile.`}>
                           <div className="arena-monolith-plot">
                             {hasCI && <span className="arena-monolith-aura" aria-hidden="true" style={{ top: `${ciTop}%`, height: `${ciHeight}%` }} />}
                             <span className="arena-monolith-stem" style={stemStyle}>
                               <span className="arena-monolith-node">
-                                <ModelMascot lab={family} size={36} />
+                                {rank === 1 && <span className="arena-monolith-crown" aria-hidden="true" />}
+                                {clipped && <span className="arena-monolith-speed" aria-hidden="true" />}
+                                <span className="arena-mascot-pose"><ModelMascot lab={family} size={48} /></span>
                               </span>
-                              <span className="arena-monolith-score">{row.elo_mean.toFixed(0)}</span>
+                              <span className="arena-monolith-tag">
+                                <span className="arena-monolith-score"><span className={`arena-monolith-rank${rank === 1 ? ' is-first' : ''}`}>#{rank}</span>{row.elo_mean.toFixed(0)}</span>
+                                <span className="arena-monolith-label"><ModelLogo name={row.model_name} size={14} /><span className="arena-monolith-name">{row.model_name}</span></span>
+                              </span>
                             </span>
-                          </div>
-                          <div className="arena-monolith-foot">
-                            <span className={`arena-monolith-rank${rank === 1 ? ' is-first' : ''}`}>#{rank}</span>
-                            <span className="arena-monolith-label"><ModelLogo name={row.model_name} size={14} /><span className="arena-monolith-name">{row.model_name}</span></span>
+                            {clipped && <span className={`arena-monolith-break is-${clipped}`} aria-hidden="true" />}
+                            {isHover && <span className="arena-monolith-card" role="presentation">
+                              <strong><ModelLogo name={row.model_name} size={16} />{row.model_name}</strong>
+                              <span className="arena-card-score">{row.elo_mean.toFixed(1)} <small>Elo</small> <em className={above ? 'is-up' : 'is-down'}>{above ? '+' : ''}{(row.elo_mean - 1500).toFixed(1)}</em></span>
+                              {overall !== rank && <span>#{overall} of all models</span>}
+                              {hasCI && <span>95% CI {row.elo_ci_lower!.toFixed(0)}–{row.elo_ci_upper!.toFixed(0)}</span>}
+                              {released && <span>Released {new Date(released + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+                              <span className="arena-card-link">View profile →</span>
+                            </span>}
                           </div>
                         </a>;
                       })}</div>

@@ -52,6 +52,8 @@
   transform:translateX(-50%);
   background:url('/assets/art/leaderboard-geometry.svg') center center / cover no-repeat;
   mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent);
+  /* Kept faint so the shapes sit behind the chart instead of crossing it. */
+  opacity:.38;
 }
 .arena-home-canvas #scenarios {
   --home-band-from:var(--bg);
