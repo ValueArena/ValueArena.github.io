@@ -32,6 +32,25 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
   const colsRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  // Reveal each homepage section as it scrolls into view; CSS picks the motion per screen size.
+  useEffect(() => {
+    const root = canvasRef.current;
+    if (!root || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const seen = new WeakSet<Element>();
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add('is-inview'); observer.unobserve(entry.target); }
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+    const watch = () => root.querySelectorAll(':scope > section, :scope > .arena-original-intro, .home-insights > section').forEach(el => {
+      if (seen.has(el)) return;
+      seen.add(el); el.classList.add('reveal'); observer.observe(el);
+    });
+    watch();
+    const mutations = new MutationObserver(watch);
+    mutations.observe(root, { childList: true, subtree: true });
+    root.classList.add('reveal-ready');
+    return () => { observer.disconnect(); mutations.disconnect(); };
+  }, []);
   const prevXRef = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     let active = true;
@@ -288,7 +307,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     {full ? <>
       <section className="arena-intro"><h1>The ValueArena leaderboards</h1><p className="arena-deck">Explore the rankings and the choices behind the scores.</p></section>
       <div className="arena-full-rankings">{ranking}</div>
-    </> : <div className="arena-home-canvas">
+    </> : <div className="arena-home-canvas" ref={canvasRef}>
         <div className="arena-original-intro arena-home story-home">
           <section className="arena-tv-panel research-intro has-pixel-art hero-with-hills" aria-labelledby="arena-home-heading">
             <PixelHills variant="hero" className="hero-hills arena-tv-hills" />
