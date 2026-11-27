@@ -26,7 +26,7 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
   const [constitution, setConstitution] = useState(LEADERBOARD_DEFAULT);
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<SummaryRow[]>([]);
-  const [perLab, setPerLab] = useState(!full);
+  const [perLab, setPerLab] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
@@ -200,6 +200,39 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     }
     prevXRef.current = nextX;
   }, [shown]);
+  // Mobile home: pin the chart while vertical scrolling pans it sideways through every model, then carry on down.
+  useEffect(() => {
+    if (full) return;
+    const mq = window.matchMedia('(max-width: 760px)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scroller = document.querySelector<HTMLElement>('#home-ranking-panel > .arena-skyline-scroll');
+    const panel = scroller?.parentElement;
+    if (!scroller || !panel) return;
+    let overflow = 0, pinTop = 0, frame = 0;
+    const reset = () => { panel.style.height = ''; scroller.style.position = ''; scroller.style.top = ''; };
+    const layout = () => {
+      reset();
+      if (!mq.matches || reduced) return;
+      overflow = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      if (overflow < 8) return;
+      pinTop = Math.max(64, (window.innerHeight - scroller.offsetHeight) / 2);
+      panel.style.height = `${scroller.offsetHeight + overflow}px`;
+      scroller.style.position = 'sticky';
+      scroller.style.top = `${pinTop}px`;
+      sync();
+    };
+    const sync = () => {
+      if (!overflow || !mq.matches) return;
+      const progress = Math.min(overflow, Math.max(0, pinTop - panel.getBoundingClientRect().top));
+      scroller.scrollLeft = progress;
+    };
+    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(sync); };
+    layout();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', layout);
+    mq.addEventListener('change', layout);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', layout); mq.removeEventListener('change', layout); reset(); };
+  }, [full, shown, loading, error]);
   const ranking = <section className="arena-ranking" id="rankings" aria-labelledby="ranking-heading">
     <div className="arena-plate">
       <header className="arena-plate-head">
