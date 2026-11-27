@@ -747,3 +747,6 @@ html { scroll-padding-top:88px; }
 .arena-skyline-datum>span { padding:0 4px; background:color-mix(in srgb,var(--bg) 70%,transparent); border-radius:3px; }
 .arena-readout-release { margin-left:16px; }
 .arena-skyline-cols:has(.is-hover) .arena-monolith:not(.is-hover) { opacity:.72; }
+/* The leaderboard still scrolls sideways, just without a visible scrollbar. */
+.arena-skyline-scroll { scrollbar-width:none; -ms-overflow-style:none; }
+.arena-skyline-scroll::-webkit-scrollbar { display:none; }
