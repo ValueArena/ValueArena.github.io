@@ -35,6 +35,20 @@ export function HomeInsights() {
   const domain = (values: number[]) => [Math.floor((Math.min(...values) - 20) / 100) * 100, Math.ceil((Math.max(...values) + 20) / 100) * 100];
   const [xMin, xMax] = domain(points.length ? points.map(p => p.x.elo_mean) : [1400, 1600]);
   const [yMin, yMax] = domain(points.length ? points.map(p => p.y.elo_mean) : [1400, 1600]);
+  // Dotted rising line: left to right, each model that beats everyone before it on the vertical value.
+  const px = (v: number) => left + (v - yMin) / (yMax - yMin) * plotWidth;
+  const py = (v: number) => 358 - (v - xMin) / (xMax - xMin) * 318;
+  const frontier = (() => {
+    const sorted = [...points].sort((a, b) => a.y.elo_mean - b.y.elo_mean);
+    const keep: typeof points = [];
+    let best = -Infinity;
+    for (const pt of sorted) if (pt.x.elo_mean > best) { keep.push(pt); best = pt.x.elo_mean; }
+    const pts = keep.map(pt => [px(pt.y.elo_mean), py(pt.x.elo_mean)]);
+    if (pts.length < 2) return '';
+    let d = `M${pts[0][0]},${pts[0][1]}`;
+    for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; d += ` C${(x0 + x1) / 2},${y0} ${(x0 + x1) / 2},${y1} ${x1},${y1}`; }
+    return d;
+  })();
   const failed = data.error || data.failures[xBoard?.run.slug || ''] || data.failures[yBoard?.run.slug || ''];
 
   return <div className="home-insights">
@@ -56,6 +70,7 @@ export function HomeInsights() {
                     : <svg className="value-scatter" viewBox={`0 0 ${width} 420`} role="group" aria-label={`${constLabel(xValue)} against ${constLabel(yValue)}. Select a model to inspect its scores.`}>
                       {[0, .25, .5, .75, 1].map(t => <g key={t} className="scatter-grid"><line x1={left} x2={right} y1={358 - t * 318} y2={358 - t * 318} /><line y1="40" y2="358" x1={left + t * plotWidth} x2={left + t * plotWidth} /><text x={left - 10} y={362 - t * 318} textAnchor="end">{Math.round(xMin + t * (xMax - xMin))}</text><text x={left + t * plotWidth} y="382" textAnchor="middle">{Math.round(yMin + t * (yMax - yMin))}</text></g>)}
                       <text className="scatter-axis" x={left + plotWidth / 2} y="410" textAnchor="middle">{constLabel(yValue)} · Elo</text><text className="scatter-axis" transform="translate(16 200) rotate(-90)" textAnchor="middle">{constLabel(xValue)} · Elo</text>
+                      {frontier && <path className="scatter-frontier" d={frontier} />}
                       {points.map((point, i) => { const logo = getModelLogo(point.name); return <g key={point.name} className="scatter-point" role="button" tabIndex={0} aria-pressed={selected === point.name} aria-label={`${point.name}: ${constLabel(xValue)} ${point.x.elo_mean.toFixed(1)}, ${constLabel(yValue)} ${point.y.elo_mean.toFixed(1)}`} onClick={() => setSelected(point.name)} onFocus={() => setSelected(point.name)} onMouseEnter={() => setSelected(point.name)} onMouseLeave={() => setSelected('')} onBlur={() => setSelected('')} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(point.name); } }} transform={`translate(${left + (point.y.elo_mean - yMin) / (yMax - yMin) * plotWidth} ${358 - (point.x.elo_mean - xMin) / (xMax - xMin) * 318})`}><rect className="scatter-hit" x="-18" y="-18" width="36" height="36" /><rect className="scatter-tile" x="-12" y="-12" width="24" height="24" fill={colorOf(point.name)} />{logo ? <image href={logo} x="-8" y="-8" width="16" height="16" /> : <circle r="4" fill="currentColor" />}{(width >= 700 && (i < 3 || selected === point.name)) && <text className="scatter-model-name" x={point.y.elo_mean > yMin + .78 * (yMax - yMin) ? -18 : 18} y={i % 2 ? 18 : -16} textAnchor={point.y.elo_mean > yMin + .78 * (yMax - yMin) ? 'end' : 'start'}>{point.name}</text>}</g>; })}
                     </svg>}
             </div>

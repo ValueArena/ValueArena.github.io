@@ -240,3 +240,5 @@
 @media (prefers-reduced-motion:reduce) {
   .arena-home-canvas .arena-original-intro .research-intro > * { animation:none; }
 }
+.value-scatter .scatter-frontier { fill:none; stroke:#6f8fbf; stroke-width:2.5; stroke-dasharray:6 7; stroke-linecap:round; opacity:.85; pointer-events:none; animation:trend-flow 1.6s linear infinite; }
+@media(prefers-reduced-motion:reduce) { .value-scatter .scatter-frontier { animation:none; } }
