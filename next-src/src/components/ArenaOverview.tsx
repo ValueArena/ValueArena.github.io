@@ -233,6 +233,33 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
     mq.addEventListener('change', layout);
     return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', layout); mq.removeEventListener('change', layout); reset(); };
   }, [full, shown, loading, error]);
+  // Dotted trend line threaded through every mascot, like a frontier curve.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [trend, setTrend] = useState<{ d: string; w: number; h: number } | null>(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) { setTrend(null); return; }
+    const measure = () => {
+      const box = stage.getBoundingClientRect();
+      const pts = Array.from(stage.querySelectorAll<HTMLElement>('.arena-monolith-stem')).map(stem => {
+        const r = stem.getBoundingClientRect();
+        const above = stem.closest('.is-above') !== null;
+        return [r.left + r.width / 2 - box.left, (above ? r.top : r.bottom) - box.top] as [number, number];
+      });
+      if (pts.length < 2) { setTrend(null); return; }
+      let d = `M${pts[0][0]},${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], mx = (x0 + x1) / 2;
+        d += ` C${mx},${y0} ${mx},${y1} ${x1},${y1}`;
+      }
+      setTrend({ d, w: box.width, h: box.height });
+    };
+    measure();
+    const late = window.setTimeout(measure, 650);
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    return () => { window.clearTimeout(late); observer.disconnect(); };
+  }, [shown, low, high]);
   const ranking = <section className="arena-ranking" id="rankings" aria-labelledby="ranking-heading">
     <div className="arena-plate">
       <header className="arena-plate-head">
@@ -280,7 +307,8 @@ export function ArenaOverview({ full = false }: { full?: boolean }) {
             : !shown.length ? <p className="arena-feedback" role="status">No scores available.</p>
               : <div className="arena-skyline-scroll" role="region" aria-label="Model rankings" tabIndex={0}>
                   <div className="arena-skyline" style={{ minWidth: Math.max(680, shown.length * 108) }}>
-                    <div className="arena-skyline-stage">
+                    <div className="arena-skyline-stage" ref={stageRef}>
+                      {trend && <svg className="arena-skyline-trend" width={trend.w} height={trend.h} viewBox={`0 0 ${trend.w} ${trend.h}`} aria-hidden="true"><path d={trend.d} /></svg>}
                       <div className="arena-skyline-grid" aria-hidden="true">
                         {gridTicks.map(tick => <div key={tick} className="arena-skyline-tick" style={{ top: `${yOf(tick)}%` }}><span>{tick}</span></div>)}
                         <div className="arena-skyline-datum" style={{ top: `${datumY}%` }}><span>1500 · equal trust</span></div>

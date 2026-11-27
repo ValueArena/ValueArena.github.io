@@ -750,3 +750,7 @@ html { scroll-padding-top:88px; }
 /* The leaderboard still scrolls sideways, just without a visible scrollbar. */
 .arena-skyline-scroll { scrollbar-width:none; -ms-overflow-style:none; }
 .arena-skyline-scroll::-webkit-scrollbar { display:none; }
+.arena-skyline-trend { position:absolute; inset:0; z-index:2; pointer-events:none; overflow:visible; }
+.arena-skyline-trend path { fill:none; stroke:#6f8fbf; stroke-width:2.5; stroke-dasharray:6 7; stroke-linecap:round; opacity:.85; animation:trend-flow 1.6s linear infinite; }
+@keyframes trend-flow { to { stroke-dashoffset:26; } }
+@media(prefers-reduced-motion:reduce) { .arena-skyline-trend path { animation:none; } }
